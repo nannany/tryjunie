@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { ArrowLeft } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
+import { createClient } from '@/lib/supabase/client'
 
 interface FormData {
   title: string
@@ -21,6 +22,8 @@ interface FormData {
   status: string
   dueDate: string
 }
+
+const supabase = createClient()
 
 const CreateTask = () => {
   const navigate = useNavigate()
@@ -59,15 +62,13 @@ const CreateTask = () => {
       return
     }
 
-    // In a real app, this would be an API call
-    setTimeout(() => {
-      toast({
-        title: "Task created",
-        description: "Your task has been created successfully.",
-      })
-      setIsSubmitting(false)
-      navigate('/tasks')
-    }, 1000)
+    supabase.from('tasks').insert({
+      title: formData.title,
+      description: formData.description,
+      status: formData.status,
+      dueDate: formData.dueDate
+    })
+    
   }
 
   return (

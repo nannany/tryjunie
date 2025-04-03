@@ -16,9 +16,6 @@ interface Task {
   dueDate: string
 }
 
-const mockTasks: Task[] = [
-]
-
 const TaskList = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [filter, setFilter] = useState<string>('all')
