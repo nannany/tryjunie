@@ -24,3 +24,8 @@ todo: どんな環境？
 
 本番環境のパスワードを要求されるので、SUPABASE_DB_PASSWORD環境変数に値を入れておく。
 
+
+## supabase db push 
+
+`supabase db push`を実行すると、supabaseの本番環境に`/supabase/migrations`配下のddlが反映される。
+
