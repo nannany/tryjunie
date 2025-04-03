@@ -47,7 +47,7 @@ const CreateTask = () => {
     setFormData((prev) => ({ ...prev, status: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
@@ -62,13 +62,21 @@ const CreateTask = () => {
       return
     }
 
-    supabase.from('tasks').insert({
+    const error = await supabase.from('tasks').insert({
       title: formData.title,
       description: formData.description,
       status: formData.status,
-      dueDate: formData.dueDate
+      due_date: formData.dueDate
     })
-    
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create task",
+        variant: "destructive",
+      })
+      setIsSubmitting(false)
+    }
   }
 
   return (
