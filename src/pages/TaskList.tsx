@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { CheckCircle2, Clock, AlertCircle, PlusCircle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+
+const supabase = createClient()
 
 // Mock task data
 interface Task {
@@ -14,41 +17,6 @@ interface Task {
 }
 
 const mockTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Complete project proposal',
-    description: 'Write and submit the project proposal document',
-    status: 'in-progress',
-    dueDate: '2023-06-15'
-  },
-  {
-    id: '2',
-    title: 'Review client feedback',
-    description: 'Go through client feedback and make necessary adjustments',
-    status: 'pending',
-    dueDate: '2023-06-10'
-  },
-  {
-    id: '3',
-    title: 'Update documentation',
-    description: 'Update the project documentation with recent changes',
-    status: 'completed',
-    dueDate: '2023-06-05'
-  },
-  {
-    id: '4',
-    title: 'Prepare presentation',
-    description: 'Create slides for the upcoming presentation',
-    status: 'pending',
-    dueDate: '2023-06-20'
-  },
-  {
-    id: '5',
-    title: 'Team meeting',
-    description: 'Attend weekly team meeting',
-    status: 'completed',
-    dueDate: '2023-06-02'
-  }
 ]
 
 const TaskList = () => {
@@ -58,7 +26,9 @@ const TaskList = () => {
   // Simulate fetching tasks
   useEffect(() => {
     // In a real app, this would be an API call
-    setTasks(mockTasks)
+    supabase.from('tasks').select('*').then(({ data }) => {
+      setTasks(data as Task[])
+    })
   }, [])
 
   // Filter tasks based on status
