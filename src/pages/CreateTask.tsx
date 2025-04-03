@@ -61,12 +61,17 @@ const CreateTask = () => {
       setIsSubmitting(false)
       return
     }
+    
+    const { data } = await supabase.auth.getUser()
+    
+    const userId = data.user?.id
 
-    const error = await supabase.from('tasks').insert({
+    const { error } = await supabase.from('tasks').insert({
       title: formData.title,
       description: formData.description,
       status: formData.status,
-      due_date: formData.dueDate
+      due_date: formData.dueDate,
+      user_id: userId
     })
 
     if (error) {
@@ -75,8 +80,8 @@ const CreateTask = () => {
         description: "Failed to create task",
         variant: "destructive",
       })
-      setIsSubmitting(false)
     }
+    setIsSubmitting(false)
   }
 
   return (
