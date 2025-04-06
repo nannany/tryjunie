@@ -311,9 +311,6 @@ const TaskList = () => {
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" asChild>
-                        <Link to={`/tasks/${task.id}`}>View</Link>
-                      </Button>
                     </div>
                   </div>
                 ))
