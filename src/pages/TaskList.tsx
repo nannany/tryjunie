@@ -265,12 +265,6 @@ const TaskList = () => {
           <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
           <p className="text-muted-foreground">Manage your tasks</p>
         </div>
-        <Button asChild>
-          <Link to="/tasks/create" className="flex items-center gap-1">
-            <PlusCircle className="h-4 w-4" />
-            New Task (Full Form)
-          </Link>
-        </Button>
       </div>
 
       {/* クイックタスク追加フォーム */}
