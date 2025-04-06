@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, Clock, AlertCircle, PlusCircle } from 'lucide-react'
+import { CheckCircle2, Clock, AlertCircle, PlusCircle, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
@@ -156,6 +156,34 @@ const TaskList = () => {
     }
   }
 
+  // タスクを削除
+  const handleDelete = async (taskId: string) => {
+    const { error } = await supabase
+      .from('tasks')
+      .delete()
+      .eq('id', taskId)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete task",
+        variant: "destructive",
+      })
+      console.error('Error deleting task:', error)
+    } else {
+      // ローカル状態から削除したタスクを除外
+      setTasks(currentTasks => 
+        currentTasks.filter(task => task.id !== taskId)
+      )
+      
+      toast({
+        title: "Success",
+        description: "Task deleted successfully",
+        duration: 2000
+      })
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -274,9 +302,19 @@ const TaskList = () => {
                         </div>
                       </div>
                     </div>
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to={`/tasks/${task.id}`}>View</Link>
-                    </Button>
+                    <div className="flex gap-2 items-center">
+                      <Button 
+                        size="icon" 
+                        variant="outline"
+                        onClick={() => handleDelete(task.id)}
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link to={`/tasks/${task.id}`}>View</Link>
+                      </Button>
+                    </div>
                   </div>
                 ))
               ) : (
