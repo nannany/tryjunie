@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, Clock, AlertCircle, PlusCircle, Trash2 } from 'lucide-react'
+import { CheckCircle2, Clock, AlertCircle, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
@@ -70,18 +69,6 @@ const TaskList = () => {
       default:
         return null
     }
-  }
-
-  // Format date
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'No due date'
-    
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    })
   }
 
   // 見積もり時間をフォーマット
