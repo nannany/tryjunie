@@ -135,13 +135,6 @@ const TaskList = () => {
       })
       console.error('Error updating task:', error)
     } else {
-      // 成功メッセージ
-      toast({
-        title: "Success",
-        description: `Task ${field} updated successfully`,
-        duration: 2000
-      })
-      
       // タスク一覧を再読み込み
       fetchTasks()
     }
