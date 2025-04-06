@@ -135,8 +135,12 @@ const TaskList = () => {
       })
       console.error('Error updating task:', error)
     } else {
-      // タスク一覧を再読み込み
-      fetchTasks()
+      // ローカル状態で更新したタスクの値を更新
+      setTasks(currentTasks => 
+        currentTasks.map(task => 
+          task.id === taskId ? { ...task, ...updateData } : task
+        )
+      )
     }
 
     // 編集モードを終了
