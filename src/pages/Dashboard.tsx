@@ -155,38 +155,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
-
-      <div className="mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Tasks</CardTitle>
-            <CardDescription>Your most recent tasks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {isLoading ? (
-                <p className="text-center text-muted-foreground">Loading tasks...</p>
-              ) : tasks.length > 0 ? (
-                <>
-                  {tasks.slice(0, 3).map(task => (
-                    <div key={task.id} className="flex items-center justify-between rounded-md border p-4">
-                      <div>
-                        <p className="font-medium">{task.title}</p>
-                        <p className="text-sm text-muted-foreground">{formatDate(task.due_date)}</p>
-                      </div>
-                      <Button size="sm" variant="outline" asChild>
-                        <Link to={`/tasks/${task.id}`}>View</Link>
-                      </Button>
-                    </div>
-                  ))}
-                </>
-              ) : (
-                <p className="text-center text-muted-foreground">No tasks found</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }
