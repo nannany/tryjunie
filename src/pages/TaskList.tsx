@@ -14,6 +14,7 @@ interface Task {
   description: string
   status: 'pending' | 'in_progress' | 'completed'
   due_date: string | null
+  estimated_minutes: number | null
 }
 
 const TaskList = () => {
@@ -68,6 +69,12 @@ const TaskList = () => {
       month: 'short', 
       day: 'numeric' 
     })
+  }
+
+  // 見積もり時間をフォーマット
+  const formatEstimatedTime = (minutes: number | null) => {
+    if (!minutes) return null;
+    return `${minutes}m`;
   }
 
   return (
@@ -134,7 +141,11 @@ const TaskList = () => {
                       {getStatusIcon(task.status)}
                       <div>
                         <p className="font-medium">{task.title}</p>
-                        <p className="text-sm text-muted-foreground">Due: {formatDate(task.due_date)}</p>
+                        <div className="flex gap-3 text-sm text-muted-foreground">
+                          <p>Due: {formatDate(task.due_date)}</p>
+                          {task.estimated_minutes && 
+                            <p>• Est: {formatEstimatedTime(task.estimated_minutes)}</p>}
+                        </div>
                       </div>
                     </div>
                     <Button size="sm" variant="outline" asChild>

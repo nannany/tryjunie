@@ -21,6 +21,7 @@ interface FormData {
   description: string
   status: string
   dueDate: string
+  estimatedMinutes: string
 }
 
 const supabase = createClient()
@@ -32,7 +33,8 @@ const CreateTask = () => {
     title: '',
     description: '',
     status: 'pending',
-    dueDate: new Date().toISOString().split('T')[0]
+    dueDate: new Date().toISOString().split('T')[0],
+    estimatedMinutes: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -71,7 +73,8 @@ const CreateTask = () => {
       description: formData.description,
       status: formData.status,
       due_date: formData.dueDate,
-      user_id: userId
+      user_id: userId,
+      estimated_minutes: formData.estimatedMinutes ? parseInt(formData.estimatedMinutes) : null
     })
 
     if (error) {
@@ -145,7 +148,7 @@ const CreateTask = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
@@ -160,6 +163,18 @@ const CreateTask = () => {
                   onChange={handleChange}
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="estimatedMinutes">Estimated Minutes</Label>
+              <Input
+                id="estimatedMinutes"
+                name="estimatedMinutes"
+                type="number"
+                min="0"
+                placeholder="Enter estimated minutes"
+                value={formData.estimatedMinutes}
+                onChange={handleChange}
+              />
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">

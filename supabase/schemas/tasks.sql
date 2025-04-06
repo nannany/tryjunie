@@ -8,6 +8,7 @@ create table if not exists public.tasks (
   title text not null,
   description text,
   status text not null default 'pending',
+  estimated_minute integer,
   due_date timestamp with time zone,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now(),
@@ -60,5 +61,6 @@ comment on column public.tasks.title is 'タスクのタイトル';
 comment on column public.tasks.description is 'タスクの詳細説明';
 comment on column public.tasks.status is 'タスクのステータス(pending, in_progress, completed)';
 comment on column public.tasks.due_date is 'タスクの期限';
+comment on column public.tasks.estimated_minute is 'タスクの見積もり時間(分)';
 comment on column public.tasks.created_at is 'タスク作成日時';
 comment on column public.tasks.updated_at is 'タスク更新日時'; 
