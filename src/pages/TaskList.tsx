@@ -31,6 +31,8 @@ const TaskList = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [editingField, setEditingField] = useState<EditingField | null>(null)
   const [editValue, setEditValue] = useState<string>('')
+  const [isAddingTask, setIsAddingTask] = useState(false)
+  const [newTaskTitle, setNewTaskTitle] = useState('')
   const { toast } = useToast()
 
   // タスクを取得
@@ -184,6 +186,78 @@ const TaskList = () => {
     }
   }
 
+  // クイックタスク追加
+  const handleAddTask = async () => {
+    if (!newTaskTitle.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Task title is required",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsAddingTask(true)
+
+    // ユーザー情報を取得
+    const { data: userData } = await supabase.auth.getUser()
+    const userId = userData.user?.id
+
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "User not authenticated",
+        variant: "destructive",
+      })
+      setIsAddingTask(false)
+      return
+    }
+
+    // 新しいタスクを作成
+    const newTask = {
+      title: newTaskTitle,
+      description: '',
+      status: 'pending',
+      user_id: userId,
+      estimated_minutes: null
+    }
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert(newTask)
+      .select()
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add task",
+        variant: "destructive",
+      })
+      console.error('Error adding task:', error)
+    } else {
+      // 新しく追加されたタスクをリストの先頭に追加
+      setTasks(currentTasks => [data[0] as Task, ...currentTasks])
+      
+      toast({
+        title: "Success",
+        description: "Task added successfully",
+        duration: 2000
+      })
+
+      // 入力フィールドをリセット
+      setNewTaskTitle('')
+    }
+
+    setIsAddingTask(false)
+  }
+
+  // キー入力イベントを処理
+  const handleNewTaskKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleAddTask()
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -194,10 +268,32 @@ const TaskList = () => {
         <Button asChild>
           <Link to="/tasks/create" className="flex items-center gap-1">
             <PlusCircle className="h-4 w-4" />
-            New Task
+            New Task (Full Form)
           </Link>
         </Button>
       </div>
+
+      {/* クイックタスク追加フォーム */}
+      <Card className="border-dashed border-2">
+        <CardContent className="pt-6">
+          <div className="flex gap-3">
+            <Input
+              placeholder="Enter a new task title"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onKeyDown={handleNewTaskKeyDown}
+              disabled={isAddingTask}
+              className="flex-1"
+            />
+            <Button 
+              onClick={handleAddTask} 
+              disabled={isAddingTask || !newTaskTitle.trim()}
+            >
+              {isAddingTask ? 'Adding...' : 'Quick Add'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex space-x-2">
         <Button 

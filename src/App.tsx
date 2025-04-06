@@ -4,7 +4,6 @@ import Layout from '@/components/Layout'
 import AuthLayout from '@/components/AuthLayout'
 import Dashboard from '@/pages/Dashboard'
 import TaskList from '@/pages/TaskList'
-import CreateTask from '@/pages/CreateTask'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import NotFound from '@/pages/NotFound'
@@ -23,7 +22,6 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="tasks" element={<TaskList />} />
-          <Route path="tasks/create" element={<CreateTask />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
