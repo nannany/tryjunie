@@ -357,12 +357,12 @@ const TaskList = () => {
                         )}
                         
                         <div className="flex gap-3 text-sm text-muted-foreground">
-                          <p>Due: {formatDate(task.due_date)}</p>
+                          {/* due_dateの表示を削除 */}
                           
                           {/* 見積もり時間フィールド */}
                           {editingField?.taskId === task.id && editingField?.field === 'estimated_minutes' ? (
                             <div className="flex items-center">
-                              <span>• Est: </span>
+                              <span>Est: </span>
                               <Input
                                 type="number"
                                 min="0"
@@ -386,7 +386,7 @@ const TaskList = () => {
                                 )
                               }
                             >
-                              • Est: {formatEstimatedTime(task.estimated_minutes) || '0m (click to set)'}
+                              Est: {formatEstimatedTime(task.estimated_minutes) || '0m (click to set)'}
                             </p>
                           )}
                         </div>
