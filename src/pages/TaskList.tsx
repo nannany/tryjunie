@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, Clock, AlertCircle, PlusCircle, PencilIcon, Save, X } from 'lucide-react'
+import { CheckCircle2, Clock, AlertCircle, PlusCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
@@ -19,37 +19,37 @@ interface Task {
   estimated_minutes: number | null
 }
 
+// 編集中のフィールドの型
+interface EditingField {
+  taskId: string;
+  field: 'title' | 'estimated_minutes';
+}
+
 const TaskList = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [filter, setFilter] = useState<string>('all')
   const [isLoading, setIsLoading] = useState(true)
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
-  const [editFormData, setEditFormData] = useState<{
-    title: string;
-    estimated_minutes: string;
-  }>({
-    title: '',
-    estimated_minutes: '',
-  })
+  const [editingField, setEditingField] = useState<EditingField | null>(null)
+  const [editValue, setEditValue] = useState<string>('')
   const { toast } = useToast()
 
   // タスクを取得
   useEffect(() => {
-    const fetchTasks = async () => {
-      setIsLoading(true)
-      const { data, error } = await supabase.from('tasks').select('*')
-      
-      if (error) {
-        console.error('Error fetching tasks:', error)
-      } else if (data) {
-        setTasks(data as Task[])
-      }
-      
-      setIsLoading(false)
-    }
-    
     fetchTasks()
   }, [])
+
+  const fetchTasks = async () => {
+    setIsLoading(true)
+    const { data, error } = await supabase.from('tasks').select('*')
+    
+    if (error) {
+      console.error('Error fetching tasks:', error)
+    } else if (data) {
+      setTasks(data as Task[])
+    }
+    
+    setIsLoading(false)
+  }
 
   // Filter tasks based on status
   const filteredTasks = filter === 'all' 
@@ -88,28 +88,25 @@ const TaskList = () => {
     return `${minutes}m`;
   }
 
-  // 編集モードの開始
-  const handleEdit = (task: Task) => {
-    setEditingTaskId(task.id)
-    setEditFormData({
-      title: task.title,
-      estimated_minutes: task.estimated_minutes ? task.estimated_minutes.toString() : '',
-    })
+  // 編集モードを開始
+  const handleEditStart = (taskId: string, field: 'title' | 'estimated_minutes', value: string) => {
+    setEditingField({ taskId, field })
+    setEditValue(value)
   }
 
-  // 編集フォームの入力処理
+  // 編集内容の変更
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setEditValue(e.target.value)
   }
 
-  // 編集の保存
-  const handleSave = async (taskId: string) => {
+  // 編集内容を保存
+  const handleEditSave = async () => {
+    if (!editingField) return
+    
+    const { taskId, field } = editingField
+    
     // バリデーション
-    if (!editFormData.title.trim()) {
+    if (field === 'title' && !editValue.trim()) {
       toast({
         title: "Validation Error",
         description: "Title is required",
@@ -118,43 +115,48 @@ const TaskList = () => {
       return
     }
 
+    const updateData: any = {}
+    if (field === 'title') {
+      updateData.title = editValue
+    } else if (field === 'estimated_minutes') {
+      updateData.estimated_minutes = editValue ? parseInt(editValue) : null
+    }
+
     const { error } = await supabase
       .from('tasks')
-      .update({
-        title: editFormData.title,
-        estimated_minutes: editFormData.estimated_minutes ? parseInt(editFormData.estimated_minutes) : null,
-      })
+      .update(updateData)
       .eq('id', taskId)
 
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to update task",
+        description: `Failed to update ${field}`,
         variant: "destructive",
       })
       console.error('Error updating task:', error)
-      return
-    }
-
-    // 成功メッセージ
-    toast({
-      title: "Success",
-      description: "Task updated successfully",
-    })
-
-    // タスク一覧を再読み込み
-    const { data } = await supabase.from('tasks').select('*')
-    if (data) {
-      setTasks(data as Task[])
+    } else {
+      // 成功メッセージ
+      toast({
+        title: "Success",
+        description: `Task ${field} updated successfully`,
+        duration: 2000
+      })
+      
+      // タスク一覧を再読み込み
+      fetchTasks()
     }
 
     // 編集モードを終了
-    setEditingTaskId(null)
+    setEditingField(null)
   }
 
-  // 編集キャンセル
-  const handleCancelEdit = () => {
-    setEditingTaskId(null)
+  // キーボードイベント処理
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleEditSave()
+    } else if (e.key === 'Escape') {
+      setEditingField(null)
+    }
   }
 
   return (
@@ -220,80 +222,64 @@ const TaskList = () => {
                     <div className="flex items-center gap-4 flex-grow">
                       {getStatusIcon(task.status)}
                       <div className="flex-grow">
-                        {editingTaskId === task.id ? (
-                          // 編集モード
-                          <div className="space-y-2">
-                            <Input
-                              name="title"
-                              value={editFormData.title}
-                              onChange={handleEditChange}
-                              className="font-medium"
-                            />
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-muted-foreground">Est:</span>
+                        {/* タイトルフィールド */}
+                        {editingField?.taskId === task.id && editingField?.field === 'title' ? (
+                          <Input
+                            value={editValue}
+                            onChange={handleEditChange}
+                            onBlur={handleEditSave}
+                            onKeyDown={handleKeyDown}
+                            className="font-medium mb-2"
+                            autoFocus
+                          />
+                        ) : (
+                          <p 
+                            className="font-medium mb-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                            onClick={() => handleEditStart(task.id, 'title', task.title)}
+                          >
+                            {task.title}
+                          </p>
+                        )}
+                        
+                        <div className="flex gap-3 text-sm text-muted-foreground">
+                          <p>Due: {formatDate(task.due_date)}</p>
+                          
+                          {/* 見積もり時間フィールド */}
+                          {editingField?.taskId === task.id && editingField?.field === 'estimated_minutes' ? (
+                            <div className="flex items-center">
+                              <span>• Est: </span>
                               <Input
-                                name="estimated_minutes"
                                 type="number"
                                 min="0"
-                                placeholder="Minutes"
-                                value={editFormData.estimated_minutes}
+                                value={editValue}
                                 onChange={handleEditChange}
-                                className="w-24 h-7 text-sm"
+                                onBlur={handleEditSave}
+                                onKeyDown={handleKeyDown}
+                                className="w-16 h-6 text-xs mx-1"
+                                autoFocus
                               />
-                              <span className="text-sm text-muted-foreground">minutes</span>
+                              <span>m</span>
                             </div>
-                          </div>
-                        ) : (
-                          // 表示モード
-                          <>
-                            <p className="font-medium">{task.title}</p>
-                            <div className="flex gap-3 text-sm text-muted-foreground">
-                              <p>Due: {formatDate(task.due_date)}</p>
-                              {task.estimated_minutes && 
-                                <p>• Est: {formatEstimatedTime(task.estimated_minutes)}</p>}
-                            </div>
-                          </>
-                        )}
+                          ) : (
+                            <p 
+                              className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+                              onClick={() => 
+                                handleEditStart(
+                                  task.id, 
+                                  'estimated_minutes', 
+                                  task.estimated_minutes ? task.estimated_minutes.toString() : ''
+                                )
+                              }
+                            >
+                              • Est: {formatEstimatedTime(task.estimated_minutes) || '0m (click to set)'}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex gap-2 items-center">
-                      {editingTaskId === task.id ? (
-                        // 編集モードのボタン
-                        <>
-                          <Button 
-                            size="icon" 
-                            variant="outline" 
-                            onClick={() => handleSave(task.id)}
-                            className="h-8 w-8"
-                          >
-                            <Save className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="outline" 
-                            onClick={handleCancelEdit}
-                            className="h-8 w-8"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        // 表示モードのボタン
-                        <>
-                          <Button 
-                            size="icon" 
-                            variant="outline" 
-                            onClick={() => handleEdit(task)}
-                            className="h-8 w-8"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" asChild>
-                            <Link to={`/tasks/${task.id}`}>View</Link>
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to={`/tasks/${task.id}`}>View</Link>
+                    </Button>
                   </div>
                 ))
               ) : (
