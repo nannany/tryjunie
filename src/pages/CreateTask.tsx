@@ -80,7 +80,17 @@ const CreateTask = () => {
         description: "Failed to create task",
         variant: "destructive",
       })
+      setIsSubmitting(false)
+      return
     }
+    
+    toast({
+      title: "Success",
+      description: "Task created successfully",
+    })
+    
+    // タスク一覧ページへリダイレクト
+    navigate('/tasks')
     setIsSubmitting(false)
   }
 

@@ -7,25 +7,36 @@ import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
 
-// Mock task data
+// Task型の定義
 interface Task {
   id: string
   title: string
   description: string
-  status: 'completed' | 'in-progress' | 'pending'
-  dueDate: string
+  status: 'pending' | 'in_progress' | 'completed'
+  due_date: string | null
 }
 
 const TaskList = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [filter, setFilter] = useState<string>('all')
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Simulate fetching tasks
+  // タスクを取得
   useEffect(() => {
-    // In a real app, this would be an API call
-    supabase.from('tasks').select('*').then(({ data }) => {
-      setTasks(data as Task[])
-    })
+    const fetchTasks = async () => {
+      setIsLoading(true)
+      const { data, error } = await supabase.from('tasks').select('*')
+      
+      if (error) {
+        console.error('Error fetching tasks:', error)
+      } else if (data) {
+        setTasks(data as Task[])
+      }
+      
+      setIsLoading(false)
+    }
+    
+    fetchTasks()
   }, [])
 
   // Filter tasks based on status
@@ -38,7 +49,7 @@ const TaskList = () => {
     switch(status) {
       case 'completed':
         return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case 'in-progress':
+      case 'in_progress':
         return <Clock className="h-5 w-5 text-blue-500" />
       case 'pending':
         return <AlertCircle className="h-5 w-5 text-yellow-500" />
@@ -48,7 +59,9 @@ const TaskList = () => {
   }
 
   // Format date
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'No due date'
+    
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { 
       year: 'numeric', 
@@ -86,8 +99,8 @@ const TaskList = () => {
           Pending
         </Button>
         <Button 
-          variant={filter === 'in-progress' ? 'default' : 'outline'} 
-          onClick={() => setFilter('in-progress')}
+          variant={filter === 'in_progress' ? 'default' : 'outline'} 
+          onClick={() => setFilter('in_progress')}
         >
           In Progress
         </Button>
@@ -103,33 +116,37 @@ const TaskList = () => {
         <CardHeader>
           <CardTitle>Task List</CardTitle>
           <CardDescription>
-            {filter === 'all' ? 'All tasks' : `${filter.charAt(0).toUpperCase() + filter.slice(1)} tasks`}
+            {filter === 'all' ? 'All tasks' : `${filter.charAt(0).toUpperCase() + filter.slice(1).replace('-', ' ')} tasks`}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredTasks.length > 0 ? (
-              filteredTasks.map(task => (
-                <div 
-                  key={task.id} 
-                  className="flex items-center justify-between rounded-md border p-4"
-                >
-                  <div className="flex items-center gap-4">
-                    {getStatusIcon(task.status)}
-                    <div>
-                      <p className="font-medium">{task.title}</p>
-                      <p className="text-sm text-muted-foreground">Due: {formatDate(task.dueDate)}</p>
+          {isLoading ? (
+            <p className="text-center text-muted-foreground">Loading tasks...</p>
+          ) : (
+            <div className="space-y-4">
+              {filteredTasks.length > 0 ? (
+                filteredTasks.map(task => (
+                  <div 
+                    key={task.id} 
+                    className="flex items-center justify-between rounded-md border p-4"
+                  >
+                    <div className="flex items-center gap-4">
+                      {getStatusIcon(task.status)}
+                      <div>
+                        <p className="font-medium">{task.title}</p>
+                        <p className="text-sm text-muted-foreground">Due: {formatDate(task.due_date)}</p>
+                      </div>
                     </div>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to={`/tasks/${task.id}`}>View</Link>
+                    </Button>
                   </div>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to={`/tasks/${task.id}`}>View</Link>
-                  </Button>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground">No tasks found</p>
-            )}
-          </div>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground">No tasks found</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
