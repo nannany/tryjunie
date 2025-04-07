@@ -15,7 +15,7 @@ function App() {
         {/* Auth routes */}
         <Route element={<AuthLayout />}>
           <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
+          <Route path="sign-up" element={<Register />} />
         </Route>
 
         {/* App routes */}
