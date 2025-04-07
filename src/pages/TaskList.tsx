@@ -14,14 +14,15 @@ interface Task {
   title: string
   description: string
   status: 'pending' | 'in_progress' | 'completed'
-  due_date: string | null
   estimated_minutes: number | null
+  start_time: string | null
+  end_time: string | null
 }
 
 // 編集中のフィールドの型
 interface EditingField {
   taskId: string;
-  field: 'title' | 'estimated_minutes';
+  field: 'title' | 'estimated_minutes' | 'start_time' | 'end_time';
 }
 
 const TaskList = () => {
@@ -77,8 +78,21 @@ const TaskList = () => {
     return `${minutes}m`;
   }
 
+  // 日時をフォーマット
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleString('ja-JP', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
   // 編集モードを開始
-  const handleEditStart = (taskId: string, field: 'title' | 'estimated_minutes', value: string) => {
+  const handleEditStart = (taskId: string, field: 'title' | 'estimated_minutes' | 'start_time' | 'end_time', value: string) => {
     setEditingField({ taskId, field })
     setEditValue(value)
   }
@@ -109,6 +123,8 @@ const TaskList = () => {
       updateData.title = editValue
     } else if (field === 'estimated_minutes') {
       updateData.estimated_minutes = editValue ? parseInt(editValue) : null
+    } else if (field === 'start_time' || field === 'end_time') {
+      updateData[field] = editValue ? new Date(editValue).toISOString() : null
     }
 
     const { error } = await supabase
@@ -344,8 +360,6 @@ const TaskList = () => {
                         )}
                         
                         <div className="flex gap-3 text-sm text-muted-foreground">
-                          {/* due_dateの表示を削除 */}
-                          
                           {/* 見積もり時間フィールド */}
                           {editingField?.taskId === task.id && editingField?.field === 'estimated_minutes' ? (
                             <div className="flex items-center">
@@ -374,6 +388,64 @@ const TaskList = () => {
                               }
                             >
                               Est: {formatEstimatedTime(task.estimated_minutes) || '0m (click to set)'}
+                            </p>
+                          )}
+
+                          {/* 開始時間フィールド */}
+                          {editingField?.taskId === task.id && editingField?.field === 'start_time' ? (
+                            <div className="flex items-center">
+                              <span>Start: </span>
+                              <Input
+                                type="datetime-local"
+                                value={editValue}
+                                onChange={handleEditChange}
+                                onBlur={handleEditSave}
+                                onKeyDown={handleKeyDown}
+                                className="w-48 h-6 text-xs mx-1"
+                                autoFocus
+                              />
+                            </div>
+                          ) : (
+                            <p 
+                              className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+                              onClick={() => 
+                                handleEditStart(
+                                  task.id, 
+                                  'start_time', 
+                                  task.start_time || ''
+                                )
+                              }
+                            >
+                              Start: {formatDateTime(task.start_time) || '(click to set)'}
+                            </p>
+                          )}
+
+                          {/* 終了時間フィールド */}
+                          {editingField?.taskId === task.id && editingField?.field === 'end_time' ? (
+                            <div className="flex items-center">
+                              <span>End: </span>
+                              <Input
+                                type="datetime-local"
+                                value={editValue}
+                                onChange={handleEditChange}
+                                onBlur={handleEditSave}
+                                onKeyDown={handleKeyDown}
+                                className="w-48 h-6 text-xs mx-1"
+                                autoFocus
+                              />
+                            </div>
+                          ) : (
+                            <p 
+                              className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+                              onClick={() => 
+                                handleEditStart(
+                                  task.id, 
+                                  'end_time', 
+                                  task.end_time || ''
+                                )
+                              }
+                            >
+                              End: {formatDateTime(task.end_time) || '(click to set)'}
                             </p>
                           )}
                         </div>
