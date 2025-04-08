@@ -69,7 +69,9 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: task.id });
+  } = useSortable({ 
+    id: task.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -92,11 +94,37 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
     });
   }
 
+  // キーボードショートカットの処理
+  const handleTaskKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // 編集中の場合はショートカットを無効化
+    if (editingField?.taskId === task.id) return;
+
+    switch (e.key.toLowerCase()) {
+      case 's':
+        if (!task.start_time) {
+          e.preventDefault();
+          onTaskTimer(task.id, 'start');
+        }
+        break;
+      case 'e':
+        if (task.start_time && !task.end_time) {
+          e.preventDefault();
+          onTaskTimer(task.id, 'stop');
+        }
+        break;
+      case 'd':
+        e.preventDefault();
+        onDelete(task.id);
+        break;
+    }
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between rounded-md border p-4"
+      className="flex items-center justify-between rounded-md border p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      onKeyDown={handleTaskKeyDown}
     >
       <div className="flex items-center gap-4">
         <div
