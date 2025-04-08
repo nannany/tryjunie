@@ -71,7 +71,22 @@ const TaskList = () => {
     if (!minutes) return null;
     return `${minutes}m`;
   }
-  
+
+  // 完了予定時刻を計算
+  const calculateEndTime = (minutes: number | null) => {
+    if (!minutes) return null;
+    const now = new Date();
+    const endTime = new Date(now.getTime() + minutes * 60000);
+    return endTime.toLocaleTimeString('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  }
+
+  // 合計見積もり時間を計算
+  const totalEstimatedMinutes = tasks.reduce((sum, task) => sum + (task.estimated_minute || 0), 0);
+
   // 2025/4/4 のような文字列をpostgresのdate型として扱える文字列(2025-04-04)に変換
   const convertDateStringToDate = (dateString: string) => {
     const [year, month, day] = dateString.split('/')
@@ -274,6 +289,15 @@ const TaskList = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
           <p className="text-muted-foreground">Manage your tasks</p>
+          {totalEstimatedMinutes > 0 && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {totalEstimatedMinutes > 0 && (
+                <span className="ml-2">
+                  完了予定: {calculateEndTime(totalEstimatedMinutes)}
+                </span>
+              )}
+            </p>
+          )}
         </div>
         <div className="text-right">
           <Popover>
