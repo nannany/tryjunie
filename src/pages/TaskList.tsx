@@ -85,7 +85,11 @@ const TaskList = () => {
   }
 
   // 合計見積もり時間を計算
-  const totalEstimatedMinutes = tasks.reduce((sum, task) => sum + (task.estimated_minute || 0), 0);
+  const totalEstimatedMinutes = tasks.reduce((sum, task) => {
+    // end_timeが設定されているタスクは除外
+    if (task.end_time) return sum;
+    return sum + (task.estimated_minute || 0);
+  }, 0);
 
   // 2025/4/4 のような文字列をpostgresのdate型として扱える文字列(2025-04-04)に変換
   const convertDateStringToDate = (dateString: string) => {
