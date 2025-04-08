@@ -536,14 +536,19 @@ const TaskList = () => {
                             </div>
                           ) : (
                             <p 
-                              className="cursor-pointer hover:bg-gray-50 p-1 rounded"
-                              onClick={() => 
-                                handleEditStart(
-                                  task.id, 
-                                  'end_time', 
-                                  task.end_time || ''
-                                )
-                              }
+                              className={cn(
+                                "cursor-pointer hover:bg-gray-50 p-1 rounded",
+                                !task.start_time && "text-gray-400 cursor-not-allowed"
+                              )}
+                              onClick={() => {
+                                if (task.start_time) {
+                                  handleEditStart(
+                                    task.id, 
+                                    'end_time', 
+                                    task.end_time || ''
+                                  );
+                                }
+                              }}
                             >
                               End: {formatDateTime(task.end_time) || '(click to set)'}
                             </p>
