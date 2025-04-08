@@ -7,20 +7,16 @@ create table if not exists public.tasks (
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null,
   description text,
-  status text not null default 'pending',
   estimated_minute integer,
   task_date date not null default current_date,
   start_time timestamp with time zone,
   end_time timestamp with time zone,
   created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now(),
-  
-  constraint status_check check (status in ('pending', 'in_progress', 'completed'))
+  updated_at timestamp with time zone not null default now()
 );
 
 -- インデックス
 create index if not exists tasks_user_id_idx on public.tasks (user_id);
-create index if not exists tasks_status_idx on public.tasks (status);
 
 -- RLS (Row Level Security)
 alter table public.tasks enable row level security;
@@ -61,7 +57,6 @@ comment on column public.tasks.id is 'タスクの一意識別子';
 comment on column public.tasks.user_id is 'タスクの所有者ID';
 comment on column public.tasks.title is 'タスクのタイトル';
 comment on column public.tasks.description is 'タスクの詳細説明';
-comment on column public.tasks.status is 'タスクのステータス(pending, in_progress, completed)';
 comment on column public.tasks.estimated_minute is 'タスクの見積もり時間(分)';
 comment on column public.tasks.start_time is 'タスクの開始時間';
 comment on column public.tasks.end_time is 'タスクの終了時間';
