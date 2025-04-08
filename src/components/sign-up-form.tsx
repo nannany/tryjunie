@@ -35,6 +35,9 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: 'https://tryjunie.vercel.app/'
+        }
       })
       if (error) throw error
       setSuccess(true)
