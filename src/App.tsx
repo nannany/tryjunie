@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import Layout from '@/components/Layout'
 import AuthLayout from '@/components/AuthLayout'
+import RequireAuth from '@/components/RequireAuth'
 import TaskList from '@/pages/TaskList'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
@@ -19,7 +20,14 @@ function App() {
 
         {/* App routes */}
         <Route path="/" element={<Layout />}>
-          <Route path="" element={<TaskList />} />
+          <Route
+            path=""
+            element={
+              <RequireAuth>
+                <TaskList />
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
