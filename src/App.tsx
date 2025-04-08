@@ -19,7 +19,7 @@ function App() {
 
         {/* App routes */}
         <Route path="/" element={<Layout />}>
-          <Route path="" element={<TaskList />} />
+          <Route path="tasks" element={<TaskList />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
