@@ -14,7 +14,7 @@ interface Task {
   title: string
   description: string
   status: 'pending' | 'in_progress' | 'completed'
-  estimated_minutes: number | null
+  estimated_minute: number | null
   start_time: string | null
   end_time: string | null
   created_at: string
@@ -23,7 +23,7 @@ interface Task {
 // 編集中のフィールドの型
 interface EditingField {
   taskId: string;
-  field: 'title' | 'estimated_minutes' | 'start_time' | 'end_time';
+  field: 'title' | 'estimated_minute' | 'start_time' | 'end_time';
 }
 
 const TaskList = () => {
@@ -90,7 +90,7 @@ const TaskList = () => {
   }
 
   // 編集モードを開始
-  const handleEditStart = (taskId: string, field: 'title' | 'estimated_minutes' | 'start_time' | 'end_time', value: string) => {
+  const handleEditStart = (taskId: string, field: 'title' | 'estimated_minute' | 'start_time' | 'end_time', value: string) => {
     setEditingField({ taskId, field })
     setEditValue(value)
   }
@@ -119,8 +119,8 @@ const TaskList = () => {
     const updateData: any = {}
     if (field === 'title') {
       updateData.title = editValue
-    } else if (field === 'estimated_minutes') {
-      updateData.estimated_minutes = editValue ? parseInt(editValue) : null
+    } else if (field === 'estimated_minute') {
+      updateData.estimated_minute = editValue ? parseInt(editValue) : null
     } else if (field === 'start_time' || field === 'end_time') {
       updateData[field] = editValue ? new Date(editValue).toISOString() : null
     }
@@ -220,7 +220,7 @@ const TaskList = () => {
       description: '',
       status: 'pending',
       user_id: userId,
-      estimated_minutes: null
+      estimated_minute: null
     }
 
     const { data, error } = await supabase
@@ -369,7 +369,7 @@ const TaskList = () => {
                         
                         <div className="flex gap-3 text-sm text-muted-foreground">
                           {/* 見積もり時間フィールド */}
-                          {editingField?.taskId === task.id && editingField?.field === 'estimated_minutes' ? (
+                          {editingField?.taskId === task.id && editingField?.field === 'estimated_minute' ? (
                             <div className="flex items-center">
                               <span>Est: </span>
                               <Input
@@ -390,12 +390,12 @@ const TaskList = () => {
                               onClick={() => 
                                 handleEditStart(
                                   task.id, 
-                                  'estimated_minutes', 
-                                  task.estimated_minutes ? task.estimated_minutes.toString() : ''
+                                  'estimated_minute', 
+                                  task.estimated_minute ? task.estimated_minute.toString() : ''
                                 )
                               }
                             >
-                              Est: {formatEstimatedTime(task.estimated_minutes) || '0m (click to set)'}
+                              Est: {formatEstimatedTime(task.estimated_minute) || '0m (click to set)'}
                             </p>
                           )}
 
