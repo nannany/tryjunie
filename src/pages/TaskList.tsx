@@ -33,9 +33,11 @@ const supabase = createClient()
 // Task型の定義
 interface Task {
   id: string
+  user_id: string
   title: string
   description: string
   estimated_minute: number | null
+  task_order: number | null
   start_time: string | null
   end_time: string | null
   created_at: string
@@ -307,7 +309,8 @@ const TaskList = () => {
       .from('tasks')
       .select('*')
       .eq('task_date', convertDateStringToDate(date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }).split(' ')[0]))
-      .order('created_at', { ascending: true })
+      .order('start_time', { ascending: true, nullsFirst: true })
+      .order('task_order', { ascending: true, nullsFirst: true })
     
     if (error) {
       console.error('Error fetching tasks:', error)
@@ -568,7 +571,7 @@ const TaskList = () => {
       // データベースの順序を更新
       const { error } = await supabase
         .from('tasks')
-        .update({ order: newIndex })
+        .update({ task_order: newIndex })
         .eq('id', active.id);
 
       if (error) {
