@@ -22,6 +22,7 @@ interface Task {
   start_time: string | null
   end_time: string | null
   created_at: string
+  task_date: string
 }
 
 // 編集中のフィールドの型
@@ -49,16 +50,11 @@ const TaskList = () => {
 
   const fetchTasks = async (date: Date) => {
     setIsLoading(true)
-    const startOfDay = new Date(date)
-    startOfDay.setHours(0, 0, 0, 0)
-    const endOfDay = new Date(date)
-    endOfDay.setHours(23, 59, 59, 999)
 
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .gte('created_at', startOfDay.toISOString())
-      .lte('created_at', endOfDay.toISOString())
+      .eq('task_date', convertDateStringToDate(date.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }).split(' ')[0]))
       .order('created_at', { ascending: true })
     
     if (error) {
@@ -74,6 +70,13 @@ const TaskList = () => {
   const formatEstimatedTime = (minutes: number | null) => {
     if (!minutes) return null;
     return `${minutes}m`;
+  }
+  
+  // 2025/4/4 のような文字列をpostgresのdate型として扱える文字列(2025-04-04)に変換
+  const convertDateStringToDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('/')
+    const formatted = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    return formatted
   }
 
   // 日時をフォーマット
@@ -195,6 +198,15 @@ const TaskList = () => {
       return
     }
 
+    if (!selectedDate) {
+      toast({
+        title: "Validation Error",
+        description: "Please select a date",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsAddingTask(true)
 
     // ユーザー情報を取得
@@ -216,7 +228,8 @@ const TaskList = () => {
       title: newTaskTitle,
       description: '',
       user_id: userId,
-      estimated_minute: null
+      estimated_minute: null,
+      task_date: selectedDate.toISOString().split('T')[0]
     }
 
     const { data, error } = await supabase
