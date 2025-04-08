@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CheckCircle2, Clock, AlertCircle, Trash2 } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
@@ -13,7 +13,6 @@ interface Task {
   id: string
   title: string
   description: string
-  status: 'pending' | 'in_progress' | 'completed'
   estimated_minute: number | null
   start_time: string | null
   end_time: string | null
@@ -28,7 +27,6 @@ interface EditingField {
 
 const TaskList = () => {
   const [tasks, setTasks] = useState<Task[]>([])
-  const [filter, setFilter] = useState<string>('all')
   const [isLoading, setIsLoading] = useState(true)
   const [editingField, setEditingField] = useState<EditingField | null>(null)
   const [editValue, setEditValue] = useState<string>('')
@@ -52,25 +50,6 @@ const TaskList = () => {
     }
     
     setIsLoading(false)
-  }
-
-  // Filter tasks based on status
-  const filteredTasks = filter === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.status === filter)
-
-  // Get status icon
-  const getStatusIcon = (status: string) => {
-    switch(status) {
-      case 'completed':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />
-      case 'in_progress':
-        return <Clock className="h-5 w-5 text-blue-500" />
-      case 'pending':
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />
-      default:
-        return null
-    }
   }
 
   // 見積もり時間をフォーマット
@@ -218,7 +197,6 @@ const TaskList = () => {
     const newTask = {
       title: newTaskTitle,
       description: '',
-      status: 'pending',
       user_id: userId,
       estimated_minute: null
     }
@@ -300,53 +278,22 @@ const TaskList = () => {
         </CardContent>
       </Card>
 
-      <div className="flex space-x-2">
-        <Button 
-          variant={filter === 'all' ? 'default' : 'outline'} 
-          onClick={() => setFilter('all')}
-        >
-          All
-        </Button>
-        <Button 
-          variant={filter === 'pending' ? 'default' : 'outline'} 
-          onClick={() => setFilter('pending')}
-        >
-          Pending
-        </Button>
-        <Button 
-          variant={filter === 'in_progress' ? 'default' : 'outline'} 
-          onClick={() => setFilter('in_progress')}
-        >
-          In Progress
-        </Button>
-        <Button 
-          variant={filter === 'completed' ? 'default' : 'outline'} 
-          onClick={() => setFilter('completed')}
-        >
-          Completed
-        </Button>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Task List</CardTitle>
-          <CardDescription>
-            {filter === 'all' ? 'All tasks' : `${filter.charAt(0).toUpperCase() + filter.slice(1).replace('-', ' ')} tasks`}
-          </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <p className="text-center text-muted-foreground">Loading tasks...</p>
           ) : (
             <div className="space-y-4">
-              {filteredTasks.length > 0 ? (
-                filteredTasks.map(task => (
+              {tasks.length > 0 ? (
+                tasks.map(task => (
                   <div 
                     key={task.id} 
                     className="flex items-center justify-between rounded-md border p-4"
                   >
                     <div className="flex items-center gap-4 flex-grow">
-                      {getStatusIcon(task.status)}
                       <div className="flex-grow">
                         {/* タイトルフィールド */}
                         {editingField?.taskId === task.id && editingField?.field === 'title' ? (
