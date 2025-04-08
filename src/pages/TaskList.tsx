@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trash2, Calendar } from 'lucide-react'
+import { Trash2, Calendar, Play, Square, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
@@ -283,6 +283,37 @@ const TaskList = () => {
     }
   }
 
+  // タスクの開始/停止を処理
+  const handleTaskTimer = async (taskId: string, action: 'start' | 'stop' | 'complete') => {
+    const updateData: any = {};
+    
+    if (action === 'start') {
+      updateData.start_time = new Date().toISOString();
+    } else if (action === 'stop') {
+      updateData.end_time = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+      .from('tasks')
+      .update(updateData)
+      .eq('id', taskId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${action} task`,
+        variant: "destructive",
+      });
+      console.error(`Error ${action}ing task:`, error);
+    } else {
+      setTasks(currentTasks =>
+        currentTasks.map(task =>
+          task.id === taskId ? { ...task, ...updateData } : task
+        )
+      );
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -367,7 +398,35 @@ const TaskList = () => {
                     key={task.id} 
                     className="flex items-center justify-between rounded-md border p-4"
                   >
-                    <div className="flex items-center gap-4 flex-grow">
+                    <div className="flex items-center gap-4">
+                      {!task.start_time ? (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => handleTaskTimer(task.id, 'start')}
+                          className="h-8 w-8 text-green-500 hover:text-green-700 hover:bg-green-50"
+                        >
+                          <Play className="h-4 w-4" />
+                        </Button>
+                      ) : !task.end_time ? (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => handleTaskTimer(task.id, 'stop')}
+                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Square className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8 text-gray-500"
+                          disabled
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </Button>
+                      )}
                       <div className="flex-grow">
                         {/* タイトルフィールド */}
                         {editingField?.taskId === task.id && editingField?.field === 'title' ? (
