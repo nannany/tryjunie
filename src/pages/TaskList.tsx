@@ -568,11 +568,17 @@ const TaskList = () => {
       const newTasks = arrayMove(tasks, oldIndex, newIndex);
       setTasks(newTasks);
 
-      // データベースの順序を更新
+      // over.id の taskを取得
+      const overTask = tasks.find((task) => task.id === over.id);
+
+      // データベースの順序を更新。 update_task_order 関数を呼び出す
       const { error } = await supabase
-        .from('tasks')
-        .update({ task_order: newIndex })
-        .eq('id', active.id);
+        .rpc('update_task_order', {
+          p_id: active.id,
+          p_user_id: overTask?.user_id,
+          p_task_date: overTask?.task_date,
+          p_task_order: overTask?.task_order
+        });
 
       if (error) {
         toast({

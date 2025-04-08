@@ -33,6 +33,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+    location.href = '/login'
   }
 
   return (
