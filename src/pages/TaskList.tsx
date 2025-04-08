@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trash2, Calendar, Play, Square, CheckCircle2 } from 'lucide-react'
+import { Trash2, Calendar, Play, Square, CheckCircle2, GripVertical } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
@@ -10,6 +10,23 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { ja } from "date-fns/locale"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const supabase = createClient()
 
@@ -31,6 +48,233 @@ interface EditingField {
   field: 'title' | 'estimated_minute' | 'start_time' | 'end_time';
 }
 
+// SortableTaskコンポーネントの追加
+const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, editValue, handleEditChange, handleEditSave, handleKeyDown, setEditValue }: {
+  task: Task;
+  onEditStart: (taskId: string, field: 'title' | 'estimated_minute' | 'start_time' | 'end_time', value: string) => void;
+  onDelete: (taskId: string) => void;
+  onTaskTimer: (taskId: string, action: 'start' | 'stop' | 'complete') => void;
+  editingField: EditingField | null;
+  editValue: string;
+  handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleEditSave: () => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  setEditValue: (value: string) => void;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  // 見積もり時間をフォーマット
+  const formatEstimatedTime = (minutes: number | null) => {
+    if (!minutes) return null;
+    return `${minutes}m`;
+  }
+
+  // 日時をフォーマット
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleString('ja-JP', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center justify-between rounded-md border p-4"
+    >
+      <div className="flex items-center gap-4">
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="h-4 w-4 text-gray-400" />
+        </div>
+        {!task.start_time ? (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => onTaskTimer(task.id, 'start')}
+            className="h-8 w-8 text-green-500 hover:text-green-700 hover:bg-green-50"
+          >
+            <Play className="h-4 w-4" />
+          </Button>
+        ) : !task.end_time ? (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => onTaskTimer(task.id, 'stop')}
+            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+          >
+            <Square className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-8 w-8 text-gray-500"
+            disabled
+          >
+            <CheckCircle2 className="h-4 w-4" />
+          </Button>
+        )}
+        <div className="flex-grow">
+          {/* タイトルフィールド */}
+          {editingField?.taskId === task.id && editingField?.field === 'title' ? (
+            <Input
+              value={editValue}
+              onChange={handleEditChange}
+              onBlur={handleEditSave}
+              onKeyDown={handleKeyDown}
+              className="font-medium mb-2"
+              autoFocus
+            />
+          ) : (
+            <p 
+              className="font-medium mb-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+              onClick={() => onEditStart(task.id, 'title', task.title)}
+            >
+              {task.title}
+            </p>
+          )}
+          
+          <div className="flex gap-3 text-sm text-muted-foreground">
+            {/* 見積もり時間フィールド */}
+            {editingField?.taskId === task.id && editingField?.field === 'estimated_minute' ? (
+              <div className="flex items-center">
+                <span>Est: </span>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editValue}
+                  onChange={handleEditChange}
+                  onBlur={handleEditSave}
+                  onKeyDown={handleKeyDown}
+                  className="w-16 h-6 text-xs mx-1"
+                  autoFocus
+                />
+                <span>m</span>
+              </div>
+            ) : (
+              <p 
+                className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+                onClick={() => 
+                  onEditStart(
+                    task.id, 
+                    'estimated_minute', 
+                    task.estimated_minute ? task.estimated_minute.toString() : ''
+                  )
+                }
+              >
+                Est: {formatEstimatedTime(task.estimated_minute) || '0m (click to set)'}
+              </p>
+            )}
+
+            {/* 開始時間フィールド */}
+            {editingField?.taskId === task.id && editingField?.field === 'start_time' ? (
+              <div className="flex items-center">
+                <span>Start: </span>
+                <Input
+                  type="time"
+                  value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value.split(':');
+                    const date = new Date();
+                    date.setHours(parseInt(hours));
+                    date.setMinutes(parseInt(minutes));
+                    setEditValue(date.toISOString());
+                  }}
+                  onBlur={handleEditSave}
+                  onKeyDown={handleKeyDown}
+                  className="w-24 h-6 text-xs mx-1"
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <p 
+                className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+                onClick={() => 
+                  onEditStart(
+                    task.id, 
+                    'start_time', 
+                    task.start_time || ''
+                  )
+                }
+              >
+                Start: {formatDateTime(task.start_time) || '(click to set)'}
+              </p>
+            )}
+
+            {/* 終了時間フィールド */}
+            {editingField?.taskId === task.id && editingField?.field === 'end_time' ? (
+              <div className="flex items-center">
+                <span>End: </span>
+                <Input
+                  type="time"
+                  value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value.split(':');
+                    const date = new Date();
+                    date.setHours(parseInt(hours));
+                    date.setMinutes(parseInt(minutes));
+                    setEditValue(date.toISOString());
+                  }}
+                  onBlur={handleEditSave}
+                  onKeyDown={handleKeyDown}
+                  className="w-24 h-6 text-xs mx-1"
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <p 
+                className={cn(
+                  "cursor-pointer hover:bg-gray-50 p-1 rounded",
+                  !task.start_time && "text-gray-400 cursor-not-allowed"
+                )}
+                onClick={() => {
+                  if (task.start_time) {
+                    onEditStart(
+                      task.id, 
+                      'end_time', 
+                      task.end_time || ''
+                    );
+                  }
+                }}
+              >
+                End: {formatDateTime(task.end_time) || '(click to set)'}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-2 items-center">
+        <Button 
+          size="icon" 
+          variant="outline"
+          onClick={() => onDelete(task.id)}
+          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const TaskList = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -40,6 +284,14 @@ const TaskList = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const { toast } = useToast()
+
+  // ドラッグ&ドロップのセンサーを設定
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // タスクを取得
   useEffect(() => {
@@ -66,12 +318,6 @@ const TaskList = () => {
     setIsLoading(false)
   }
 
-  // 見積もり時間をフォーマット
-  const formatEstimatedTime = (minutes: number | null) => {
-    if (!minutes) return null;
-    return `${minutes}m`;
-  }
-
   // 完了予定時刻を計算
   const calculateEndTime = (minutes: number | null) => {
     if (!minutes) return null;
@@ -96,16 +342,6 @@ const TaskList = () => {
     const [year, month, day] = dateString.split('/')
     const formatted = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     return formatted
-  }
-
-  // 日時をフォーマット
-  const formatDateTime = (dateString: string | null) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleString('ja-JP', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   }
 
   // 編集モードを開始
@@ -318,6 +554,34 @@ const TaskList = () => {
     }
   };
 
+  // ドラッグ&ドロップの処理
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = tasks.findIndex((task) => task.id === active.id);
+      const newIndex = tasks.findIndex((task) => task.id === over.id);
+      
+      const newTasks = arrayMove(tasks, oldIndex, newIndex);
+      setTasks(newTasks);
+
+      // データベースの順序を更新
+      const { error } = await supabase
+        .from('tasks')
+        .update({ order: newIndex })
+        .eq('id', active.id);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update task order",
+          variant: "destructive",
+        });
+        console.error('Error updating task order:', error);
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -397,181 +661,32 @@ const TaskList = () => {
           ) : (
             <div className="space-y-4">
               {tasks.length > 0 ? (
-                tasks.map(task => (
-                  <div 
-                    key={task.id} 
-                    className="flex items-center justify-between rounded-md border p-4"
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={tasks.map(task => task.id)}
+                    strategy={verticalListSortingStrategy}
                   >
-                    <div className="flex items-center gap-4">
-                      {!task.start_time ? (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => handleTaskTimer(task.id, 'start')}
-                          className="h-8 w-8 text-green-500 hover:text-green-700 hover:bg-green-50"
-                        >
-                          <Play className="h-4 w-4" />
-                        </Button>
-                      ) : !task.end_time ? (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => handleTaskTimer(task.id, 'stop')}
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Square className="h-4 w-4" />
-                        </Button>
-                      ) : (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 text-gray-500"
-                          disabled
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <div className="flex-grow">
-                        {/* タイトルフィールド */}
-                        {editingField?.taskId === task.id && editingField?.field === 'title' ? (
-                          <Input
-                            value={editValue}
-                            onChange={handleEditChange}
-                            onBlur={handleEditSave}
-                            onKeyDown={handleKeyDown}
-                            className="font-medium mb-2"
-                            autoFocus
-                          />
-                        ) : (
-                          <p 
-                            className="font-medium mb-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
-                            onClick={() => handleEditStart(task.id, 'title', task.title)}
-                          >
-                            {task.title}
-                          </p>
-                        )}
-                        
-                        <div className="flex gap-3 text-sm text-muted-foreground">
-                          {/* 見積もり時間フィールド */}
-                          {editingField?.taskId === task.id && editingField?.field === 'estimated_minute' ? (
-                            <div className="flex items-center">
-                              <span>Est: </span>
-                              <Input
-                                type="number"
-                                min="0"
-                                value={editValue}
-                                onChange={handleEditChange}
-                                onBlur={handleEditSave}
-                                onKeyDown={handleKeyDown}
-                                className="w-16 h-6 text-xs mx-1"
-                                autoFocus
-                              />
-                              <span>m</span>
-                            </div>
-                          ) : (
-                            <p 
-                              className="cursor-pointer hover:bg-gray-50 p-1 rounded"
-                              onClick={() => 
-                                handleEditStart(
-                                  task.id, 
-                                  'estimated_minute', 
-                                  task.estimated_minute ? task.estimated_minute.toString() : ''
-                                )
-                              }
-                            >
-                              Est: {formatEstimatedTime(task.estimated_minute) || '0m (click to set)'}
-                            </p>
-                          )}
-
-                          {/* 開始時間フィールド */}
-                          {editingField?.taskId === task.id && editingField?.field === 'start_time' ? (
-                            <div className="flex items-center">
-                              <span>Start: </span>
-                              <Input
-                                type="time"
-                                value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
-                                onChange={(e) => {
-                                  const [hours, minutes] = e.target.value.split(':');
-                                  const date = new Date();
-                                  date.setHours(parseInt(hours));
-                                  date.setMinutes(parseInt(minutes));
-                                  setEditValue(date.toISOString());
-                                }}
-                                onBlur={handleEditSave}
-                                onKeyDown={handleKeyDown}
-                                className="w-24 h-6 text-xs mx-1"
-                                autoFocus
-                              />
-                            </div>
-                          ) : (
-                            <p 
-                              className="cursor-pointer hover:bg-gray-50 p-1 rounded"
-                              onClick={() => 
-                                handleEditStart(
-                                  task.id, 
-                                  'start_time', 
-                                  task.start_time || ''
-                                )
-                              }
-                            >
-                              Start: {formatDateTime(task.start_time) || '(click to set)'}
-                            </p>
-                          )}
-
-                          {/* 終了時間フィールド */}
-                          {editingField?.taskId === task.id && editingField?.field === 'end_time' ? (
-                            <div className="flex items-center">
-                              <span>End: </span>
-                              <Input
-                                type="time"
-                                value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
-                                onChange={(e) => {
-                                  const [hours, minutes] = e.target.value.split(':');
-                                  const date = new Date();
-                                  date.setHours(parseInt(hours));
-                                  date.setMinutes(parseInt(minutes));
-                                  setEditValue(date.toISOString());
-                                }}
-                                onBlur={handleEditSave}
-                                onKeyDown={handleKeyDown}
-                                className="w-24 h-6 text-xs mx-1"
-                                autoFocus
-                              />
-                            </div>
-                          ) : (
-                            <p 
-                              className={cn(
-                                "cursor-pointer hover:bg-gray-50 p-1 rounded",
-                                !task.start_time && "text-gray-400 cursor-not-allowed"
-                              )}
-                              onClick={() => {
-                                if (task.start_time) {
-                                  handleEditStart(
-                                    task.id, 
-                                    'end_time', 
-                                    task.end_time || ''
-                                  );
-                                }
-                              }}
-                            >
-                              End: {formatDateTime(task.end_time) || '(click to set)'}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 items-center">
-                      <Button 
-                        size="icon" 
-                        variant="outline"
-                        onClick={() => handleDelete(task.id)}
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))
+                    {tasks.map(task => (
+                      <SortableTask
+                        key={task.id}
+                        task={task}
+                        onEditStart={handleEditStart}
+                        onDelete={handleDelete}
+                        onTaskTimer={handleTaskTimer}
+                        editingField={editingField}
+                        editValue={editValue}
+                        handleEditChange={handleEditChange}
+                        handleEditSave={handleEditSave}
+                        handleKeyDown={handleKeyDown}
+                        setEditValue={setEditValue}
+                      />
+                    ))}
+                  </SortableContext>
+                </DndContext>
               ) : (
                 <p className="text-center text-muted-foreground">No tasks found</p>
               )}
