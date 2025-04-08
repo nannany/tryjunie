@@ -1,13 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, CheckSquare, Settings } from 'lucide-react'
+import { CheckSquare, Settings } from 'lucide-react'
 
 const navItems = [
-  {
-    title: 'Dashboard',
-    href: '/',
-    icon: LayoutDashboard,
-  },
   {
     title: 'Tasks',
     href: '/tasks',
