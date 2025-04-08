@@ -83,9 +83,6 @@ const TaskList = () => {
     if (!dateString) return null;
     const date = new Date(dateString);
     return date.toLocaleString('ja-JP', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -396,12 +393,18 @@ const TaskList = () => {
                             <div className="flex items-center">
                               <span>Start: </span>
                               <Input
-                                type="datetime-local"
-                                value={editValue}
-                                onChange={handleEditChange}
+                                type="time"
+                                value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
+                                onChange={(e) => {
+                                  const [hours, minutes] = e.target.value.split(':');
+                                  const date = new Date();
+                                  date.setHours(parseInt(hours));
+                                  date.setMinutes(parseInt(minutes));
+                                  setEditValue(date.toISOString());
+                                }}
                                 onBlur={handleEditSave}
                                 onKeyDown={handleKeyDown}
-                                className="w-48 h-6 text-xs mx-1"
+                                className="w-24 h-6 text-xs mx-1"
                                 autoFocus
                               />
                             </div>
@@ -425,12 +428,18 @@ const TaskList = () => {
                             <div className="flex items-center">
                               <span>End: </span>
                               <Input
-                                type="datetime-local"
-                                value={editValue}
-                                onChange={handleEditChange}
+                                type="time"
+                                value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
+                                onChange={(e) => {
+                                  const [hours, minutes] = e.target.value.split(':');
+                                  const date = new Date();
+                                  date.setHours(parseInt(hours));
+                                  date.setMinutes(parseInt(minutes));
+                                  setEditValue(date.toISOString());
+                                }}
                                 onBlur={handleEditSave}
                                 onKeyDown={handleKeyDown}
-                                className="w-48 h-6 text-xs mx-1"
+                                className="w-24 h-6 text-xs mx-1"
                                 autoFocus
                               />
                             </div>
