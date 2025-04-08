@@ -17,6 +17,7 @@ interface Task {
   estimated_minutes: number | null
   start_time: string | null
   end_time: string | null
+  created_at: string
 }
 
 // 編集中のフィールドの型
@@ -264,6 +265,16 @@ const TaskList = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
           <p className="text-muted-foreground">Manage your tasks</p>
+        </div>
+        <div className="text-right">
+          <h2 className="text-xl font-semibold">
+            {tasks.length > 0 ? new Date(tasks[0].created_at).toLocaleDateString('ja-JP', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              weekday: 'long'
+            }) : ''}
+          </h2>
         </div>
       </div>
 
