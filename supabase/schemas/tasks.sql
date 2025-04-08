@@ -8,6 +8,7 @@ create table if not exists public.tasks (
   title text not null,
   description text,
   estimated_minute integer,
+  task_order integer,
   task_date date not null default current_date,
   start_time timestamp with time zone,
   end_time timestamp with time zone,
