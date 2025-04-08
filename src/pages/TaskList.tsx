@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { ja } from "date-fns/locale"
 
 const supabase = createClient()
 
@@ -32,16 +37,29 @@ const TaskList = () => {
   const [editValue, setEditValue] = useState<string>('')
   const [isAddingTask, setIsAddingTask] = useState(false)
   const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const { toast } = useToast()
 
   // タスクを取得
   useEffect(() => {
-    fetchTasks()
-  }, [])
+    if (selectedDate) {
+      fetchTasks(selectedDate)
+    }
+  }, [selectedDate])
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (date: Date) => {
     setIsLoading(true)
-    const { data, error } = await supabase.from('tasks').select('*')
+    const startOfDay = new Date(date)
+    startOfDay.setHours(0, 0, 0, 0)
+    const endOfDay = new Date(date)
+    endOfDay.setHours(23, 59, 59, 999)
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .gte('created_at', startOfDay.toISOString())
+      .lte('created_at', endOfDay.toISOString())
+      .order('created_at', { ascending: true })
     
     if (error) {
       console.error('Error fetching tasks:', error)
@@ -245,14 +263,33 @@ const TaskList = () => {
           <p className="text-muted-foreground">Manage your tasks</p>
         </div>
         <div className="text-right">
-          <h2 className="text-xl font-semibold">
-            {tasks.length > 0 ? new Date(tasks[0].created_at).toLocaleDateString('ja-JP', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long'
-            }) : ''}
-          </h2>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-[240px] justify-start text-left font-normal",
+                  !selectedDate && "text-muted-foreground"
+                )}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {selectedDate ? (
+                  format(selectedDate, "PPP", { locale: ja })
+                ) : (
+                  <span>日付を選択</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                initialFocus
+                locale={ja}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
