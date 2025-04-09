@@ -142,11 +142,11 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
       style={style}
       className="flex items-center justify-between rounded-md border p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       onKeyDown={handleTaskKeyDown}
+          {...attributes}
+          {...listeners}
     >
       <div className="flex items-center gap-4">
         <div
-          {...attributes}
-          {...listeners}
           className="cursor-grab active:cursor-grabbing"
         >
           <GripVertical className="h-4 w-4 text-gray-400" />
@@ -341,7 +341,12 @@ const TaskList = () => {
 
   // ドラッグ&ドロップのセンサーを設定
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 500,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
