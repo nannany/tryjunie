@@ -142,8 +142,9 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
       style={style}
       className="flex items-center justify-between rounded-md border p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       onKeyDown={handleTaskKeyDown}
-          {...attributes}
-          {...listeners}
+      {...attributes}
+      {...listeners}
+      tabIndex={0}
     >
       <div className="flex items-center gap-4">
         <div
