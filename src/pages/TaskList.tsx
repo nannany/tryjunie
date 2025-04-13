@@ -132,6 +132,34 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
         e.preventDefault();
         onDelete(task.id);
         break;
+      case 'arrowup':
+      case 'arrowdown':
+        // 上下キーのデフォルト動作を防ぐ
+        e.preventDefault();
+        // 親コンポーネントにイベントを伝播させる
+        e.stopPropagation();
+
+        // 現在フォーカスされている要素を取得
+        const currentFocus = document.activeElement;
+        if (!currentFocus) return;
+
+        // タスク要素を取得
+        const taskElements = Array.from(document.querySelectorAll('[data-task-id]'));
+        const currentIndex = taskElements.indexOf(currentFocus as HTMLElement);
+
+        if (currentIndex === -1) return;
+
+        // 上下キーに応じて次のタスクを選択
+        let nextIndex;
+        if (e.key.toLowerCase() === 'arrowup') {
+          nextIndex = Math.max(0, currentIndex - 1);
+        } else {
+          nextIndex = Math.min(taskElements.length - 1, currentIndex + 1);
+        }
+
+        // 次のタスクにフォーカスを移動
+        (taskElements[nextIndex] as HTMLElement).focus();
+        break;
     }
   };
 
@@ -144,6 +172,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
       {...attributes}
       {...listeners}
       tabIndex={0}
+      data-task-id={task.id}
     >
       <div className="flex items-center gap-4">
         <div
