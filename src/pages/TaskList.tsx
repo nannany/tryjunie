@@ -348,9 +348,6 @@ const TaskList = () => {
         tolerance: 5,
       },
     }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
   );
 
   // タスクを取得
