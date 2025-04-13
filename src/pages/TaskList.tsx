@@ -13,7 +13,6 @@ import { ja } from "date-fns/locale"
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
