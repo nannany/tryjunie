@@ -231,7 +231,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
             {/* 見積もり時間フィールド */}
             {editingField?.taskId === task.id && editingField?.field === 'estimated_minute' ? (
               <div className="flex items-center">
-                <span>Est: </span>
+                <span>見積もり: </span>
                 <Input
                   type="number"
                   min="0"
@@ -242,7 +242,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
                   className="w-16 h-6 text-xs mx-1"
                   autoFocus
                 />
-                <span>m</span>
+                <span>分</span>
               </div>
             ) : (
               <p 
@@ -255,7 +255,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
                   )
                 }
               >
-                Est: {formatEstimatedTime(task.estimated_minute) || '0m (click to set)'}
+                見積もり: {formatEstimatedTime(task.estimated_minute) || '0分 (クリックして設定)'}
               </p>
             )}
 
