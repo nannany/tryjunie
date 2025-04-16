@@ -262,7 +262,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
             {/* 開始時間フィールド */}
             {editingField?.taskId === task.id && editingField?.field === 'start_time' ? (
               <div className="flex items-center">
-                <span>Start: </span>
+                <span>開始: </span>
                 <Input
                   type="time"
                   value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
@@ -290,14 +290,14 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
                   )
                 }
               >
-                Start: {formatDateTime(task.start_time) || '(click to set)'}
+                開始: {formatDateTime(task.start_time) || '(クリックして設定)'}
               </p>
             )}
 
             {/* 終了時間フィールド */}
             {editingField?.taskId === task.id && editingField?.field === 'end_time' ? (
               <div className="flex items-center">
-                <span>End: </span>
+                <span>終了: </span>
                 <Input
                   type="time"
                   value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
@@ -330,14 +330,14 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
                   }
                 }}
               >
-                End: {formatDateTime(task.end_time) || '(click to set)'}
+                終了: {formatDateTime(task.end_time) || '(クリックして設定)'}
               </p>
             )}
 
             {/* 所要時間の表示 */}
             {task.start_time && task.end_time && (
               <p className="text-sm text-muted-foreground">
-                Duration: {formatDuration(calculateDuration(task.start_time, task.end_time))}
+                所要時間: {formatDuration(calculateDuration(task.start_time, task.end_time))}
               </p>
             )}
           </div>
