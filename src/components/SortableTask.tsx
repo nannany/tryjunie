@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { GripVertical, Play, Square, CheckCircle2, Trash2 } from 'lucide-react';
+import { GripVertical, Play, Square, CheckCircle2, Trash2, X } from 'lucide-react';
 import React from 'react';
 
 // Task型の定義
@@ -26,7 +26,7 @@ interface EditingField {
   field: 'title' | 'estimated_minute' | 'start_time' | 'end_time';
 }
 
-const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, editValue, handleEditChange, handleEditSave, handleKeyDown, setEditValue }: {
+const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, editValue, handleEditChange, handleEditSave, handleKeyDown, setEditValue, setEditingField }: {
   task: Task;
   onEditStart: (taskId: string, field: 'title' | 'estimated_minute' | 'start_time' | 'end_time', value: string) => void;
   onDelete: (taskId: string) => void;
@@ -37,6 +37,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
   handleEditSave: () => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   setEditValue: (value: string) => void;
+  setEditingField: (field: EditingField | null) => void;
 }) => {
   const {
     attributes,
@@ -84,6 +85,47 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;
     return minutes > 0 ? `${hours}時間${minutes}分` : `${hours}時間`;
+  };
+
+  // テキスト入力を日時に変換
+  const convertTextToDateTime = (text: string) => {
+    try {
+      // 時間形式を検出して対応（例：「13:45」や「13時45分」など）
+      let hours: number;
+      let minutes: number;
+      
+      if (text.includes(':')) {
+        // 「13:45」形式
+        const [h, m] = text.split(':');
+        hours = parseInt(h);
+        minutes = parseInt(m);
+      } else if (text.includes('時')) {
+        // 「13時45分」形式
+        let parts = text.split('時');
+        hours = parseInt(parts[0]);
+        minutes = parts[1] ? parseInt(parts[1].replace('分', '')) : 0;
+      } else {
+        // 数字だけの場合は時間として解釈（例：「13」→「13:00」）
+        hours = parseInt(text);
+        minutes = 0;
+      }
+      
+      if (isNaN(hours) || isNaN(minutes)) {
+        return null;
+      }
+
+      // 時刻が有効かチェック
+      if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        return null;
+      }
+      
+      const date = new Date();
+      date.setHours(hours, minutes, 0, 0);
+      return date.toISOString();
+    } catch (e) {
+      console.error('時刻の解析エラー:', e);
+      return null;
+    }
   };
 
   // キーボードショートカットの処理
@@ -137,6 +179,22 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
         (taskElements[nextIndex] as HTMLElement).focus();
         break;
     }
+  };
+
+  // 開始時刻の編集処理
+  const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value);
+  };
+
+  // 開始時刻の保存処理
+  const handleStartTimeSave = () => {
+    if (editValue && editValue.trim() !== '') {
+      const dateTimeValue = convertTextToDateTime(editValue);
+      if (dateTimeValue) {
+        setEditValue(dateTimeValue);
+      }
+    }
+    handleEditSave();
   };
 
   return (
@@ -238,17 +296,20 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
               <div className="flex items-center">
                 <span>開始: </span>
                 <Input
-                  type="time"
-                  value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
-                  onChange={(e) => {
-                    const [hours, minutes] = e.target.value.split(':');
-                    const date = new Date();
-                    date.setHours(parseInt(hours));
-                    date.setMinutes(parseInt(minutes));
-                    setEditValue(date.toISOString());
+                  type="text"
+                  placeholder="--:--"
+                  value={editValue ? (editValue.includes('T') ? 
+                    new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : 
+                    editValue) : ''}
+                  onChange={handleStartTimeChange}
+                  onBlur={handleStartTimeSave}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleStartTimeSave();
+                    } else if (e.key === 'Escape') {
+                      setEditingField(null);
+                    }
                   }}
-                  onBlur={handleEditSave}
-                  onKeyDown={handleKeyDown}
                   className="w-24 h-6 text-xs mx-1"
                   autoFocus
                 />
@@ -273,17 +334,36 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
               <div className="flex items-center">
                 <span>終了: </span>
                 <Input
-                  type="time"
-                  value={editValue ? new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : ''}
+                  type="text"
+                  placeholder="--:--"
+                  value={editValue ? (editValue.includes('T') ? 
+                    new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : 
+                    editValue) : ''}
                   onChange={(e) => {
-                    const [hours, minutes] = e.target.value.split(':');
-                    const date = new Date();
-                    date.setHours(parseInt(hours));
-                    date.setMinutes(parseInt(minutes));
-                    setEditValue(date.toISOString());
+                    setEditValue(e.target.value);
                   }}
-                  onBlur={handleEditSave}
-                  onKeyDown={handleKeyDown}
+                  onBlur={() => {
+                    if (editValue && editValue.trim() !== '') {
+                      const dateTimeValue = convertTextToDateTime(editValue);
+                      if (dateTimeValue) {
+                        setEditValue(dateTimeValue);
+                      }
+                    }
+                    handleEditSave();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      if (editValue && editValue.trim() !== '') {
+                        const dateTimeValue = convertTextToDateTime(editValue);
+                        if (dateTimeValue) {
+                          setEditValue(dateTimeValue);
+                        }
+                      }
+                      handleEditSave();
+                    } else if (e.key === 'Escape') {
+                      setEditingField(null);
+                    }
+                  }}
                   className="w-24 h-6 text-xs mx-1"
                   autoFocus
                 />

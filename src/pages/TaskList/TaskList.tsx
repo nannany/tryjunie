@@ -463,6 +463,7 @@ const TaskList = () => {
                         handleEditSave={handleEditSave}
                         handleKeyDown={handleKeyDown}
                         setEditValue={setEditValue}
+                        setEditingField={setEditingField}
                       />
                     ))}
                   </SortableContext>
