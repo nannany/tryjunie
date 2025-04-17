@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { GripVertical, Play, Square, CheckCircle2, Trash2, X } from 'lucide-react';
+import { GripVertical, Play, Square, CheckCircle2, Trash2 } from 'lucide-react';
 import React from 'react';
 
 // Task型の定義
