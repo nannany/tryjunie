@@ -3,12 +3,12 @@ import { Toaster } from '@/components/ui/toaster'
 import Layout from '@/components/Layout'
 import AuthLayout from '@/components/AuthLayout'
 import RequireAuth from '@/components/RequireAuth'
-import TaskList from '@/pages/TaskList'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import ForgotPassword from '@/pages/ForgotPassword'
 import ResetPassword from '@/pages/ResetPassword'
 import NotFound from '@/pages/NotFound'
+import TaskList from './pages/TaskList/TaskList'
 
 function App() {
   return (
