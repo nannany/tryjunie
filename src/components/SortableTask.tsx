@@ -2,9 +2,10 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { GripVertical, Play, Square, CheckCircle2, Trash2 } from 'lucide-react';
-import React from 'react';
+import { GripVertical, Play, Square, CheckCircle2, Trash2, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
 
 // Task型の定義
 interface Task {
@@ -52,6 +53,45 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  // ポップオーバーの開閉状態を管理
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  // 見積もり時間オプションの生成
+  const getTimeOptions = () => {
+    const now = new Date();
+    const currentMinutes = now.getMinutes();
+    
+    // 現在時刻の分数
+    const currentOption = { value: currentMinutes.toString(), label: `${currentMinutes}分（現在時刻）` };
+    
+    // 5分前
+    const fiveMinutesAgo = { value: '5', label: '5分' };
+    
+    // 10分前
+    const tenMinutesAgo = { value: '10', label: '10分' };
+
+    // その他の一般的な時間オプション
+    const commonOptions = [
+      { value: '15', label: '15分' },
+      { value: '30', label: '30分' },
+      { value: '45', label: '45分' },
+      { value: '60', label: '1時間' }
+    ];
+    
+    return [currentOption, fiveMinutesAgo, tenMinutesAgo, ...commonOptions];
+  };
+
+  // 時間オプション選択時の処理
+  const handleTimeOptionSelect = (value: string) => {
+    setEditValue(value);
+    setPopoverOpen(false);
+    
+    // 選択後に自動保存
+    setTimeout(() => {
+      handleEditSave();
+    }, 100);
   };
 
   // 見積もり時間をフォーマット
@@ -262,19 +302,55 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
           <div className="flex gap-3 text-sm text-muted-foreground">
             {/* 見積もり時間フィールド */}
             {editingField?.taskId === task.id && editingField?.field === 'estimated_minute' ? (
-              <div className="flex items-center">
-                <span>見積もり: </span>
-                <Input
-                  type="text"
-                  value={editValue}
-                  onChange={handleEditChange}
-                  onBlur={handleEditSave}
-                  onKeyDown={handleKeyDown}
-                  className="w-16 h-6 text-xs mx-1"
-                  autoFocus
-                />
-                <span>分</span>
-              </div>
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <div className="flex items-center cursor-pointer">
+                    <span>見積もり: </span>
+                    <div className="relative flex items-center">
+                      <Input
+                        type="text"
+                        value={editValue}
+                        onChange={handleEditChange}
+                        onFocus={() => setPopoverOpen(true)}
+                        onBlur={(e) => {
+                          // クリック先がポップオーバーの内部であれば保存しない
+                          const related = e.relatedTarget as HTMLElement;
+                          if (related?.closest('[data-popover-content]')) return;
+                          handleEditSave();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleEditSave();
+                          } else if (e.key === 'Escape') {
+                            setEditingField(null);
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setPopoverOpen(true);
+                          }
+                        }}
+                        className="w-16 h-6 text-xs mx-1 pr-7"
+                        autoFocus
+                      />
+                      <ChevronDown className="absolute right-2 h-4 w-4 opacity-50" />
+                    </div>
+                    <span>分</span>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent data-popover-content className="w-48 p-0" align="start">
+                  <div className="grid">
+                    {getTimeOptions().map((option) => (
+                      <Button
+                        key={option.value}
+                        variant="ghost"
+                        className="justify-start text-left px-3 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                        onClick={() => handleTimeOptionSelect(option.value)}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             ) : (
               <p 
                 className="cursor-pointer hover:bg-gray-50 p-1 rounded"
