@@ -77,21 +77,16 @@ const SortableTask = ({
 
   // 見積もり時間オプションの生成
   const getTimeOptions = () => {
-    // 5分前
-    const fiveMinutesAgo = { value: '5', label: '5分' };
-    
-    // 10分前
-    const tenMinutesAgo = { value: '10', label: '10分' };
-
-    // その他の一般的な時間オプション
-    const commonOptions = [
+    const options = [
+      { value: '5', label: '5分' },
+      { value: '10', label: '10分' },
       { value: '15', label: '15分' },
       { value: '30', label: '30分' },
       { value: '45', label: '45分' },
-      { value: '60', label: '1時間' }
+      { value: '60', label: '1時間' },
     ];
     
-    return [fiveMinutesAgo, tenMinutesAgo, ...commonOptions];
+    return [...options];
   };
 
   // 時間オプション選択時の処理
