@@ -265,8 +265,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
               <div className="flex items-center">
                 <span>見積もり: </span>
                 <Input
-                  type="number"
-                  min="0"
+                  type="text"
                   value={editValue}
                   onChange={handleEditChange}
                   onBlur={handleEditSave}
