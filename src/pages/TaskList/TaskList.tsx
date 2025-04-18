@@ -363,6 +363,15 @@ const TaskList = () => {
     }
   };
 
+  // タスクの更新を処理するヘルパー関数を追加
+  const updateLocalTask = (taskId: string, updateData: any) => {
+    setTasks(currentTasks => 
+      currentTasks.map(task => 
+        task.id === taskId ? { ...task, ...updateData } : task
+      )
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -464,6 +473,7 @@ const TaskList = () => {
                         handleKeyDown={handleKeyDown}
                         setEditValue={setEditValue}
                         setEditingField={setEditingField}
+                        updateLocalTask={updateLocalTask} // 新しいpropsを追加
                       />
                     ))}
                   </SortableContext>

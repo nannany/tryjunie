@@ -6,6 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { GripVertical, Play, Square, CheckCircle2, Trash2, ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient(); // supabaseクライアントをコンポーネント内で作成
 
 // Task型の定義
 interface Task {
@@ -27,7 +30,20 @@ interface EditingField {
   field: 'title' | 'estimated_minute' | 'start_time' | 'end_time';
 }
 
-const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, editValue, handleEditChange, handleEditSave, handleKeyDown, setEditValue, setEditingField }: {
+const SortableTask = ({ 
+  task, 
+  onEditStart, 
+  onDelete, 
+  onTaskTimer, 
+  editingField, 
+  editValue, 
+  handleEditChange, 
+  handleEditSave, 
+  handleKeyDown, 
+  setEditValue, 
+  setEditingField,
+  updateLocalTask // 新しいプロップとして追加
+}: {
   task: Task;
   onEditStart: (taskId: string, field: 'title' | 'estimated_minute' | 'start_time' | 'end_time', value: string) => void;
   onDelete: (taskId: string) => void;
@@ -39,6 +55,7 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   setEditValue: (value: string) => void;
   setEditingField: (field: EditingField | null) => void;
+  updateLocalTask: (taskId: string, updateData: any) => void; // TaskListコンポーネントから渡される関数
 }) => {
   const {
     attributes,
@@ -85,13 +102,41 @@ const SortableTask = ({ task, onEditStart, onDelete, onTaskTimer, editingField, 
 
   // 時間オプション選択時の処理
   const handleTimeOptionSelect = (value: string) => {
-    setEditValue(value);
+    // ポップオーバーを閉じる
     setPopoverOpen(false);
     
-    // 選択後に自動保存
-    setTimeout(() => {
-      handleEditSave();
-    }, 100);
+    // 選択された値を直接使用して editingField と taskId を取得
+    if (editingField) {
+      const { taskId, field } = editingField;
+      
+      // 更新データを生成（estimated_minuteの場合は数値に変換）
+      const updateData: any = {};
+      updateData[field] = value ? parseInt(value) : null;
+      
+      // 直接APIを呼び出してデータベースを更新
+      const updateTask = async () => {
+        const { error } = await supabase
+          .from('tasks')
+          .update(updateData)
+          .eq('id', taskId);
+        
+        if (error) {
+          console.error('Error updating task:', error);
+        } else {
+          // ローカル状態も更新
+          updateLocalTask(taskId, updateData);
+          
+          // 編集状態を解除
+          setEditingField(null);
+        }
+      };
+      
+      // state の値に依存せずに直接更新を実行
+      updateTask();
+      
+      // 表示用の値も更新しておく（UIの整合性のため）
+      setEditValue(value);
+    }
   };
 
   // 見積もり時間をフォーマット
