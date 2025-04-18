@@ -208,12 +208,6 @@ const TaskList = () => {
       setTasks(currentTasks => 
         currentTasks.filter(task => task.id !== taskId)
       );
-      
-      toast({
-        title: "Success",
-        description: "Task deleted successfully",
-        duration: 2000
-      });
     }
   };
 
@@ -278,12 +272,6 @@ const TaskList = () => {
       // 新しく追加されたタスクをリストの先頭に追加
       setTasks(currentTasks => [data[0] as Task, ...currentTasks]);
       
-      toast({
-        title: "Success",
-        description: "Task added successfully",
-        duration: 2000
-      });
-
       // 入力フィールドをリセット
       setNewTaskTitle('');
     }
