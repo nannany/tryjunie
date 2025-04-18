@@ -77,12 +77,6 @@ const SortableTask = ({
 
   // 見積もり時間オプションの生成
   const getTimeOptions = () => {
-    const now = new Date();
-    const currentMinutes = now.getMinutes();
-    
-    // 現在時刻の分数
-    const currentOption = { value: currentMinutes.toString(), label: `${currentMinutes}分（現在時刻）` };
-    
     // 5分前
     const fiveMinutesAgo = { value: '5', label: '5分' };
     
@@ -97,7 +91,7 @@ const SortableTask = ({
       { value: '60', label: '1時間' }
     ];
     
-    return [currentOption, fiveMinutesAgo, tenMinutesAgo, ...commonOptions];
+    return [fiveMinutesAgo, tenMinutesAgo, ...commonOptions];
   };
 
   // 時間オプション選択時の処理
