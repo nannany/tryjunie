@@ -74,6 +74,7 @@ const SortableTask = ({
 
   // ポップオーバーの開閉状態を管理
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [startTimePopoverOpen, setStartTimePopoverOpen] = useState(false);
 
   // 見積もり時間オプションの生成
   const getTimeOptions = () => {
@@ -87,6 +88,28 @@ const SortableTask = ({
     ];
     
     return [...options];
+  };
+
+  // 開始時刻オプションの生成
+  const getStartTimeOptions = () => {
+    const now = new Date();
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60000);
+    const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
+    
+    return [
+      { 
+        value: now.toISOString(), 
+        label: '現在時刻 (' + now.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) + ')' 
+      },
+      { 
+        value: fiveMinutesAgo.toISOString(), 
+        label: '5分前 (' + fiveMinutesAgo.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) + ')' 
+      },
+      { 
+        value: tenMinutesAgo.toISOString(), 
+        label: '10分前 (' + tenMinutesAgo.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) + ')' 
+      },
+    ];
   };
 
   // 時間オプション選択時の処理
@@ -125,6 +148,43 @@ const SortableTask = ({
       
       // 表示用の値も更新しておく（UIの整合性のため）
       setEditValue(value);
+    }
+  };
+
+  // 開始時刻オプション選択時の処理
+  const handleStartTimeSelect = (isoString: string) => {
+    // ポップオーバーを閉じる
+    setStartTimePopoverOpen(false);
+    
+    if (editingField) {
+      const { taskId, field } = editingField;
+      
+      const updateData: any = {};
+      updateData[field] = isoString;
+      
+      // 直接APIを呼び出してデータベースを更新
+      const updateTask = async () => {
+        const { error } = await supabase
+          .from('tasks')
+          .update(updateData)
+          .eq('id', taskId);
+        
+        if (error) {
+          console.error('Error updating task start time:', error);
+        } else {
+          // ローカル状態も更新
+          updateLocalTask(taskId, updateData);
+          
+          // 編集状態を解除
+          setEditingField(null);
+        }
+      };
+      
+      // 更新実行
+      updateTask();
+      
+      // 表示用の値も更新
+      setEditValue(isoString);
     }
   };
 
@@ -402,27 +462,56 @@ const SortableTask = ({
 
             {/* 開始時間フィールド */}
             {editingField?.taskId === task.id && editingField?.field === 'start_time' ? (
-              <div className="flex items-center">
-                <span>開始: </span>
-                <Input
-                  type="text"
-                  placeholder="--:--"
-                  value={editValue ? (editValue.includes('T') ? 
-                    new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : 
-                    editValue) : ''}
-                  onChange={handleStartTimeChange}
-                  onBlur={handleStartTimeSave}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleStartTimeSave();
-                    } else if (e.key === 'Escape') {
-                      setEditingField(null);
-                    }
-                  }}
-                  className="w-24 h-6 text-xs mx-1"
-                  autoFocus
-                />
-              </div>
+              <Popover open={startTimePopoverOpen} onOpenChange={setStartTimePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <div className="flex items-center cursor-pointer">
+                    <span>開始: </span>
+                    <div className="relative flex items-center">
+                      <Input
+                        type="text"
+                        placeholder="--:--"
+                        value={editValue ? (editValue.includes('T') ? 
+                          new Date(editValue).toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) : 
+                          editValue) : ''}
+                        onChange={handleStartTimeChange}
+                        onFocus={() => setStartTimePopoverOpen(true)}
+                        onBlur={(e) => {
+                          const related = e.relatedTarget as HTMLElement;
+                          if (related?.closest('[data-popover-content]')) return;
+                          handleStartTimeSave();
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleStartTimeSave();
+                          } else if (e.key === 'Escape') {
+                            setEditingField(null);
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setStartTimePopoverOpen(true);
+                          }
+                        }}
+                        className="w-24 h-6 text-xs mx-1 pr-7"
+                        autoFocus
+                      />
+                      <ChevronDown className="absolute right-2 h-4 w-4 opacity-50" />
+                    </div>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent data-popover-content className="w-48 p-0" align="start">
+                  <div className="grid">
+                    {getStartTimeOptions().map((option) => (
+                      <Button
+                        key={option.value}
+                        variant="ghost"
+                        className="justify-start text-left px-3 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                        onClick={() => handleStartTimeSelect(option.value)}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             ) : (
               <p 
                 className="cursor-pointer hover:bg-gray-50 p-1 rounded"
