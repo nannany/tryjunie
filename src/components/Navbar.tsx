@@ -40,7 +40,7 @@ const Navbar = () => {
     <nav className="border-b bg-background px-4 py-3">
       <div className="flex items-center justify-between">
         <Link to="/" className="text-xl font-bold">
-          Task Manager
+          タスクマネージャー
         </Link>
         <div className="flex items-center gap-4">
           {isLoading ? (
@@ -50,7 +50,7 @@ const Navbar = () => {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-1">
                 <LogOut className="h-4 w-4" />
-                Logout
+                ログアウト
               </Button>
             </div>
           ) : (
