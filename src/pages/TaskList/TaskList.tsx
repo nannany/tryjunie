@@ -56,6 +56,7 @@ const TaskList = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
+  const [lastTaskEndTime, setLastTaskEndTime] = useState<string | null>(null);
 
   // ドラッグ&ドロップのセンサーを設定
   const sensors = useSensors(
@@ -88,6 +89,9 @@ const TaskList = () => {
       console.error('Error fetching tasks:', error);
     } else if (data) {
       setTasks(data as Task[]);
+      // 最終タスクの終了時間を取得
+      const lastTask = data[data.length - 1];
+      setLastTaskEndTime(lastTask?.end_time || null);
     }
     
     setIsLoading(false);
@@ -372,6 +376,11 @@ const TaskList = () => {
                   完了予定: {calculateEndTime(totalEstimatedMinutes)}
                 </span>
               )}
+              {lastTaskEndTime && (
+                <span className="ml-2">
+                  最終タスク終了時間: {lastTaskEndTime}
+                </span>
+              )}
             </p>
           )}
         </div>
@@ -461,7 +470,8 @@ const TaskList = () => {
                         handleKeyDown={handleKeyDown}
                         setEditValue={setEditValue}
                         setEditingField={setEditingField}
-                        updateLocalTask={updateLocalTask} // 新しいpropsを追加
+                        updateLocalTask={updateLocalTask}
+                        lastTaskEndTime={lastTaskEndTime} // 最終タスクの終了時間を渡す
                       />
                     ))}
                   </SortableContext>

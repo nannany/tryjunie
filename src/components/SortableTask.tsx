@@ -42,7 +42,8 @@ const SortableTask = ({
   handleKeyDown, 
   setEditValue, 
   setEditingField,
-  updateLocalTask // 新しいプロップとして追加
+  updateLocalTask, // 新しいプロップとして追加
+  lastTaskEndTime // 最終タスクの終了時間
 }: {
   task: Task;
   onEditStart: (taskId: string, field: 'title' | 'estimated_minute' | 'start_time' | 'end_time', value: string) => void;
@@ -55,7 +56,8 @@ const SortableTask = ({
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   setEditValue: (value: string) => void;
   setEditingField: (field: EditingField | null) => void;
-  updateLocalTask: (taskId: string, updateData: any) => void; // TaskListコンポーネントから渡される関数
+  updateLocalTask: (taskId: string, updateData: any) => void;
+  lastTaskEndTime: string | null; // 最終タスクの終了時間
 }) => {
   const {
     attributes,
@@ -96,7 +98,7 @@ const SortableTask = ({
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60000);
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
     
-    return [
+    const options = [
       { 
         value: now.toISOString(), 
         label: '現在時刻 (' + now.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) + ')' 
@@ -110,6 +112,17 @@ const SortableTask = ({
         label: '10分前 (' + tenMinutesAgo.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) + ')' 
       },
     ];
+    
+    // 最終タスクの終了時間があれば選択肢に追加
+    if (lastTaskEndTime) {
+      const endTime = new Date(lastTaskEndTime);
+      options.push({ 
+        value: lastTaskEndTime, 
+        label: '前のタスクの終了時間 (' + endTime.toLocaleTimeString('ja-JP', { hour12: false, hour: '2-digit', minute: '2-digit' }) + ')' 
+      });
+    }
+    
+    return options;
   };
 
   // 時間オプション選択時の処理
