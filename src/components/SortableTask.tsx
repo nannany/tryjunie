@@ -266,7 +266,9 @@ const SortableTask = ({
         return null;
       }
       
-      const date = new Date();
+      // タスクの日付を使用して日時を設定
+      const taskDate = new Date(task.task_date);
+      const date = new Date(taskDate);
       date.setHours(hours, minutes, 0, 0);
       return date.toISOString();
     } catch (e) {
