@@ -257,7 +257,7 @@ const TaskList = () => {
       description: '',
       user_id: userId,
       estimated_minute: null,
-      task_date: selectedDate.toISOString().split('T')[0]
+      task_date: convertDateStringToDate(selectedDate.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }).split(' ')[0])
     };
 
     const { data, error } = await supabase
