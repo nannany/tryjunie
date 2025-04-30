@@ -603,7 +603,7 @@ const SortableTask = ({
 
             {/* 所要時間の表示 */}
             {task.start_time && task.end_time && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground p-1">
                 所要時間: {formatDuration(calculateDuration(task.start_time, task.end_time))}
               </p>
             )}
