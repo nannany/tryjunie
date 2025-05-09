@@ -376,11 +376,6 @@ const TaskList = () => {
                   完了予定: {calculateEndTime(totalEstimatedMinutes)}
                 </span>
               )}
-              {lastTaskEndTime && (
-                <span className="ml-2">
-                  最終タスク終了時間: {lastTaskEndTime}
-                </span>
-              )}
             </p>
           )}
         </div>
