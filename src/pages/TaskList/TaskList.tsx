@@ -56,7 +56,17 @@ const TaskList = () => {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const { toast } = useToast();
-  const [lastTaskEndTime, setLastTaskEndTime] = useState<string | null>(null);
+  
+  // 最終タスクの終了時間を取得
+  // tasksのうち、最も終了時間が遅いタスクの終了時間を取得
+  const lastTaskEndTime = tasks.reduce<string | null>((latest, task) => {
+    if (task.end_time) {
+      const endTime = new Date(task.end_time);
+      const latestTime = latest !== null ? new Date(latest) : null;
+      return latestTime && latestTime > endTime ? latest : task.end_time;
+    }
+    return latest;
+  }, null);
 
   // ドラッグ&ドロップのセンサーを設定
   const sensors = useSensors(
@@ -89,9 +99,6 @@ const TaskList = () => {
       console.error('Error fetching tasks:', error);
     } else if (data) {
       setTasks(data as Task[]);
-      // 最終タスクの終了時間を取得
-      const lastTask = data[data.length - 1];
-      setLastTaskEndTime(lastTask?.end_time || null);
     }
     
     setIsLoading(false);
