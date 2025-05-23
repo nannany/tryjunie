@@ -39,6 +39,13 @@ for delete
 to authenticated
 using (auth.uid() = user_id);
 
+-- Users can read their own integration keys
+create policy "Users can read their own integration keys"
+on public.integration_keys
+for select
+to authenticated
+using (auth.uid() = user_id);
+
 -- コメント
 comment on table public.integration_keys is 'インテグレーションキー管理テーブル';
 comment on column public.integration_keys.id is 'インテグレーションキーの一意識別子';
