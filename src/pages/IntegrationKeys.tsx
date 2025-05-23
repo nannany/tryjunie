@@ -44,8 +44,10 @@ const IntegrationKeysPage = () => {
 
   // 初回ロード時にキーを取得
   useEffect(() => {
-    fetchKeys();
-  }, []);
+    if (user) {
+      fetchKeys();
+    }
+  }, [user]);
 
   // 新しいキーを生成する
   const handleGenerateKey = async (e: React.FormEvent) => {
