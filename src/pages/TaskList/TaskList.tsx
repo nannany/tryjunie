@@ -24,7 +24,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import SortableTask from '@/components/SortableTask';
-import { Task, TaskAction } from '@/types/task';
+import { Task } from '@/types/task';
 import { taskReducer } from '@/reducers/taskReducer';
 
 const supabase = createClient();
