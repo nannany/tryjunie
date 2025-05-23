@@ -35,7 +35,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     fetchUserSession();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null);
       setIsLoading(false); // Set loading to false on auth state change
     });
