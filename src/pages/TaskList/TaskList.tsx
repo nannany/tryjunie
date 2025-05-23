@@ -24,75 +24,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import SortableTask from '@/components/SortableTask';
+import { Task } from '@/types/task';
+import { taskReducer } from '@/reducers/taskReducer';
 
 const supabase = createClient();
-
-// Task型の定義
-interface Task {
-  id: string;
-  user_id: string;
-  title: string;
-  description: string;
-  estimated_minute: number | null;
-  task_order: number | null;
-  start_time: string | null;
-  end_time: string | null;
-  created_at: string;
-  task_date: string;
-}
-
-// Action Types
-type SetTasksAction = {
-  type: 'SET_TASKS';
-  payload: Task[];
-};
-
-type AddTaskAction = {
-  type: 'ADD_TASK';
-  payload: Task;
-};
-
-type UpdateTaskAction = {
-  type: 'UPDATE_TASK';
-  payload: Partial<Task> & { id: string }; // Requires id, and allows partial updates to other fields
-};
-
-type DeleteTaskAction = {
-  type: 'DELETE_TASK';
-  payload: string; // Task id
-};
-
-type ReorderTasksAction = {
-  type: 'REORDER_TASKS';
-  payload: Task[]; // The new ordered array of tasks
-};
-
-type TaskAction =
-  | SetTasksAction
-  | AddTaskAction
-  | UpdateTaskAction
-  | DeleteTaskAction
-  | ReorderTasksAction;
-
-// Task Reducer
-const taskReducer = (state: Task[], action: TaskAction): Task[] => {
-  switch (action.type) {
-    case 'SET_TASKS':
-      return action.payload;
-    case 'ADD_TASK':
-      return [action.payload, ...state]; // Adds new task to the beginning
-    case 'UPDATE_TASK':
-      return state.map(task =>
-        task.id === action.payload.id ? { ...task, ...action.payload } : task
-      );
-    case 'DELETE_TASK':
-      return state.filter(task => task.id !== action.payload);
-    case 'REORDER_TASKS':
-      return action.payload;
-    default:
-      return state;
-  }
-};
 
 // 編集中のフィールドの型
 interface EditingField {
