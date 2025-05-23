@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
@@ -41,6 +41,59 @@ interface Task {
   task_date: string;
 }
 
+// Action Types
+type SetTasksAction = {
+  type: 'SET_TASKS';
+  payload: Task[];
+};
+
+type AddTaskAction = {
+  type: 'ADD_TASK';
+  payload: Task;
+};
+
+type UpdateTaskAction = {
+  type: 'UPDATE_TASK';
+  payload: Partial<Task> & { id: string }; // Requires id, and allows partial updates to other fields
+};
+
+type DeleteTaskAction = {
+  type: 'DELETE_TASK';
+  payload: string; // Task id
+};
+
+type ReorderTasksAction = {
+  type: 'REORDER_TASKS';
+  payload: Task[]; // The new ordered array of tasks
+};
+
+type TaskAction =
+  | SetTasksAction
+  | AddTaskAction
+  | UpdateTaskAction
+  | DeleteTaskAction
+  | ReorderTasksAction;
+
+// Task Reducer
+const taskReducer = (state: Task[], action: TaskAction): Task[] => {
+  switch (action.type) {
+    case 'SET_TASKS':
+      return action.payload;
+    case 'ADD_TASK':
+      return [action.payload, ...state]; // Adds new task to the beginning
+    case 'UPDATE_TASK':
+      return state.map(task =>
+        task.id === action.payload.id ? { ...task, ...action.payload } : task
+      );
+    case 'DELETE_TASK':
+      return state.filter(task => task.id !== action.payload);
+    case 'REORDER_TASKS':
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
 // 編集中のフィールドの型
 interface EditingField {
   taskId: string;
@@ -48,7 +101,7 @@ interface EditingField {
 }
 
 const TaskList = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, dispatch] = useReducer(taskReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [editValue, setEditValue] = useState<string>('');
@@ -98,7 +151,7 @@ const TaskList = () => {
     if (error) {
       console.error('Error fetching tasks:', error);
     } else if (data) {
-      setTasks(data as Task[]);
+      dispatch({ type: 'SET_TASKS', payload: data as Task[] });
     }
     
     setIsLoading(false);
@@ -180,11 +233,7 @@ const TaskList = () => {
       console.error('Error updating task:', error);
     } else {
       // ローカル状態で更新したタスクの値を更新
-      setTasks(currentTasks => 
-        currentTasks.map(task => 
-          task.id === taskId ? { ...task, ...updateData } : task
-        )
-      );
+      dispatch({ type: 'UPDATE_TASK', payload: { id: taskId, ...updateData } });
     }
 
     // 編集モードを終了
@@ -216,9 +265,7 @@ const TaskList = () => {
       console.error('Error deleting task:', error);
     } else {
       // ローカル状態から削除したタスクを除外
-      setTasks(currentTasks => 
-        currentTasks.filter(task => task.id !== taskId)
-      );
+      dispatch({ type: 'DELETE_TASK', payload: taskId });
     }
   };
 
@@ -281,7 +328,7 @@ const TaskList = () => {
       console.error('Error adding task:', error);
     } else {
       // 新しく追加されたタスクをリストの先頭に追加
-      setTasks(currentTasks => [data[0] as Task, ...currentTasks]);
+      dispatch({ type: 'ADD_TASK', payload: data[0] as Task });
       
       // 入力フィールドをリセット
       setNewTaskTitle('');
@@ -320,11 +367,7 @@ const TaskList = () => {
       });
       console.error(`Error ${action}ing task:`, error);
     } else {
-      setTasks(currentTasks =>
-        currentTasks.map(task =>
-          task.id === taskId ? { ...task, ...updateData } : task
-        )
-      );
+      dispatch({ type: 'UPDATE_TASK', payload: { id: taskId, ...updateData } });
     }
   };
 
@@ -337,7 +380,7 @@ const TaskList = () => {
       const newIndex = tasks.findIndex((task) => task.id === over.id);
       
       const newTasks = arrayMove(tasks, oldIndex, newIndex);
-      setTasks(newTasks);
+      dispatch({ type: 'REORDER_TASKS', payload: newTasks });
 
       // over.id の taskを取得
       const overTask = tasks.find((task) => task.id === over.id);
@@ -364,11 +407,7 @@ const TaskList = () => {
 
   // タスクの更新を処理するヘルパー関数を追加
   const updateLocalTask = (taskId: string, updateData: any) => {
-    setTasks(currentTasks => 
-      currentTasks.map(task => 
-        task.id === taskId ? { ...task, ...updateData } : task
-      )
-    );
+    dispatch({ type: 'UPDATE_TASK', payload: { id: taskId, ...updateData } });
   };
 
   return (
