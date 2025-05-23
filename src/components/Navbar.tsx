@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from './ui/button'
-import { LogIn, LogOut } from 'lucide-react'
+import { LogIn, LogOut, Key } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
@@ -48,6 +48,12 @@ const Navbar = () => {
             <span className="text-sm text-muted-foreground">Loading...</span>
           ) : isAuthenticated ? (
             <div className="flex items-center gap-2">
+              <Button asChild variant="outline" size="sm" className="flex items-center gap-1 mr-2">
+                <Link to="/integration-keys">
+                  <Key className="h-4 w-4" />
+                  インテグレーションキー
+                </Link>
+              </Button>
               <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-1">
                 <LogOut className="h-4 w-4" />
                 ログアウト

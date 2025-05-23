@@ -9,6 +9,7 @@ import ForgotPassword from '@/pages/ForgotPassword'
 import ResetPassword from '@/pages/ResetPassword'
 import NotFound from '@/pages/NotFound'
 import TaskList from './pages/TaskList/TaskList'
+import IntegrationKeys from './pages/IntegrationKeys'
 
 function App() {
   return (
@@ -29,6 +30,14 @@ function App() {
             element={
               <RequireAuth>
                 <TaskList />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="integration-keys"
+            element={
+              <RequireAuth>
+                <IntegrationKeys />
               </RequireAuth>
             }
           />
