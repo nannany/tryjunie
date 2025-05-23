@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { PlusCircle, Trash2, RefreshCw, Copy, CheckCircle, XCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useSupabaseUser } from '@/lib/supabase/hooks/useSupabaseUser';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import type { IntegrationKey } from '@/types/integration-key';
 const supabase = createClient();
 
 const IntegrationKeysPage = () => {
+  const { user } = useSupabaseUser();
   const [keys, setKeys] = useState<IntegrationKey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newKeyName, setNewKeyName] = useState('');
@@ -57,8 +59,16 @@ const IntegrationKeysPage = () => {
     }
 
     // ユーザー情報を取得
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id;
+    const userId = user?.id;
+
+    if (!userId) {
+      toast({
+        variant: 'destructive',
+        title: 'エラー',
+        description: 'ユーザー情報が取得できませんでした。再度ログインしてください。',
+      });
+      return;
+    }
 
     setIsCreating(true);
     try {
@@ -70,7 +80,7 @@ const IntegrationKeysPage = () => {
         .insert({
           name: newKeyName.trim(),
           key: keyString,
-          user_id: userId,
+          user_id: userId, // userId is now from the hook
           is_active: true,
         });
 

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useSupabaseUser } from '@/lib/supabase/hooks/useSupabaseUser';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
@@ -36,6 +37,7 @@ interface EditingField {
 }
 
 const TaskList = () => {
+  const { user } = useSupabaseUser();
   const [tasks, dispatch] = useReducer(taskReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [editingField, setEditingField] = useState<EditingField | null>(null);
@@ -227,8 +229,7 @@ const TaskList = () => {
     setIsAddingTask(true);
 
     // ユーザー情報を取得
-    const { data: userData } = await supabase.auth.getUser();
-    const userId = userData.user?.id;
+    const userId = user?.id;
 
     if (!userId) {
       toast({
