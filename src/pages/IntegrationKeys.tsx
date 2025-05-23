@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { PlusCircle, Trash2, RefreshCw, Copy, CheckCircle, XCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -56,6 +56,10 @@ const IntegrationKeysPage = () => {
       return;
     }
 
+    // ユーザー情報を取得
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData.user?.id;
+
     setIsCreating(true);
     try {
       // セキュアなAPIキーを生成
@@ -66,6 +70,8 @@ const IntegrationKeysPage = () => {
         .insert({
           name: newKeyName.trim(),
           key: keyString,
+          user_id: userId,
+          is_active: true,
         });
 
       if (error) throw error;
