@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn, parseTimeInputToISOString } from '@/lib/utils'; // Adjusted import path
 import { GripVertical, Play, Square, CheckCircle2, Trash2, ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -234,49 +234,6 @@ const SortableTask = ({
     return minutes > 0 ? `${hours}時間${minutes}分` : `${hours}時間`;
   };
 
-  // テキスト入力を日時に変換
-  const convertTextToDateTime = (text: string) => {
-    try {
-      // 時間形式を検出して対応（例：「13:45」や「13時45分」など）
-      let hours: number;
-      let minutes: number;
-      
-      if (text.includes(':')) {
-        // 「13:45」形式
-        const [h, m] = text.split(':');
-        hours = parseInt(h);
-        minutes = parseInt(m);
-      } else if (text.includes('時')) {
-        // 「13時45分」形式
-        let parts = text.split('時');
-        hours = parseInt(parts[0]);
-        minutes = parts[1] ? parseInt(parts[1].replace('分', '')) : 0;
-      } else {
-        // 数字だけの場合は時間として解釈（例：「13」→「13:00」）
-        hours = parseInt(text);
-        minutes = 0;
-      }
-      
-      if (isNaN(hours) || isNaN(minutes)) {
-        return null;
-      }
-
-      // 時刻が有効かチェック
-      if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        return null;
-      }
-      
-      // タスクの日付を使用して日時を設定
-      const taskDate = new Date(task.task_date);
-      const date = new Date(taskDate);
-      date.setHours(hours, minutes, 0, 0);
-      return date.toISOString();
-    } catch (e) {
-      console.error('時刻の解析エラー:', e);
-      return null;
-    }
-  };
-
   // キーボードショートカットの処理
   const handleTaskKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     // 編集中の場合はショートカットを無効化
@@ -338,7 +295,7 @@ const SortableTask = ({
   // 開始時刻の保存処理
   const handleStartTimeSave = () => {
     if (editValue && editValue.trim() !== '') {
-      const dateTimeValue = convertTextToDateTime(editValue);
+      const dateTimeValue = parseTimeInputToISOString(editValue, task.task_date);
       if (dateTimeValue) {
         setEditValue(dateTimeValue);
       }
@@ -557,7 +514,7 @@ const SortableTask = ({
                   }}
                   onBlur={() => {
                     if (editValue && editValue.trim() !== '') {
-                      const dateTimeValue = convertTextToDateTime(editValue);
+                      const dateTimeValue = parseTimeInputToISOString(editValue, task.task_date);
                       if (dateTimeValue) {
                         setEditValue(dateTimeValue);
                       }
@@ -567,7 +524,7 @@ const SortableTask = ({
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       if (editValue && editValue.trim() !== '') {
-                        const dateTimeValue = convertTextToDateTime(editValue);
+                        const dateTimeValue = parseTimeInputToISOString(editValue, task.task_date);
                         if (dateTimeValue) {
                           setEditValue(dateTimeValue);
                         }
