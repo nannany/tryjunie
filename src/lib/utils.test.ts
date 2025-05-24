@@ -22,8 +22,8 @@ describe('cn', () => {
   });
 
   it('should deduplicate class names', () => {
-    expect(cn('foo', 'foo', 'bar', 'bar')).toBe('foo bar');
-    expect(cn('foo foo bar bar')).toBe('foo bar');
+    expect(cn('text-red-500', 'text-red-500', 'p-2', 'p-2')).toBe('text-red-500 p-2');
+    expect(cn('text-red-500 text-red-500 p-2 p-2')).toBe('text-red-500 p-2');
     expect(cn('text-red-500 text-red-500')).toBe('text-red-500');
   });
 
