@@ -240,24 +240,27 @@ const SortableTask = ({
     if (editingField?.taskId === task.id) return;
 
     switch (e.key.toLowerCase()) {
-      case 's':
+      case 's': {
         if (!task.start_time) {
           e.preventDefault();
           onTaskTimer(task.id, 'start');
         }
         break;
-      case 'e':
+      }
+      case 'e': {
         if (task.start_time && !task.end_time) {
           e.preventDefault();
           onTaskTimer(task.id, 'stop');
         }
         break;
-      case 'd':
+      }
+      case 'd': {
         e.preventDefault();
         onDelete(task.id);
         break;
+      }
       case 'arrowup':
-      case 'arrowdown':
+      case 'arrowdown': {
         // 上下キーのデフォルト動作を防ぐ
         e.preventDefault();
         // 親コンポーネントにイベントを伝播させる
@@ -284,6 +287,7 @@ const SortableTask = ({
         // 次のタスクにフォーカスを移動
         (taskElements[nextIndex] as HTMLElement).focus();
         break;
+      }
     }
   };
 
