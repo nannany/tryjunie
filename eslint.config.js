@@ -25,9 +25,9 @@ export default [
     },
     rules: {
       // specific rules for CJS if any, e.g. disable typescript specific rules if they bleed
-       "@typescript-eslint/no-var-requires": "off", // Allow require in .cjs files
-       "@typescript-eslint/no-require-imports": "off", // Allow require in .cjs files
-    }
+      "@typescript-eslint/no-var-requires": "off", // Allow require in .cjs files
+      "@typescript-eslint/no-require-imports": "off", // Allow require in .cjs files
+    },
   },
   // Configuration for eslint.config.js itself (ES Module)
   {
@@ -40,14 +40,16 @@ export default [
         process: "readonly",
       },
     },
-     plugins: { // Ensure typescript plugin is available for rules if needed, though less common for eslint.config.js
+    plugins: {
+      // Ensure typescript plugin is available for rules if needed, though less common for eslint.config.js
       "@typescript-eslint": tseslint.plugin,
     },
-    rules: { // Example: allow console in eslint.config.js
-        "no-console": "off",
-         "@typescript-eslint/no-var-requires": "off",
-         "@typescript-eslint/no-require-imports": "off",
-    }
+    rules: {
+      // Example: allow console in eslint.config.js
+      "no-console": "off",
+      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/no-require-imports": "off",
+    },
   },
   // Configuration for TypeScript and TSX files (main src project)
   {
@@ -66,7 +68,7 @@ export default [
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,
-      "react": pluginReact,
+      react: pluginReact,
       "react-hooks": eslintPluginReactHooks,
       "react-refresh": eslintPluginReactRefresh,
     },
@@ -108,7 +110,8 @@ export default [
         ecmaFeatures: { jsx: true }, // Assuming JSX might be used, adjust if not
         sourceType: "module",
       },
-      globals: { // Adjust globals as needed for mcp project
+      globals: {
+        // Adjust globals as needed for mcp project
         ...globals.node, // Or browser, depending on mcp's environment
       },
     },

@@ -1,40 +1,42 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Button } from './ui/button'
-import { LogIn, LogOut, Key } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "./ui/button";
+import { LogIn, LogOut, Key } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient()
+const supabase = createClient();
 
 const Navbar = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
-      setIsLoading(true)
-      const { data } = await supabase.auth.getUser()
-      setIsAuthenticated(!!data.user)
-      setIsLoading(false)
-    }
+      setIsLoading(true);
+      const { data } = await supabase.auth.getUser();
+      setIsAuthenticated(!!data.user);
+      setIsLoading(false);
+    };
 
     // 初回レンダリング時に認証状態をチェック
-    checkAuth()
+    checkAuth();
 
     // 認証状態の変更を監視
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session)
-    })
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setIsAuthenticated(!!session);
+      },
+    );
 
     return () => {
-      authListener.subscription.unsubscribe()
-    }
-  }, [])
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    location.href = '/login'
-  }
+    await supabase.auth.signOut();
+    location.href = "/login";
+  };
 
   return (
     <nav className="border-b bg-background px-4 py-3">
@@ -48,13 +50,23 @@ const Navbar = () => {
             <span className="text-sm text-muted-foreground">Loading...</span>
           ) : isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm" className="flex items-center gap-1 mr-2">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 mr-2"
+              >
                 <Link to="/integration-keys">
                   <Key className="h-4 w-4" />
                   インテグレーションキー
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center gap-1"
+              >
                 <LogOut className="h-4 w-4" />
                 ログアウト
               </Button>
@@ -70,7 +82,7 @@ const Navbar = () => {
         </div>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

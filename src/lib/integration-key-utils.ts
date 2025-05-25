@@ -4,15 +4,16 @@
  * @returns 生成されたAPIキー
  */
 export const generateApiKey = (length = 32): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const bytes = new Uint8Array(length);
   crypto.getRandomValues(bytes);
-  
-  let result = '';
-  bytes.forEach(byte => {
+
+  let result = "";
+  bytes.forEach((byte) => {
     result += chars[byte % chars.length];
   });
-  
+
   return result;
 };
 
@@ -22,15 +23,15 @@ export const generateApiKey = (length = 32): string => {
  * @returns フォーマットされた日付文字列
  */
 export const formatJapaneseDate = (date: string | null): string => {
-  if (!date) return '未使用';
-  
+  if (!date) return "未使用";
+
   const d = new Date(date);
-  return d.toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric'
+  return d.toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
   });
 };

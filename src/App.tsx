@@ -1,15 +1,15 @@
-import { Routes, Route } from 'react-router-dom'
-import { Toaster } from '@/components/ui/toaster'
-import Layout from '@/components/Layout'
-import AuthLayout from '@/components/AuthLayout'
-import RequireAuth from '@/components/RequireAuth'
-import Login from '@/pages/Login'
-import Register from '@/pages/Register'
-import ForgotPassword from '@/pages/ForgotPassword'
-import ResetPassword from '@/pages/ResetPassword'
-import NotFound from '@/pages/NotFound'
-import TaskList from './pages/TaskList/TaskList'
-import IntegrationKeys from './pages/IntegrationKeys'
+import { Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import Layout from "@/components/Layout";
+import AuthLayout from "@/components/AuthLayout";
+import RequireAuth from "@/components/RequireAuth";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
+import NotFound from "@/pages/NotFound";
+import TaskList from "./pages/TaskList/TaskList";
+import IntegrationKeys from "./pages/IntegrationKeys";
 
 function App() {
   return (
@@ -46,7 +46,7 @@ function App() {
       </Routes>
       <Toaster />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

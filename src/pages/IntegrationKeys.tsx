@@ -1,13 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { PlusCircle, Trash2, RefreshCw, Copy, CheckCircle, XCircle } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-import { useSupabaseUser } from '@/lib/supabase/hooks/useSupabaseUser';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { toast } from '@/components/ui/use-toast';
-import { generateApiKey, formatJapaneseDate } from '@/lib/integration-key-utils';
-import type { IntegrationKey } from '@/types/integration-key';
+import React, { useState, useEffect } from "react";
+import {
+  PlusCircle,
+  Trash2,
+  RefreshCw,
+  Copy,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useSupabaseUser } from "@/lib/supabase/hooks/useSupabaseUser";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
+import {
+  generateApiKey,
+  formatJapaneseDate,
+} from "@/lib/integration-key-utils";
+import type { IntegrationKey } from "@/types/integration-key";
 
 const supabase = createClient();
 
@@ -15,7 +31,7 @@ const IntegrationKeysPage = () => {
   const { user } = useSupabaseUser();
   const [keys, setKeys] = useState<IntegrationKey[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [newKeyName, setNewKeyName] = useState('');
+  const [newKeyName, setNewKeyName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
 
@@ -24,17 +40,17 @@ const IntegrationKeysPage = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('integration_keys')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+        .from("integration_keys")
+        .select("*")
+        .eq("user_id", user?.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setKeys(data || []);
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'エラー',
+        variant: "destructive",
+        title: "エラー",
         description: `インテグレーションキーの取得に失敗しました: ${error.message}`,
       });
     } finally {
@@ -54,9 +70,9 @@ const IntegrationKeysPage = () => {
     e.preventDefault();
     if (!newKeyName.trim()) {
       toast({
-        variant: 'destructive',
-        title: 'エラー',
-        description: 'キー名を入力してください',
+        variant: "destructive",
+        title: "エラー",
+        description: "キー名を入力してください",
       });
       return;
     }
@@ -66,9 +82,10 @@ const IntegrationKeysPage = () => {
 
     if (!userId) {
       toast({
-        variant: 'destructive',
-        title: 'エラー',
-        description: 'ユーザー情報が取得できませんでした。再度ログインしてください。',
+        variant: "destructive",
+        title: "エラー",
+        description:
+          "ユーザー情報が取得できませんでした。再度ログインしてください。",
       });
       return;
     }
@@ -78,28 +95,26 @@ const IntegrationKeysPage = () => {
       // セキュアなAPIキーを生成
       const keyString = generateApiKey(40);
 
-      const { error } = await supabase
-        .from('integration_keys')
-        .insert({
-          name: newKeyName.trim(),
-          key: keyString,
-          user_id: userId, // userId is now from the hook
-          is_active: true,
-        });
+      const { error } = await supabase.from("integration_keys").insert({
+        name: newKeyName.trim(),
+        key: keyString,
+        user_id: userId, // userId is now from the hook
+        is_active: true,
+      });
 
       if (error) throw error;
 
       toast({
-        title: '成功',
-        description: 'インテグレーションキーが生成されました',
+        title: "成功",
+        description: "インテグレーションキーが生成されました",
       });
 
-      setNewKeyName('');
+      setNewKeyName("");
       await fetchKeys();
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'エラー',
+        variant: "destructive",
+        title: "エラー",
         description: `キーの生成に失敗しました: ${error.message}`,
       });
     } finally {
@@ -111,22 +126,22 @@ const IntegrationKeysPage = () => {
   const handleDeactivateKey = async (keyId: string) => {
     try {
       const { error } = await supabase
-        .from('integration_keys')
+        .from("integration_keys")
         .update({ is_active: false })
-        .eq('id', keyId);
+        .eq("id", keyId);
 
       if (error) throw error;
 
       toast({
-        title: '成功',
-        description: 'インテグレーションキーが無効化されました',
+        title: "成功",
+        description: "インテグレーションキーが無効化されました",
       });
-      
+
       await fetchKeys();
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'エラー',
+        variant: "destructive",
+        title: "エラー",
         description: `キーの無効化に失敗しました: ${error.message}`,
       });
     }
@@ -134,28 +149,32 @@ const IntegrationKeysPage = () => {
 
   // キーを削除する
   const handleDeleteKey = async (keyId: string) => {
-    if (!confirm('このインテグレーションキーを削除してもよろしいですか？この操作は元に戻せません。')) {
+    if (
+      !confirm(
+        "このインテグレーションキーを削除してもよろしいですか？この操作は元に戻せません。",
+      )
+    ) {
       return;
     }
 
     try {
       const { error } = await supabase
-        .from('integration_keys')
+        .from("integration_keys")
         .delete()
-        .eq('id', keyId);
+        .eq("id", keyId);
 
       if (error) throw error;
 
       toast({
-        title: '成功',
-        description: 'インテグレーションキーが削除されました',
+        title: "成功",
+        description: "インテグレーションキーが削除されました",
       });
-      
+
       await fetchKeys();
     } catch (error: any) {
       toast({
-        variant: 'destructive',
-        title: 'エラー',
+        variant: "destructive",
+        title: "エラー",
         description: `キーの削除に失敗しました: ${error.message}`,
       });
     }
@@ -165,12 +184,12 @@ const IntegrationKeysPage = () => {
   const handleCopyKey = (key: string, id: string) => {
     navigator.clipboard.writeText(key);
     setCopiedKeyId(id);
-    
+
     toast({
-      title: 'コピーしました',
-      description: 'インテグレーションキーがクリップボードにコピーされました',
+      title: "コピーしました",
+      description: "インテグレーションキーがクリップボードにコピーされました",
     });
-    
+
     // 3秒後にコピー状態をリセット
     setTimeout(() => {
       setCopiedKeyId(null);
@@ -198,7 +217,10 @@ const IntegrationKeysPage = () => {
         <CardContent>
           <form onSubmit={handleGenerateKey} className="flex items-end gap-4">
             <div className="flex-1">
-              <label htmlFor="keyName" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="keyName"
+                className="block text-sm font-medium mb-2"
+              >
                 キー名 (用途など)
               </label>
               <Input
@@ -209,9 +231,13 @@ const IntegrationKeysPage = () => {
                 required
               />
             </div>
-            <Button type="submit" disabled={isCreating} className="flex items-center gap-2">
+            <Button
+              type="submit"
+              disabled={isCreating}
+              className="flex items-center gap-2"
+            >
               <PlusCircle className="h-4 w-4" />
-              {isCreating ? 'キー生成中...' : 'キーを生成'}
+              {isCreating ? "キー生成中..." : "キーを生成"}
             </Button>
           </form>
         </CardContent>
@@ -285,8 +311,8 @@ const IntegrationKeysPage = () => {
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs ${
                             key.is_active
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                         >
                           {key.is_active ? (
@@ -302,8 +328,12 @@ const IntegrationKeysPage = () => {
                           )}
                         </span>
                       </td>
-                      <td className="py-3 px-4">{formatJapaneseDate(key.created_at)}</td>
-                      <td className="py-3 px-4">{formatJapaneseDate(key.last_used_at)}</td>
+                      <td className="py-3 px-4">
+                        {formatJapaneseDate(key.created_at)}
+                      </td>
+                      <td className="py-3 px-4">
+                        {formatJapaneseDate(key.last_used_at)}
+                      </td>
                       <td className="py-3 px-4 text-right">
                         {key.is_active && (
                           <Button

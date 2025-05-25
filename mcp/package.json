@@ -2,7 +2,7 @@
   "name": "mcp",
   "version": "1.0.0",
   "main": "index.js",
-  "type" : "module",
+  "type": "module",
   "bin": {
     "mcp": "./build/index.js"
   },

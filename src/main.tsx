@@ -1,11 +1,11 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App'
-import './styles/globals.css'
-import { UserProvider } from './contexts/UserContext'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+import "./styles/globals.css";
+import { UserProvider } from "./contexts/UserContext";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <UserProvider>
@@ -13,4 +13,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       </UserProvider>
     </BrowserRouter>
   </React.StrictMode>,
-)
+);

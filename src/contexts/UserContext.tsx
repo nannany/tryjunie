@@ -1,6 +1,6 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '@supabase/supabase-js';
-import { createClient } from '@/lib/supabase/client';
+import { createContext, useState, useEffect, ReactNode } from "react";
+import { User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
@@ -10,7 +10,9 @@ interface UserContextType {
   error: Error | null;
 }
 
-export const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(
+  undefined,
+);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -21,7 +23,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const fetchUserSession = async () => {
       setIsLoading(true);
       try {
-        const { data: { user: currentUser }, error: fetchError } = await supabase.auth.getUser();
+        const {
+          data: { user: currentUser },
+          error: fetchError,
+        } = await supabase.auth.getUser();
         if (fetchError) {
           throw fetchError;
         }
@@ -35,10 +40,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
     fetchUserSession();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null);
-      setIsLoading(false); // Set loading to false on auth state change
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_, session) => {
+        setUser(session?.user ?? null);
+        setIsLoading(false); // Set loading to false on auth state change
+      },
+    );
 
     return () => {
       if (authListener?.subscription) {

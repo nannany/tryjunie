@@ -14,27 +14,27 @@ export interface Task {
 
 // Action Types
 export type SetTasksAction = {
-  type: 'SET_TASKS';
+  type: "SET_TASKS";
   payload: Task[];
 };
 
 export type AddTaskAction = {
-  type: 'ADD_TASK';
+  type: "ADD_TASK";
   payload: Task;
 };
 
 export type UpdateTaskAction = {
-  type: 'UPDATE_TASK';
+  type: "UPDATE_TASK";
   payload: Partial<Task> & { id: string }; // Requires id, and allows partial updates to other fields
 };
 
 export type DeleteTaskAction = {
-  type: 'DELETE_TASK';
+  type: "DELETE_TASK";
   payload: string; // Task id
 };
 
 export type ReorderTasksAction = {
-  type: 'REORDER_TASKS';
+  type: "REORDER_TASKS";
   payload: Task[]; // The new ordered array of tasks
 };
 
