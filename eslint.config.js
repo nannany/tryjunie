@@ -81,6 +81,16 @@ export default [
         { allowConstantExport: true },
       ],
       "no-undef": "error", // Ensure this is active to catch undefined variables
+      "no-unused-vars": "off", // Disable base rule as we use @typescript-eslint/no-unused-vars
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          // 先頭に _ を付けた変数・引数は許容
+          varsIgnorePattern: "^_",
+          argsIgnorePattern: "^_",
+          caughtErrors: "all",
+        },
+      ],
     },
     settings: {
       react: {
