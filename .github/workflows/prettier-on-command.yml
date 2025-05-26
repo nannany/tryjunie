@@ -1,0 +1,47 @@
+name: prettier-on-command
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  run-prettier:
+    # PR 以外の issue コメントは無視
+    if: >
+      github.event.issue.pull_request != null &&
+      contains(github.event.comment.body, '/prettier')
+    permissions:
+      contents: write # commit/push 用
+      pull-requests: write # コメント返信用
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PR の HEAD を取る
+          ref: ${{ github.event.issue.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      - run: npm ci # 依存を入れる
+      - run: npx prettier --write .
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          if ! git diff --quiet ; then
+            git commit -am "chore: format with Prettier"
+            git push
+          fi
+
+      - name: Reply comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: "✅ Prettier を実行し、変更をプッシュしました。"
+            })
