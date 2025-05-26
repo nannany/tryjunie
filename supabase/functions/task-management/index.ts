@@ -187,7 +187,11 @@ Deno.serve(async (req) => {
 
     // JWTを生成する関数
     // jwtSecret and supabaseUrl are passed directly as they are already retrieved and checked
-    async function createToken(userId: string, currentJwtSecret: string, currentSupabaseUrl: string) {
+    async function createToken(
+      userId: string,
+      currentJwtSecret: string,
+      currentSupabaseUrl: string,
+    ) {
       const payload = {
         sub: userId,
         role: "authenticated",

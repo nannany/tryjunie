@@ -68,7 +68,11 @@ Deno.test("createToken generates a valid JWT with correct claims", async () => {
   try {
     // In a real test, you'd call the original createToken function from index.ts
     // For now, calling the adapted version:
-    token = await createTokenForTest(mockUserId, mockJwtSecret, mockSupabaseUrl);
+    token = await createTokenForTest(
+      mockUserId,
+      mockJwtSecret,
+      mockSupabaseUrl,
+    );
   } catch (e) {
     error = e;
   } finally {
@@ -89,14 +93,33 @@ Deno.test("createToken generates a valid JWT with correct claims", async () => {
     verificationError = e;
   }
 
-  assert(!verificationError, `Token verification failed: ${verificationError?.message}`);
+  assert(
+    !verificationError,
+    `Token verification failed: ${verificationError?.message}`,
+  );
   assertExists(decodedPayload, "Token payload could not be decoded.");
 
   // Check standard claims
-  assertEquals(decodedPayload.sub, mockUserId, "Subject claim (sub) is incorrect.");
-  assertEquals(decodedPayload.iss, mockSupabaseUrl, "Issuer claim (iss) is incorrect.");
-  assertEquals(decodedPayload.aud, "authenticated", "Audience claim (aud) is incorrect.");
-  assertEquals(decodedPayload.role, "authenticated", "Role claim is incorrect.");
+  assertEquals(
+    decodedPayload.sub,
+    mockUserId,
+    "Subject claim (sub) is incorrect.",
+  );
+  assertEquals(
+    decodedPayload.iss,
+    mockSupabaseUrl,
+    "Issuer claim (iss) is incorrect.",
+  );
+  assertEquals(
+    decodedPayload.aud,
+    "authenticated",
+    "Audience claim (aud) is incorrect.",
+  );
+  assertEquals(
+    decodedPayload.role,
+    "authenticated",
+    "Role claim is incorrect.",
+  );
 
   // Check time-based claims (iat, exp)
   assertExists(decodedPayload.iat, "IssuedAt claim (iat) is missing.");
@@ -104,41 +127,52 @@ Deno.test("createToken generates a valid JWT with correct claims", async () => {
   assert(typeof decodedPayload.iat === "number", "iat should be a number.");
   assert(typeof decodedPayload.exp === "number", "exp should be a number.");
   assert(decodedPayload.exp > decodedPayload.iat, "exp should be after iat.");
-  
+
   // Check if iat is recent (e.g., within the last 5 minutes)
   const nowInSeconds = Math.floor(Date.now() / 1000);
   assert(
-    decodedPayload.iat <= nowInSeconds && decodedPayload.iat > nowInSeconds - 300,
-    "iat is not recent."
+    decodedPayload.iat <= nowInSeconds &&
+      decodedPayload.iat > nowInSeconds - 300,
+    "iat is not recent.",
   );
   // Check if exp is approximately 1 hour from iat
-  assertEquals(decodedPayload.exp, decodedPayload.iat + 3600, "exp is not 1 hour after iat.");
+  assertEquals(
+    decodedPayload.exp,
+    decodedPayload.iat + 3600,
+    "exp is not 1 hour after iat.",
+  );
 });
 
-Deno.test("createToken (adapted) throws error if JWT secret is empty or too weak (conceptual)", async () => {
-  // This specific test is harder to make pass deterministically with createTokenForTest
-  // because crypto.subtle.importKey itself will throw an error for weak keys
-  // before djwt.create even gets called with an empty secret.
-  // djwt's own internal checks might also fire.
+Deno.test(
+  "createToken (adapted) throws error if JWT secret is empty or too weak (conceptual)",
+  async () => {
+    // This specific test is harder to make pass deterministically with createTokenForTest
+    // because crypto.subtle.importKey itself will throw an error for weak keys
+    // before djwt.create even gets called with an empty secret.
+    // djwt's own internal checks might also fire.
 
-  // The main function (index.ts) has an upfront check for SUPABASE_JWT_SECRET.
-  // This test case is more about the robustness of crypto APIs.
+    // The main function (index.ts) has an upfront check for SUPABASE_JWT_SECRET.
+    // This test case is more about the robustness of crypto APIs.
 
-  const mockUserId = "test-user-id";
-  const mockSupabaseUrl = "http://localhost:8000";
-  const weakSecret = ""; // Empty secret
+    const mockUserId = "test-user-id";
+    const mockSupabaseUrl = "http://localhost:8000";
+    const weakSecret = ""; // Empty secret
 
-  let error: Error | undefined;
-  try {
-    // We are calling createTokenForTest directly, which doesn't have the Deno.env.get('SUPABASE_JWT_SECRET') check.
-    // The error will likely come from crypto.subtle.importKey.
-    await createTokenForTest(mockUserId, weakSecret, mockSupabaseUrl);
-  } catch (e) {
-    error = e;
-  }
-  
-  assertExists(error, "createTokenForTest should throw an error with an empty secret.");
-  // The error message might vary: "Key length is zero" or similar from crypto.subtle, or from djwt.
-  // For now, just checking an error is thrown is sufficient for this conceptual test.
-  console.log(`(Conceptual test) Error for empty secret: ${error?.message}`);
-});
+    let error: Error | undefined;
+    try {
+      // We are calling createTokenForTest directly, which doesn't have the Deno.env.get('SUPABASE_JWT_SECRET') check.
+      // The error will likely come from crypto.subtle.importKey.
+      await createTokenForTest(mockUserId, weakSecret, mockSupabaseUrl);
+    } catch (e) {
+      error = e;
+    }
+
+    assertExists(
+      error,
+      "createTokenForTest should throw an error with an empty secret.",
+    );
+    // The error message might vary: "Key length is zero" or similar from crypto.subtle, or from djwt.
+    // For now, just checking an error is thrown is sufficient for this conceptual test.
+    console.log(`(Conceptual test) Error for empty secret: ${error?.message}`);
+  },
+);
