@@ -5,37 +5,9 @@ import {
   assertObjectMatch,
 } from "https://deno.land/std@0.192.0/testing/asserts.ts"; // Using a specific version for stability
 import * as djwt from "https://deno.land/x/djwt@v2.8/mod.ts";
+import { createToken } from "./index.ts";
 // Assuming the createToken function is exported from index.ts or can be extracted/adapted
 // For this test, let's copy a simplified version of createToken here or make it accessible.
-
-// Simplified/adapted createToken for testing.
-// In a real scenario, you'd import this from your actual index.ts.
-// To make this self-contained for the tool, I'm redefining it.
-// IMPORTANT: This definition MUST match the one in index.ts for the test to be valid.
-async function createTokenForTest(
-  userId: string,
-  currentJwtSecret: string,
-  currentSupabaseUrl: string,
-) {
-  const payload = {
-    sub: userId,
-    role: "authenticated",
-    aud: "authenticated",
-    iss: currentSupabaseUrl,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiration
-  };
-
-  const secretKeyData = new TextEncoder().encode(currentJwtSecret);
-  const key = await crypto.subtle.importKey(
-    "raw",
-    secretKeyData,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign", "verify"], // Ensure "verify" is also here if using the same key for djwt.verify
-  );
-  return await djwt.create({ alg: "HS256", typ: "JWT" }, payload, key);
-}
 
 // Helper to import a key for djwt.verify, similar to how createToken does for signing
 async function importKeyForVerification(jwtSecret: string) {
@@ -68,7 +40,7 @@ Deno.test("createToken generates a valid JWT with correct claims", async () => {
   try {
     // In a real test, you'd call the original createToken function from index.ts
     // For now, calling the adapted version:
-    token = await createTokenForTest(
+    token = await createToken(
       mockUserId,
       mockJwtSecret,
       mockSupabaseUrl,
@@ -160,16 +132,16 @@ Deno.test(
 
     let error: Error | undefined;
     try {
-      // We are calling createTokenForTest directly, which doesn't have the Deno.env.get('SUPABASE_JWT_SECRET') check.
+      // We are calling createToken directly, which doesn't have the Deno.env.get('SUPABASE_JWT_SECRET') check.
       // The error will likely come from crypto.subtle.importKey.
-      await createTokenForTest(mockUserId, weakSecret, mockSupabaseUrl);
+      await createToken(mockUserId, weakSecret, mockSupabaseUrl);
     } catch (e) {
       error = e;
     }
 
     assertExists(
       error,
-      "createTokenForTest should throw an error with an empty secret.",
+      "createToken should throw an error with an empty secret.",
     );
     // The error message might vary: "Key length is zero" or similar from crypto.subtle, or from djwt.
     // For now, just checking an error is thrown is sufficient for this conceptual test.

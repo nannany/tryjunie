@@ -58,6 +58,33 @@ function validateTaskData(data: any): { valid: boolean; errors?: string[] } {
   };
 }
 
+// JWTを生成する関数
+// jwtSecret and supabaseUrl are passed directly as they are already retrieved and checked
+export async function createToken(
+  userId: string,
+  currentJwtSecret: string,
+  currentSupabaseUrl: string,
+) {
+  const payload = {
+    sub: userId,
+    role: "authenticated",
+    aud: "authenticated",
+    iss: currentSupabaseUrl,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiration
+  };
+
+  const secretKeyData = new TextEncoder().encode(currentJwtSecret);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    secretKeyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"],
+  );
+  return await djwt.create({ alg: "HS256", typ: "JWT" }, payload, key);
+}
+
 console.log("Task Management Function initialized");
 
 Deno.serve(async (req) => {
@@ -185,37 +212,10 @@ Deno.serve(async (req) => {
 
     const actualUserId = keyData.user_id;
 
-    // JWTを生成する関数
-    // jwtSecret and supabaseUrl are passed directly as they are already retrieved and checked
-    async function createToken(
-      userId: string,
-      currentJwtSecret: string,
-      currentSupabaseUrl: string,
-    ) {
-      const payload = {
-        sub: userId,
-        role: "authenticated",
-        aud: "authenticated",
-        iss: currentSupabaseUrl,
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiration
-      };
-
-      const secretKeyData = new TextEncoder().encode(currentJwtSecret);
-      const key = await crypto.subtle.importKey(
-        "raw",
-        secretKeyData,
-        { name: "HMAC", hash: "SHA-256" },
-        false,
-        ["sign", "verify"],
-      );
-      return await djwt.create({ alg: "HS256", typ: "JWT" }, payload, key);
-    }
-
     let token;
     try {
       // supabaseUrl and jwtSecret are already confirmed to exist from the top check
-      token = await createToken(actualUserId, jwtSecret, supabaseUrl);
+      token = await createToken(actualUserId, jwtSecret!, supabaseUrl!); // jwtSecret and supabaseUrl are checked at the beginning of Deno.serve
     } catch (e) {
       // This catch block is now for unexpected errors during token creation itself,
       // as specific env var checks are done earlier or within createToken.
