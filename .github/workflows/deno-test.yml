@@ -1,0 +1,32 @@
+name: Deno Test
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main # Or your default branch
+    paths:
+      - 'supabase/functions/**'
+  pull_request:
+    paths:
+      - 'supabase/functions/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x # Use a specific version or v1.x for latest 1.x
+
+      - name: Run Deno tests
+        run: |
+          deno test --allow-read --allow-env --allow-net supabase/functions/task-management/index.test.ts
+        # Optional: If tests need to be run from a specific directory:
+        # working-directory: ./supabase/functions/task-management
