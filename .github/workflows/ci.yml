@@ -20,12 +20,15 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
+        working-directory: ./ui
 
       - name: Run linters
         run: npm run lint
+        working-directory: ./ui
 
       - name: Run Prettier check
-        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md,yml}" # Generic check, can be refined
+        run: npx prettier --check "ui/**/*.{ts,tsx,js,jsx,json,md,yml}" # Generic check, can be refined
 
       - name: Run tests
         run: npm test
+        working-directory: ./ui
