@@ -46,6 +46,12 @@ for select
 to authenticated
 using (auth.uid() = user_id);
 
+-- idでの検索は全て許可
+create policy "Anyone can select integration_keys by id"
+on public.integration_keys
+for select
+using (id is not null);
+
 -- コメント
 comment on table public.integration_keys is 'インテグレーションキー管理テーブル';
 comment on column public.integration_keys.id is 'インテグレーションキーの一意識別子';
