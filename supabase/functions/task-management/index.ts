@@ -95,6 +95,13 @@ Deno.serve(async (req) => {
   const jwtSecret = Deno.env.get("SUPABASE_JWT_SECRET"); // Checked here for early exit
 
   if (!supabaseUrl || !serviceRoleKey || !anonKey || !jwtSecret) {
+    // debug用にどの環境系変数が欠けているかをログに出力
+    console.error("Environment variables:");
+    console.error("SUPABASE_URL:", supabaseUrl);
+    console.error("SUPABASE_SERVICE_ROLE_KEY:", serviceRoleKey);
+    console.error("SUPABASE_ANON_KEY:", anonKey);
+    console.error("SUPABASE_JWT_SECRET:", jwtSecret);
+
     console.error(
       "Missing one or more required environment variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_ANON_KEY, SUPABASE_JWT_SECRET",
     );
