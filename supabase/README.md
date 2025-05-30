@@ -3,8 +3,7 @@
 ## supabase start
 
 `supabase start`を実行すると、ローカルに環境が作られる。
-
-todo: どんな環境？
+ローカルマシン上で Supabase スタック（PostgreSQL データベース、Supabase Studio UI、ローカル Edge Functions など）を起動します。開発やテストに便利です。
 
 ## supabase login
 
@@ -27,7 +26,7 @@ todo: どんな環境？
 
 ## supabase db push
 
-`supabase db push`を実行すると、supabase の本番環境に`/supabase/migrations`配下の ddl が反映される。
+ローカルデータベーススキーマの現在の状態（または指定されたスキーマファイル）をリモートデータベースにプッシュします。注意：このコマンドはマイグレーション履歴をバイパスする可能性があるため、本番環境への直接の使用は慎重に行うべきです。本番環境には `supabase migration up` を使ってマイグレーションを順次適用することを推奨します。主にローカル開発や、リモートの開発・ステージング環境を素早く更新・リセットするのに適しています。
 
 ---
 
