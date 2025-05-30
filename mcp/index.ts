@@ -1,19 +1,21 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
-import fetch from 'node-fetch'; // Using node-fetch v2
-import { z } from 'zod';
-import zodToJsonSchema from 'zod-to-json-schema';
+import fetch from "node-fetch"; // Using node-fetch v2
+import { z } from "zod";
 
 // Environment variable checks
 const supabaseFunctionUrl = process.env.SUPABASE_FUNCTION_URL;
 const integrationId = process.env.X_INTEGRATION_ID;
 
+// Tool definitions
+const CREATE_TASK_TOOL_NAME = "create_task";
+const CREATE_TASK_TOOL_DESCRIPTION =
+  "Creates a new task in Supabase via the task-management function.";
+
 if (!supabaseFunctionUrl) {
-  console.error("FATAL: SUPABASE_FUNCTION_URL environment variable is not set.");
+  console.error(
+    "FATAL: SUPABASE_FUNCTION_URL environment variable is not set.",
+  );
   process.exit(1);
 }
 if (!integrationId) {
@@ -21,11 +23,19 @@ if (!integrationId) {
   process.exit(1);
 }
 
-console.log(`MCP Server configured to use Supabase URL: ${supabaseFunctionUrl}`);
+console.log(
+  `MCP Server configured to use Supabase URL: ${supabaseFunctionUrl}`,
+);
 console.log(`MCP Server configured to use Integration ID: ${integrationId}`);
 
 const transport = new StdioServerTransport();
-const server = new McpServer(transport);
+const server = new McpServer({
+  name: "Supabase Task Management MCP Server",
+  version: "1.0.0",
+  capabilities: {
+    tools: [CREATE_TASK_TOOL_NAME],
+  },
+});
 
 // Interface for task parameters (kept for clarity, matches the schema)
 interface CreateTaskParams {
@@ -37,37 +47,63 @@ interface CreateTaskParams {
 
 // Zod schema for validating createTask parameters
 const CreateTaskParamsSchema = z.object({
-  title: z.string().min(1, { message: "Title is required and cannot be empty." }),
+  title: z.string().min(1, {
+    message: "Title is required and cannot be empty.",
+  }),
   description: z.string().optional(),
-  estimated_minute: z.number().int().gte(0, { message: "Estimated minutes must be a non-negative integer." }).optional(),
-  task_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Task date must be in YYYY-MM-DD format." }).optional(),
+  estimated_minute: z.number().int().gte(0, {
+    message: "Estimated minutes must be a non-negative integer.",
+  }).optional(),
+  task_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: "Task date must be in YYYY-MM-DD format.",
+  }).optional(),
 });
-
-// Tool definitions
-const CREATE_TASK_TOOL_NAME = 'create_task';
-const CREATE_TASK_TOOL_DESCRIPTION = 'Creates a new task in Supabase via the task-management function.';
 
 // Core logic for the createTask tool
 const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params as CreateTaskParams; Zod validation happens at the start of this function
-  console.log(`[${new Date().toISOString()}] MCP Tool '${CREATE_TASK_TOOL_NAME}' called with raw params:`, params);
+  console.log(
+    `[${
+      new Date().toISOString()
+    }] MCP Tool '${CREATE_TASK_TOOL_NAME}' called with raw params:`,
+    params,
+  );
 
   let validatedParams: CreateTaskParams;
   try {
     validatedParams = CreateTaskParamsSchema.parse(params); // params are validated here
-    console.log(`[${new Date().toISOString()}] Validated params for '${CREATE_TASK_TOOL_NAME}':`, validatedParams);
+    console.log(
+      `[${
+        new Date().toISOString()
+      }] Validated params for '${CREATE_TASK_TOOL_NAME}':`,
+      validatedParams,
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error(`[${new Date().toISOString()}] Invalid parameters for '${CREATE_TASK_TOOL_NAME}' tool:`, error.flatten().fieldErrors);
+      console.error(
+        `[${
+          new Date().toISOString()
+        }] Invalid parameters for '${CREATE_TASK_TOOL_NAME}' tool:`,
+        error.flatten().fieldErrors,
+      );
       const errorSummary = Object.entries(error.flatten().fieldErrors)
-        .map(([field, messages]) => `${field}: ${messages?.join(', ')}`)
-        .join('; ');
+        .map(([field, messages]) => `${field}: ${messages?.join(", ")}`)
+        .join("; ");
       // This error will be caught by the CallTool handler and propagated
-      throw new Error(`Invalid parameters for ${CREATE_TASK_TOOL_NAME}: ${errorSummary}`);
+      throw new Error(
+        `Invalid parameters for ${CREATE_TASK_TOOL_NAME}: ${errorSummary}`,
+      );
     }
-    console.error(`[${new Date().toISOString()}] Unexpected error during parameter validation for '${CREATE_TASK_TOOL_NAME}':`, error);
-    throw new Error('An unexpected error occurred during parameter validation.');
+    console.error(
+      `[${
+        new Date().toISOString()
+      }] Unexpected error during parameter validation for '${CREATE_TASK_TOOL_NAME}':`,
+      error,
+    );
+    throw new Error(
+      "An unexpected error occurred during parameter validation.",
+    );
   }
-  
+
   const body = {
     title: validatedParams.title,
     description: validatedParams.description,
@@ -76,12 +112,17 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
   };
 
   try {
-    console.log(`[${new Date().toISOString()}] Forwarding request to Supabase function: ${supabaseFunctionUrl} with body:`, body);
+    console.log(
+      `[${
+        new Date().toISOString()
+      }] Forwarding request to Supabase function: ${supabaseFunctionUrl} with body:`,
+      body,
+    );
     const response = await fetch(supabaseFunctionUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'x-integration-id': integrationId,
+        "Content-Type": "application/json",
+        "x-integration-id": integrationId,
       },
       body: JSON.stringify(body),
     });
@@ -90,63 +131,83 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
     try {
       responseBody = await response.json();
     } catch (parseError) {
-      console.error(`[${new Date().toISOString()}] Error parsing JSON response from Supabase:`, parseError);
+      console.error(
+        `[${
+          new Date().toISOString()
+        }] Error parsing JSON response from Supabase:`,
+        parseError,
+      );
       if (!response.ok) {
-        throw new Error(`Supabase function returned non-OK status ${response.status} and non-JSON/empty response.`);
+        throw new Error(
+          `Supabase function returned non-OK status ${response.status} and non-JSON/empty response.`,
+        );
       }
-      throw new Error(`Supabase function returned OK status but failed to parse JSON response: ${parseError}`);
+      throw new Error(
+        `Supabase function returned OK status but failed to parse JSON response: ${parseError}`,
+      );
     }
-    
-    console.log(`[${new Date().toISOString()}] Received response from Supabase: ${response.status}`, responseBody);
+
+    console.log(
+      `[${
+        new Date().toISOString()
+      }] Received response from Supabase: ${response.status}`,
+      responseBody,
+    );
 
     if (!response.ok) {
-      console.error(`[${new Date().toISOString()}] Supabase function returned an error: ${response.status}`, responseBody);
-      const errorMessage = (responseBody && typeof responseBody === 'object' && 'message' in responseBody) 
-        ? (responseBody as { message: string }).message 
+      console.error(
+        `[${
+          new Date().toISOString()
+        }] Supabase function returned an error: ${response.status}`,
+        responseBody,
+      );
+      const errorMessage = (responseBody && typeof responseBody === "object" &&
+          "message" in responseBody)
+        ? (responseBody as { message: string }).message
         : JSON.stringify(responseBody);
-      throw new Error(`Error from Supabase: ${response.status} - ${errorMessage}`);
+      throw new Error(
+        `Error from Supabase: ${response.status} - ${errorMessage}`,
+      );
     }
-    
-    console.log(`[${new Date().toISOString()}] Task created successfully via Supabase:`, responseBody);
+
+    console.log(
+      `[${new Date().toISOString()}] Task created successfully via Supabase:`,
+      responseBody,
+    );
     return responseBody;
   } catch (error: any) { // Errors from fetch or Supabase logic
-    console.error(`[${new Date().toISOString()}] Error in '${CREATE_TASK_TOOL_NAME}' tool logic execution:`, error);
+    console.error(
+      `[${
+        new Date().toISOString()
+      }] Error in '${CREATE_TASK_TOOL_NAME}' tool logic execution:`,
+      error,
+    );
     if (error instanceof Error) {
-        throw error; 
+      throw error;
     }
-    throw new Error(`An unknown error occurred within the ${CREATE_TASK_TOOL_NAME} tool execution.`);
+    throw new Error(
+      `An unknown error occurred within the ${CREATE_TASK_TOOL_NAME} tool execution.`,
+    );
   }
 };
 
 // --- MCP Request Handlers ---
-
-// ListTools Handler
-server.setRequestHandler(ListToolsRequestSchema, async (_request) => {
-  console.log(`[${new Date().toISOString()}] Handling ListTools request.`);
-  const createTaskInputJsonSchema = zodToJsonSchema(CreateTaskParamsSchema, "CreateTaskParamsSchema");
-
-  return {
-    tools: [
-      {
-        name: CREATE_TASK_TOOL_NAME,
-        description: CREATE_TASK_TOOL_DESCRIPTION,
-        inputSchema: createTaskInputJsonSchema,
-      },
-    ],
-  };
-});
-
 // CallTool Handler
-server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
+server.tool(CREATE_TASK_TOOL_NAME, async (request: any) => {
   // Assuming request is an object with toolName and parameters.
   // For stricter validation, parse 'request' with CallToolRequestSchema if it's a Zod schema.
   // E.g., const validatedRequest = CallToolRequestSchema.parse(request);
   // const { toolName, parameters } = validatedRequest;
-  
+
   const toolName = request.toolName;
   const parameters = request.parameters; // These parameters are passed to the specific tool logic
 
-  console.log(`[${new Date().toISOString()}] Handling CallTool request for tool: '${toolName}' with parameters:`, parameters);
+  console.log(
+    `[${
+      new Date().toISOString()
+    }] Handling CallTool request for tool: '${toolName}' with parameters:`,
+    parameters,
+  );
 
   try {
     switch (toolName) {
@@ -155,21 +216,43 @@ server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
         return await createTaskToolLogic(parameters);
       // Cases for other tools would go here
       default:
-        console.error(`[${new Date().toISOString()}] Unknown tool called: '${toolName}'`);
+        console.error(
+          `[${new Date().toISOString()}] Unknown tool called: '${toolName}'`,
+        );
         throw new Error(`Tool '${toolName}' not found.`);
     }
   } catch (error: any) {
     // This catches errors from tool logic (including Zod validation errors within them) or the switch statement.
-    console.error(`[${new Date().toISOString()}] Error during execution of tool '${toolName}':`, error.message);
+    console.error(
+      `[${
+        new Date().toISOString()
+      }] Error during execution of tool '${toolName}':`,
+      error.message,
+    );
     // Re-throw the error so McpServer can handle it and relay to the client.
     // Ensure it's an Error instance.
     if (error instanceof Error) {
       throw error;
     }
-    throw new Error(`An unexpected error occurred while executing tool '${toolName}': ${error}`);
+    throw new Error(
+      `An unexpected error occurred while executing tool '${toolName}': ${error}`,
+    );
   }
 });
 
-console.log(`[${new Date().toISOString()}] MCP Server with StdioTransport started. Ready to handle ListTools and CallTool requests.`);
+console.log(
+  `[${
+    new Date().toISOString()
+  }] MCP Server with StdioTransport started. Ready to handle ListTools and CallTool requests.`,
+);
 
-[end of mcp/index.ts]
+async function main() {
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  console.error("Task Management MCP Server running on stdio");
+}
+
+main().catch((error) => {
+  console.error("Fatal error in main():", error);
+  process.exit(1);
+});
