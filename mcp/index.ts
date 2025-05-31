@@ -23,7 +23,6 @@ if (!integrationId) {
   process.exit(1);
 }
 
-const transport = new StdioServerTransport();
 const server = new McpServer({
   name: "Supabase Task Management MCP Server",
   version: "1.0.0",
