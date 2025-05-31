@@ -167,36 +167,16 @@ server.tool(
   // E.g., const validatedRequest = CallToolRequestSchema.parse(request);
   // const { toolName, parameters } = validatedRequest;
 
-  const toolName = request.toolName;
   const parameters = request.parameters; // These parameters are passed to the specific tool logic
 
   try {
-    switch (toolName) {
-      case CREATE_TASK_TOOL_NAME:
-        // createTaskToolLogic itself handles Zod validation of its parameters
-        return await createTaskToolLogic(parameters);
-      // Cases for other tools would go here
-      default:
-        console.error(
-          `[${new Date().toISOString()}] Unknown tool called: '${toolName}'`,
-        );
-        throw new Error(`Tool '${toolName}' not found.`);
-    }
+    return await createTaskToolLogic(parameters);
   } catch (error: any) {
-    // This catches errors from tool logic (including Zod validation errors within them) or the switch statement.
-    console.error(
-      `[${
-        new Date().toISOString()
-      }] Error during execution of tool '${toolName}':`,
-      error.message,
-    );
-    // Re-throw the error so McpServer can handle it and relay to the client.
-    // Ensure it's an Error instance.
     if (error instanceof Error) {
       throw error;
     }
     throw new Error(
-      `An unexpected error occurred while executing tool '${toolName}': ${error}`,
+      `An unexpected error occurred : ${error}`,
     );
   }
 });
