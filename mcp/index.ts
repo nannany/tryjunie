@@ -27,7 +27,7 @@ const server = new McpServer({
   name: "Supabase Task Management MCP Server",
   version: "1.0.0",
   capabilities: {
-    tools: [CREATE_TASK_TOOL_NAME],
+    tools: {},
   },
 });
 
@@ -157,7 +157,10 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
 
 // --- MCP Request Handlers ---
 // CallTool Handler
-server.tool(CREATE_TASK_TOOL_NAME, async (request: any) => {
+server.tool(
+    CREATE_TASK_TOOL_NAME,
+    CREATE_TASK_TOOL_DESCRIPTION,
+    async (request: any) => {
   // Assuming request is an object with toolName and parameters.
   // For stricter validation, parse 'request' with CallToolRequestSchema if it's a Zod schema.
   // E.g., const validatedRequest = CallToolRequestSchema.parse(request);
