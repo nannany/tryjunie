@@ -182,12 +182,21 @@ server.tool(
   },
   async ({ title, description, estimated_minute, task_date }) => {
     try {
-      return await createTaskToolLogic({
+      await createTaskToolLogic({
         title,
         description,
         estimated_minute,
         task_date,
       });
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: "task created",
+          },
+        ],
+      };
     } catch (error: any) {
       if (error instanceof Error) {
         throw error;
