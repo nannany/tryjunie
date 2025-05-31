@@ -161,17 +161,33 @@ const createTaskToolLogic = async (params: CreateTaskParams) => {
 server.tool(
   CREATE_TASK_TOOL_NAME,
   CREATE_TASK_TOOL_DESCRIPTION,
-  CreateTaskParamsSchema.shape, // Use Zod schema for parameter validation
-  async (request: any) => {
-    // Assuming request is an object with toolName and parameters.
-    // For stricter validation, parse 'request' with CallToolRequestSchema if it's a Zod schema.
-    // E.g., const validatedRequest = CallToolRequestSchema.parse(request);
-    // const { toolName, parameters } = validatedRequest;
-
-    const parameters = request.parameters; // These parameters are passed to the specific tool logic
-
+  {
+    title: z.string().min(1, {
+      message: "Title is required and cannot be empty.",
+    }),
+    description: z.string().optional(),
+    estimated_minute: z
+      .number()
+      .int()
+      .gte(0, {
+        message: "Estimated minutes must be a non-negative integer.",
+      })
+      .optional(),
+    task_date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, {
+        message: "Task date must be in YYYY-MM-DD format.",
+      })
+      .optional(),
+  },
+  async ({ title, description, estimated_minute, task_date }) => {
     try {
-      return await createTaskToolLogic(parameters);
+      return await createTaskToolLogic({
+        title,
+        description,
+        estimated_minute,
+        task_date,
+      });
     } catch (error: any) {
       if (error instanceof Error) {
         throw error;
