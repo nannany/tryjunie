@@ -23,11 +23,6 @@ if (!integrationId) {
   process.exit(1);
 }
 
-console.log(
-  `MCP Server configured to use Supabase URL: ${supabaseFunctionUrl}`,
-);
-console.log(`MCP Server configured to use Integration ID: ${integrationId}`);
-
 const transport = new StdioServerTransport();
 const server = new McpServer({
   name: "Supabase Task Management MCP Server",
@@ -61,22 +56,9 @@ const CreateTaskParamsSchema = z.object({
 
 // Core logic for the createTask tool
 const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params as CreateTaskParams; Zod validation happens at the start of this function
-  console.log(
-    `[${
-      new Date().toISOString()
-    }] MCP Tool '${CREATE_TASK_TOOL_NAME}' called with raw params:`,
-    params,
-  );
-
   let validatedParams: CreateTaskParams;
   try {
     validatedParams = CreateTaskParamsSchema.parse(params); // params are validated here
-    console.log(
-      `[${
-        new Date().toISOString()
-      }] Validated params for '${CREATE_TASK_TOOL_NAME}':`,
-      validatedParams,
-    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(
@@ -112,12 +94,6 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
   };
 
   try {
-    console.log(
-      `[${
-        new Date().toISOString()
-      }] Forwarding request to Supabase function: ${supabaseFunctionUrl} with body:`,
-      body,
-    );
     const response = await fetch(supabaseFunctionUrl, {
       method: "POST",
       headers: {
@@ -147,13 +123,6 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
       );
     }
 
-    console.log(
-      `[${
-        new Date().toISOString()
-      }] Received response from Supabase: ${response.status}`,
-      responseBody,
-    );
-
     if (!response.ok) {
       console.error(
         `[${
@@ -170,10 +139,6 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
       );
     }
 
-    console.log(
-      `[${new Date().toISOString()}] Task created successfully via Supabase:`,
-      responseBody,
-    );
     return responseBody;
   } catch (error: any) { // Errors from fetch or Supabase logic
     console.error(
@@ -201,13 +166,6 @@ server.tool(CREATE_TASK_TOOL_NAME, async (request: any) => {
 
   const toolName = request.toolName;
   const parameters = request.parameters; // These parameters are passed to the specific tool logic
-
-  console.log(
-    `[${
-      new Date().toISOString()
-    }] Handling CallTool request for tool: '${toolName}' with parameters:`,
-    parameters,
-  );
 
   try {
     switch (toolName) {
@@ -239,12 +197,6 @@ server.tool(CREATE_TASK_TOOL_NAME, async (request: any) => {
     );
   }
 });
-
-console.log(
-  `[${
-    new Date().toISOString()
-  }] MCP Server with StdioTransport started. Ready to handle ListTools and CallTool requests.`,
-);
 
 async function main() {
   const transport = new StdioServerTransport();
