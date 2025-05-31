@@ -1,5 +1,5 @@
 {
-  "name": "mcp",
+  "name": "@USER/mcp",
   "version": "1.0.0",
   "main": "index.js",
   "bin": {
@@ -27,5 +27,12 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
-  "description": ""
+  "description": "",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/USER/MCP_REPO.git"
+  }
 }
