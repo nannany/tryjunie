@@ -45,25 +45,31 @@ const CreateTaskParamsSchema = z.object({
     message: "Title is required and cannot be empty.",
   }),
   description: z.string().optional(),
-  estimated_minute: z.number().int().gte(0, {
-    message: "Estimated minutes must be a non-negative integer.",
-  }).optional(),
-  task_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
-    message: "Task date must be in YYYY-MM-DD format.",
-  }).optional(),
+  estimated_minute: z
+    .number()
+    .int()
+    .gte(0, {
+      message: "Estimated minutes must be a non-negative integer.",
+    })
+    .optional(),
+  task_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      message: "Task date must be in YYYY-MM-DD format.",
+    })
+    .optional(),
 });
 
 // Core logic for the createTask tool
-const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params as CreateTaskParams; Zod validation happens at the start of this function
+const createTaskToolLogic = async (params: CreateTaskParams) => {
+  // Type params as CreateTaskParams; Zod validation happens at the start of this function
   let validatedParams: CreateTaskParams;
   try {
     validatedParams = CreateTaskParamsSchema.parse(params); // params are validated here
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error(
-        `[${
-          new Date().toISOString()
-        }] Invalid parameters for '${CREATE_TASK_TOOL_NAME}' tool:`,
+        `[${new Date().toISOString()}] Invalid parameters for '${CREATE_TASK_TOOL_NAME}' tool:`,
         error.flatten().fieldErrors,
       );
       const errorSummary = Object.entries(error.flatten().fieldErrors)
@@ -75,9 +81,7 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
       );
     }
     console.error(
-      `[${
-        new Date().toISOString()
-      }] Unexpected error during parameter validation for '${CREATE_TASK_TOOL_NAME}':`,
+      `[${new Date().toISOString()}] Unexpected error during parameter validation for '${CREATE_TASK_TOOL_NAME}':`,
       error,
     );
     throw new Error(
@@ -107,9 +111,7 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
       responseBody = await response.json();
     } catch (parseError) {
       console.error(
-        `[${
-          new Date().toISOString()
-        }] Error parsing JSON response from Supabase:`,
+        `[${new Date().toISOString()}] Error parsing JSON response from Supabase:`,
         parseError,
       );
       if (!response.ok) {
@@ -124,26 +126,25 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
 
     if (!response.ok) {
       console.error(
-        `[${
-          new Date().toISOString()
-        }] Supabase function returned an error: ${response.status}`,
+        `[${new Date().toISOString()}] Supabase function returned an error: ${response.status}`,
         responseBody,
       );
-      const errorMessage = (responseBody && typeof responseBody === "object" &&
-          "message" in responseBody)
-        ? (responseBody as { message: string }).message
-        : JSON.stringify(responseBody);
+      const errorMessage =
+        responseBody &&
+        typeof responseBody === "object" &&
+        "message" in responseBody
+          ? (responseBody as { message: string }).message
+          : JSON.stringify(responseBody);
       throw new Error(
         `Error from Supabase: ${response.status} - ${errorMessage}`,
       );
     }
 
     return responseBody;
-  } catch (error: any) { // Errors from fetch or Supabase logic
+  } catch (error: any) {
+    // Errors from fetch or Supabase logic
     console.error(
-      `[${
-        new Date().toISOString()
-      }] Error in '${CREATE_TASK_TOOL_NAME}' tool logic execution:`,
+      `[${new Date().toISOString()}] Error in '${CREATE_TASK_TOOL_NAME}' tool logic execution:`,
       error,
     );
     if (error instanceof Error) {
@@ -158,28 +159,27 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
 // --- MCP Request Handlers ---
 // CallTool Handler
 server.tool(
-    CREATE_TASK_TOOL_NAME,
-    CREATE_TASK_TOOL_DESCRIPTION,
-    CreateTaskParamsSchema.shape, // Use Zod schema for parameter validation
-    async (request: any) => {
-  // Assuming request is an object with toolName and parameters.
-  // For stricter validation, parse 'request' with CallToolRequestSchema if it's a Zod schema.
-  // E.g., const validatedRequest = CallToolRequestSchema.parse(request);
-  // const { toolName, parameters } = validatedRequest;
+  CREATE_TASK_TOOL_NAME,
+  CREATE_TASK_TOOL_DESCRIPTION,
+  CreateTaskParamsSchema.shape, // Use Zod schema for parameter validation
+  async (request: any) => {
+    // Assuming request is an object with toolName and parameters.
+    // For stricter validation, parse 'request' with CallToolRequestSchema if it's a Zod schema.
+    // E.g., const validatedRequest = CallToolRequestSchema.parse(request);
+    // const { toolName, parameters } = validatedRequest;
 
-  const parameters = request.parameters; // These parameters are passed to the specific tool logic
+    const parameters = request.parameters; // These parameters are passed to the specific tool logic
 
-  try {
-    return await createTaskToolLogic(parameters);
-  } catch (error: any) {
-    if (error instanceof Error) {
-      throw error;
+    try {
+      return await createTaskToolLogic(parameters);
+    } catch (error: any) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(`An unexpected error occurred : ${error}`);
     }
-    throw new Error(
-      `An unexpected error occurred : ${error}`,
-    );
-  }
-});
+  },
+);
 
 async function main() {
   const transport = new StdioServerTransport();
