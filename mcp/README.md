@@ -129,3 +129,77 @@ This section provides an example of how this MCP server could be configured in a
   - Include any other environment variables your server might need in the future.
 
 This configuration allows the MCP client to start and communicate with your MCP server, which then acts as a bridge to your Supabase function.
+
+## Publishing to GitHub Packages
+
+This section explains how to publish the `mcp` package to GitHub Packages.
+
+### Prerequisites
+
+- **Node.js and npm installed**: Ensure you have Node.js (which includes npm) installed on your system.
+- **GitHub Personal Access Token (PAT)**: You need a PAT with the `write:packages` scope.
+    - Generate one from your GitHub Developer settings.
+    - **Important**: Keep this PAT secure, like a password. Do not commit it to your repository.
+- **`package.json` Name Scope**: The `name` field in `mcp/package.json` must be correctly scoped for GitHub Packages. It should look like `@USER/mcp`.
+    - **Remember to replace `USER` with your actual GitHub username or organization name.**
+- **`package.json` publishConfig**: The `mcp/package.json` file must include a `publishConfig` section:
+    ```json
+    "publishConfig": {
+      "registry": "https://npm.pkg.github.com/"
+    }
+    ```
+- **`package.json` Repository URL**: The `mcp/package.json` file should have a `repository` field pointing to your GitHub repository:
+    ```json
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/USER/MCP_REPO.git"
+    }
+    ```
+    - **Remember to replace `USER` with your GitHub username/organization and `MCP_REPO` with your repository name.**
+
+### Steps to Publish
+
+1.  **Authenticate with GitHub Packages**:
+    You need to tell npm to use your PAT for publishing to GitHub Packages. Create or update your `~/.npmrc` file (or `$HOME/.npmrc` on Windows/macOS/Linux for robustness) with the following line:
+    ```bash
+    echo "//npm.pkg.github.com/:_authToken=YOUR_PAT" > ~/.npmrc
+    ```
+    - Replace `YOUR_PAT` with your actual Personal Access Token.
+    - This step only needs to be done once on your machine, unless your PAT changes.
+
+2.  **Navigate to the mcp directory**:
+    Open your terminal and change to the `mcp` package directory:
+    ```bash
+    cd /path/to/your/project/mcp
+    ```
+
+3.  **Install dependencies**:
+    Ensure all dependencies are up-to-date:
+    ```bash
+    npm install
+    ```
+
+4.  **Build the package**:
+    Compile the TypeScript code to JavaScript. This usually outputs to a `build` or `dist` directory as specified in your `tsconfig.json` and `package.json` ("files" array).
+    ```bash
+    npm run build
+    ```
+
+5.  **Publish the package**:
+    Now you can publish the package to GitHub Packages:
+    ```bash
+    npm publish
+    ```
+
+### Troubleshooting
+
+If you encounter issues during publishing:
+
+- **Verify PAT Permissions**: Ensure your PAT has the `write:packages` scope.
+- **Check `package.json`**:
+    - Double-check that the package `name` is correctly scoped (e.g., `@USER/mcp`).
+    - Confirm the `publishConfig` section is present and correct.
+    - Verify the `repository.url` is accurate.
+- **Correct Directory**: Make sure you are running `npm publish` from within the `mcp` directory (i.e., the directory containing the `package.json` you want to publish).
+- **npm Version**: In some rare cases, older npm versions might have issues. Consider updating npm: `npm install -g npm@latest`.
+- **Existing Package Version**: You cannot publish the same version of a package twice. Increment the `version` in `package.json` if you are republishing.
