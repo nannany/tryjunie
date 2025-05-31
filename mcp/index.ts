@@ -160,6 +160,7 @@ const createTaskToolLogic = async (params: CreateTaskParams) => { // Type params
 server.tool(
     CREATE_TASK_TOOL_NAME,
     CREATE_TASK_TOOL_DESCRIPTION,
+    CreateTaskParamsSchema.shape, // Use Zod schema for parameter validation
     async (request: any) => {
   // Assuming request is an object with toolName and parameters.
   // For stricter validation, parse 'request' with CallToolRequestSchema if it's a Zod schema.
