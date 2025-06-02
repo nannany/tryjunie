@@ -1,16 +1,16 @@
 {
   "name": "@nannany/mcp",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "main": "index.js",
   "bin": {
-    "mcp": "build/index.js"
+    "mcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
-    "build"
+    "dist/**"
   ],
   "keywords": [],
   "author": "",
