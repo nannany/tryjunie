@@ -8,7 +8,7 @@ import { z } from "zod";
 // Environment variable checks
 // supabaseFunctionUrl is expected to be the base URL for Supabase functions
 // (e.g., "http://localhost:54321/functions/v1" or "https://<project_ref>.supabase.co/functions/v1").
-let supabaseFunctionUrl = "https://vehthsanmculqrnxhpkx.supabase.co/functions/v1/";
+const supabaseFunctionUrl = "https://vehthsanmculqrnxhpkx.supabase.co/functions/v1/";
 const integrationId = process.env.X_INTEGRATION_ID;
 
 // Tool definitions
