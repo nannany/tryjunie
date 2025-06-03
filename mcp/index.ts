@@ -8,7 +8,7 @@ import { z } from "zod";
 // Environment variable checks
 // supabaseFunctionUrl is expected to be the base URL for Supabase functions
 // (e.g., "http://localhost:54321/functions/v1" or "https://<project_ref>.supabase.co/functions/v1").
-let supabaseFunctionUrl = process.env.SUPABASE_FUNCTION_URL;
+let supabaseFunctionUrl = "https://vehthsanmculqrnxhpkx.supabase.co/functions/v1/";
 const integrationId = process.env.X_INTEGRATION_ID;
 
 // Tool definitions
@@ -19,25 +19,6 @@ const CREATE_TASK_TOOL_DESCRIPTION =
 const SEARCH_TASKS_PER_DAY_TOOL_NAME = "search_tasks_per_day";
 const SEARCH_TASKS_PER_DAY_TOOL_DESCRIPTION =
   "Searches for tasks on a specific day in Supabase via the search-tasks-per-day function.";
-
-if (!supabaseFunctionUrl) {
-  console.error(
-    "FATAL: SUPABASE_FUNCTION_URL environment variable is not set.",
-  );
-  process.exit(1);
-}
-
-if (!supabaseFunctionUrl.startsWith("http")) {
-  console.error(
-    "FATAL: SUPABASE_FUNCTION_URL must start with 'http'.",
-  );
-  process.exit(1);
-}
-
-// Remove trailing slash if present
-if (supabaseFunctionUrl.endsWith("/")) {
-  supabaseFunctionUrl = supabaseFunctionUrl.slice(0, -1);
-}
 
 if (!integrationId) {
   console.error("FATAL: X_INTEGRATION_ID environment variable is not set.");
