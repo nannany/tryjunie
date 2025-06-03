@@ -32,6 +32,17 @@ to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
+-- keyとuser_idが一致する場合は認証不要でUPDATEを許可
+create policy "Anyone can update by key and user_id"
+on public.integration_keys
+for update
+using (
+  key is not null and user_id is not null
+)
+with check (
+  key is not null and user_id is not null
+);
+
 -- 自分のインテグレーションキーだけを削除できる
 create policy "Users can delete their own integration keys" 
 on public.integration_keys
