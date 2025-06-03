@@ -6,7 +6,9 @@ import fetch from "node-fetch"; // Using node-fetch v2
 import { z } from "zod";
 
 // Environment variable checks
-const supabaseFunctionUrl = process.env.SUPABASE_FUNCTION_URL;
+// supabaseFunctionUrl is expected to be the base URL for Supabase functions
+// (e.g., "http://localhost:54321/functions/v1" or "https://<project_ref>.supabase.co/functions/v1").
+let supabaseFunctionUrl = process.env.SUPABASE_FUNCTION_URL;
 const integrationId = process.env.X_INTEGRATION_ID;
 
 // Tool definitions
@@ -14,12 +16,29 @@ const CREATE_TASK_TOOL_NAME = "create_task";
 const CREATE_TASK_TOOL_DESCRIPTION =
   "Creates a new task in Supabase via the task-management function.";
 
+const SEARCH_TASKS_PER_DAY_TOOL_NAME = "search_tasks_per_day";
+const SEARCH_TASKS_PER_DAY_TOOL_DESCRIPTION =
+  "Searches for tasks on a specific day in Supabase via the search-tasks-per-day function.";
+
 if (!supabaseFunctionUrl) {
   console.error(
     "FATAL: SUPABASE_FUNCTION_URL environment variable is not set.",
   );
   process.exit(1);
 }
+
+if (!supabaseFunctionUrl.startsWith("http")) {
+  console.error(
+    "FATAL: SUPABASE_FUNCTION_URL must start with 'http'.",
+  );
+  process.exit(1);
+}
+
+// Remove trailing slash if present
+if (supabaseFunctionUrl.endsWith("/")) {
+  supabaseFunctionUrl = supabaseFunctionUrl.slice(0, -1);
+}
+
 if (!integrationId) {
   console.error("FATAL: X_INTEGRATION_ID environment variable is not set.");
   process.exit(1);
@@ -62,8 +81,18 @@ const CreateTaskParamsSchema = z.object({
     .optional(),
 });
 
+// Zod schema for validating searchTasksPerDay parameters
+const SearchTasksPerDayParamsSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: "Date must be in YYYY-MM-DD format.",
+  }),
+});
+
 // Core logic for the createTask tool
-const createTaskToolLogic = async (params: CreateTaskParams) => {
+const createTaskToolLogic = async (
+  params: CreateTaskParams,
+  baseSupabaseFunctionUrl: string,
+) => {
   // Type params as CreateTaskParams; Zod validation happens at the start of this function
   let validatedParams: CreateTaskParams;
   try {
@@ -98,8 +127,10 @@ const createTaskToolLogic = async (params: CreateTaskParams) => {
     task_date: validatedParams.task_date,
   };
 
+  const functionUrl = `${baseSupabaseFunctionUrl}/task-management`;
+
   try {
-    const response = await fetch(supabaseFunctionUrl, {
+    const response = await fetch(functionUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -113,22 +144,22 @@ const createTaskToolLogic = async (params: CreateTaskParams) => {
       responseBody = await response.json();
     } catch (parseError) {
       console.error(
-        `[${new Date().toISOString()}] Error parsing JSON response from Supabase:`,
+        `[${new Date().toISOString()}] Error parsing JSON response from Supabase for '${CREATE_TASK_TOOL_NAME}':`,
         parseError,
       );
       if (!response.ok) {
         throw new Error(
-          `Supabase function returned non-OK status ${response.status} and non-JSON/empty response.`,
+          `Supabase function '${CREATE_TASK_TOOL_NAME}' returned non-OK status ${response.status} and non-JSON/empty response.`,
         );
       }
       throw new Error(
-        `Supabase function returned OK status but failed to parse JSON response: ${parseError}`,
+        `Supabase function '${CREATE_TASK_TOOL_NAME}' returned OK status but failed to parse JSON response: ${parseError}`,
       );
     }
 
     if (!response.ok) {
       console.error(
-        `[${new Date().toISOString()}] Supabase function returned an error: ${response.status}`,
+        `[${new Date().toISOString()}] Supabase function '${CREATE_TASK_TOOL_NAME}' returned an error: ${response.status}`,
         responseBody,
       );
       const errorMessage =
@@ -138,7 +169,7 @@ const createTaskToolLogic = async (params: CreateTaskParams) => {
           ? (responseBody as { message: string }).message
           : JSON.stringify(responseBody);
       throw new Error(
-        `Error from Supabase: ${response.status} - ${errorMessage}`,
+        `Error from Supabase for '${CREATE_TASK_TOOL_NAME}': ${response.status} - ${errorMessage}`,
       );
     }
 
@@ -154,6 +185,103 @@ const createTaskToolLogic = async (params: CreateTaskParams) => {
     }
     throw new Error(
       `An unknown error occurred within the ${CREATE_TASK_TOOL_NAME} tool execution.`,
+    );
+  }
+};
+
+// Interface for searchTasksPerDay parameters
+interface SearchTasksPerDayParams {
+  date: string;
+}
+
+// Core logic for the searchTasksPerDay tool
+const searchTasksPerDayToolLogic = async (
+  params: SearchTasksPerDayParams,
+  baseSupabaseFunctionUrl: string,
+) => {
+  let validatedParams: SearchTasksPerDayParams;
+  try {
+    validatedParams = SearchTasksPerDayParamsSchema.parse(params);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error(
+        `[${new Date().toISOString()}] Invalid parameters for '${SEARCH_TASKS_PER_DAY_TOOL_NAME}' tool:`,
+        error.flatten().fieldErrors,
+      );
+      const errorSummary = Object.entries(error.flatten().fieldErrors)
+        .map(([field, messages]) => `${field}: ${messages?.join(", ")}`)
+        .join("; ");
+      throw new Error(
+        `Invalid parameters for ${SEARCH_TASKS_PER_DAY_TOOL_NAME}: ${errorSummary}`,
+      );
+    }
+    console.error(
+      `[${new Date().toISOString()}] Unexpected error during parameter validation for '${SEARCH_TASKS_PER_DAY_TOOL_NAME}':`,
+      error,
+    );
+    throw new Error(
+      "An unexpected error occurred during parameter validation.",
+    );
+  }
+
+  const functionUrl = `${baseSupabaseFunctionUrl}/search-tasks-per-day`;
+  const body = { date: validatedParams.date };
+
+  try {
+    const response = await fetch(functionUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-integration-id": integrationId, // integrationId is a global constant
+      },
+      body: JSON.stringify(body),
+    });
+
+    let responseBody;
+    try {
+      responseBody = await response.json();
+    } catch (parseError) {
+      console.error(
+        `[${new Date().toISOString()}] Error parsing JSON response from Supabase for '${SEARCH_TASKS_PER_DAY_TOOL_NAME}':`,
+        parseError,
+      );
+      if (!response.ok) {
+        throw new Error(
+          `Supabase function '${SEARCH_TASKS_PER_DAY_TOOL_NAME}' returned non-OK status ${response.status} and non-JSON/empty response.`,
+        );
+      }
+      throw new Error(
+        `Supabase function '${SEARCH_TASKS_PER_DAY_TOOL_NAME}' returned OK status but failed to parse JSON response: ${parseError}`,
+      );
+    }
+
+    if (!response.ok) {
+      console.error(
+        `[${new Date().toISOString()}] Supabase function '${SEARCH_TASKS_PER_DAY_TOOL_NAME}' returned an error: ${response.status}`,
+        responseBody,
+      );
+      const errorMessage =
+        responseBody &&
+        typeof responseBody === "object" &&
+        "message" in responseBody
+          ? (responseBody as { message: string }).message
+          : JSON.stringify(responseBody);
+      throw new Error(
+        `Error from Supabase for '${SEARCH_TASKS_PER_DAY_TOOL_NAME}': ${response.status} - ${errorMessage}`,
+      );
+    }
+
+    return responseBody; // Should be { tasks: [...] }
+  } catch (error: any) {
+    console.error(
+      `[${new Date().toISOString()}] Error in '${SEARCH_TASKS_PER_DAY_TOOL_NAME}' tool logic execution:`,
+      error,
+    );
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(
+      `An unknown error occurred within the ${SEARCH_TASKS_PER_DAY_TOOL_NAME} tool execution.`,
     );
   }
 };
@@ -184,12 +312,16 @@ server.tool(
   },
   async ({ title, description, estimated_minute, task_date }) => {
     try {
-      await createTaskToolLogic({
-        title,
-        description,
-        estimated_minute,
-        task_date,
-      });
+      // supabaseFunctionUrl is the global constant holding the base URL
+      await createTaskToolLogic(
+        {
+          title,
+          description,
+          estimated_minute,
+          task_date,
+        },
+        supabaseFunctionUrl,
+      );
 
       return {
         content: [
@@ -204,6 +336,41 @@ server.tool(
         throw error;
       }
       throw new Error(`An unexpected error occurred : ${error}`);
+    }
+  },
+);
+
+// Register search_tasks_per_day tool
+server.tool(
+  SEARCH_TASKS_PER_DAY_TOOL_NAME,
+  SEARCH_TASKS_PER_DAY_TOOL_DESCRIPTION,
+  {
+    date: SearchTasksPerDayParamsSchema.shape.date,
+  },
+  async ({ date }: { date: string }) => {
+    try {
+      // supabaseFunctionUrl is the global constant holding the base URL
+      const tasksResponse = await searchTasksPerDayToolLogic(
+        { date },
+        supabaseFunctionUrl,
+      );
+
+      return {
+        content: [
+          {
+            type: "text",
+            // Assuming tasksResponse is an object like { tasks: [...] }
+            text: `Successfully fetched tasks for ${date}: ${JSON.stringify(tasksResponse.tasks)}`,
+          },
+        ],
+      };
+    } catch (error: any) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(
+        `An unexpected error occurred while searching tasks for ${date}: ${error}`,
+      );
     }
   },
 );
