@@ -5,19 +5,195 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import * as djwt from "https://deno.land/x/djwt@v2.8/mod.ts";
+
+interface RequestData {
+  date?: string;
+}
+
+// JWTを生成する関数
+// jwtSecret and supabaseUrl are passed directly as they are already retrieved and checked
+export async function createToken(
+  userId: string,
+  currentJwtSecret: string,
+  currentSupabaseUrl: string,
+) {
+  const payload = {
+    sub: userId,
+    role: "authenticated",
+    aud: "authenticated",
+    iss: currentSupabaseUrl,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiration
+  };
+
+  const secretKeyData = new TextEncoder().encode(currentJwtSecret);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    secretKeyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"],
+  );
+  return await djwt.create({ alg: "HS256", typ: "JWT" }, payload, key);
+}
+
 console.log("Hello from Functions!")
 
-Deno.serve(async (req) => {
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
+// Exported handler for testing
+export const handler = async (req: Request): Promise<Response> => {
+  // Environment variable checks
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const jwtSecret = Deno.env.get("X_SUPABASE_JWT_SECRET");
+
+  if (!supabaseUrl || !serviceRoleKey || !anonKey || !jwtSecret) {
+    // Construct the error message carefully
+    const missing = [
+      !supabaseUrl ? "SUPABASE_URL" : null,
+      !serviceRoleKey ? "SUPABASE_SERVICE_ROLE_KEY" : null,
+      !anonKey ? "SUPABASE_ANON_KEY" : null,
+      !jwtSecret ? "X_SUPABASE_JWT_SECRET" : null,
+    ].filter(Boolean).join(", ");
+    console.error(`Missing environment variables: ${missing}`);
+    return new Response(
+      JSON.stringify({ error: "Server configuration error." }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Method check
+  if (req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  let requestData: RequestData;
+  try {
+    requestData = await req.json();
+  } catch (error) {
+    console.error("Error parsing request body:", error);
+    return new Response(
+      JSON.stringify({ error: "Invalid JSON format" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (!requestData || typeof requestData.date !== "string") {
+    return new Response(
+      JSON.stringify({ error: "Missing or invalid date parameter" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const dateString = requestData.date;
+  const date = new Date(dateString);
+
+  if (isNaN(date.getTime())) {
+    return new Response(
+      JSON.stringify({ error: "Invalid date format" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Retrieve x-integration-id header
+  const integrationId = req.headers.get("x-integration-id");
+  if (!integrationId) {
+    return new Response(
+      JSON.stringify({ error: "x-integration-id header is missing" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Initialize Service Role Client
+  const serviceRoleClient = createClient(
+    supabaseUrl, // Already checked
+    serviceRoleKey, // Already checked
+    {
+      auth: {
+        persistSession: false,
+      },
+    },
+  );
+
+  // Query integration_keys table
+  const { data: keyData, error: keyError } = await serviceRoleClient
+    .from("integration_keys")
+    .select("user_id, is_active")
+    .eq("key", integrationId)
+    .single();
+
+  if (keyError || !keyData) {
+    console.error("Error fetching integration key or key not found:", keyError);
+    return new Response(
+      JSON.stringify({ error: "Integration key not found." }),
+      { status: 404, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  if (!keyData.is_active) {
+    return new Response(
+      JSON.stringify({ error: "Integration key is inactive." }),
+      { status: 403, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Generate JWT
+  const actualUserId = keyData.user_id;
+  let token;
+  try {
+    token = await createToken(actualUserId, jwtSecret!, supabaseUrl!);
+  } catch (e) {
+    console.error("JWT generation error:", e.message);
+    return new Response(
+      JSON.stringify({ error: "Failed to generate authentication token." }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Initialize User-Specific Supabase Client
+  const userSupabaseClient = createClient(
+    supabaseUrl, // Already checked
+    anonKey!, // Already checked and asserted as non-null
+    {
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    },
+  );
+
+  // Fetch Tasks
+  const { data: tasksData, error: tasksError } = await userSupabaseClient
+    .from("tasks")
+    .select("*") // Or specify columns: "id, title, description, ..."
+    .eq("task_date", dateString) // dateString is the validated date from request
+    .eq("user_id", actualUserId); // actualUserId from integration_keys
+
+  if (tasksError) {
+    console.error("Error fetching tasks:", tasksError);
+    return new Response(
+      JSON.stringify({ error: "Failed to fetch tasks", details: tasksError.message }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
+    JSON.stringify({ tasks: tasksData === null ? [] : tasksData }),
+    { headers: { "Content-Type": "application/json" }, status: 200 },
   )
-})
+};
+
+// Start the server
+Deno.serve(handler);
 
 /* To invoke locally:
 
@@ -25,8 +201,8 @@ Deno.serve(async (req) => {
   2. Make an HTTP request:
 
   curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/search-tasks-per-day' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
+    --header 'x-integration-id: your-integration-id' \
     --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
+    --data '{"date":"2025-05-23"}'
 
 */
