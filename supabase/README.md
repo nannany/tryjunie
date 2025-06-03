@@ -30,6 +30,10 @@
 
 ---
 
+# supabase functions new ~~
+
+新しい supabase functions を作成するときに使用する。
+
 # supabase functions deploy
 
 本番環境に supabase functions をデプロイする。
