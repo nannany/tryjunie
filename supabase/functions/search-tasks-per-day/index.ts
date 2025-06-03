@@ -142,6 +142,24 @@ export const handler = async (req: Request): Promise<Response> => {
     );
   }
 
+  // ==> ADD THE UPDATE LOGIC HERE <==
+  try {
+    const { error: updateError } = await serviceRoleClient
+      .from("integration_keys")
+      .update({ last_used_at: new Date().toISOString() })
+      .eq("key", integrationId)
+      .eq("user_id", actualUserId); // <== ADD THIS CONDITION
+
+    if (updateError) {
+      console.error("Error updating last_used_at for integration key:", updateError);
+      // Non-critical error, so we don't return. Log and continue.
+    }
+  } catch (e) {
+      console.error("Exception during last_used_at update for integration key:", e.message);
+      // Non-critical error, so we don't return. Log and continue.
+  }
+  // ==> END OF ADDED LOGIC <==
+
   // Generate JWT
   const actualUserId = keyData.user_id;
   let token;
