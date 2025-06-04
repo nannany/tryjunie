@@ -79,6 +79,10 @@ describe("parseTimeInputToISOString", () => {
     expect(parseTimeInputToISOString("12:345", baseDate)).toBeNull();
   });
 
+  it('should return null for invalid format "12:34:56" (too many colons)', () => {
+    expect(parseTimeInputToISOString("12:34:56", baseDate)).toBeNull();
+  });
+
   it('should return null for invalid hour "2500"', () => {
     expect(parseTimeInputToISOString("2500", baseDate)).toBeNull();
   });
