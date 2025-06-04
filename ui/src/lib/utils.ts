@@ -15,8 +15,18 @@ export const parseTimeInputToISOString = (
     let minutes: number;
 
     if (textInput.includes(":")) {
-      // 「13:45」形式
-      const [h, m] = textInput.split(":");
+      // 「13:45」形式。コロンは1つだけ、分は必ず2桁
+      const parts = textInput.split(":");
+      if (
+        parts.length !== 2 ||
+        parts[0] === "" ||
+        parts[1].length !== 2 ||
+        !/^\d+$/.test(parts[0]) ||
+        !/^\d+$/.test(parts[1])
+      ) {
+        return null;
+      }
+      const [h, m] = parts;
       hours = parseInt(h);
       minutes = parseInt(m);
     } else if (textInput.includes("時")) {
