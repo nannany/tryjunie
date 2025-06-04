@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
         .from("integration_keys")
         .update({ last_used_at: new Date().toISOString() })
         .eq("key", integrationId)
-        .eq("user_id", actualUserId); // <== ADD THIS CONDITION
+        .eq("user_id", keyData.user_id); // <== ADD THIS CONDITION
 
       if (updateError) {
         console.error("Error updating last_used_at for integration key:", updateError);
