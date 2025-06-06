@@ -154,7 +154,7 @@ export const handler = async (req: Request): Promise<Response> => {
       console.error("Error updating last_used_at for integration key:", updateError);
       // Non-critical error, so we don't return. Log and continue.
     }
-  } catch (e) {
+  } catch (e: any) {
       console.error("Exception during last_used_at update for integration key:", e.message);
       // Non-critical error, so we don't return. Log and continue.
   }
@@ -165,7 +165,7 @@ export const handler = async (req: Request): Promise<Response> => {
   let token;
   try {
     token = await createToken(actualUserId, jwtSecret!, supabaseUrl!);
-  } catch (e) {
+  } catch (e: any) {
     console.error("JWT generation error:", e.message);
     return new Response(
       JSON.stringify({ error: "Failed to generate authentication token." }),

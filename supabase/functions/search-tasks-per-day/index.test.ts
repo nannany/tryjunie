@@ -1,11 +1,8 @@
 import {
-  assert,
   assertEquals,
-  assertExists,
 } from "https://deno.land/std@0.220.0/assert/mod.ts";
-import { sinon } from "https://deno.land/x/sinon@v2.0.2/mod.ts";
-import { serve } from "../../../_shared/test_utils.ts"; // Assuming a shared test utility for serving
-import handler from "./index.ts"; // Import the handler from index.ts
+import sinon from "npm:sinon";
+import { handler } from "./index.ts"; // Import the handler from index.ts
 
 // Mock environment variables
 const mockEnv = {
