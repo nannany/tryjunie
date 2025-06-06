@@ -1,8 +1,3 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
-// Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts"
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -13,7 +8,6 @@ interface RequestData {
 }
 
 // JWTを生成する関数
-// jwtSecret and supabaseUrl are passed directly as they are already retrieved and checked
 export async function createToken(
   userId: string,
   currentJwtSecret: string,
@@ -142,7 +136,6 @@ export const handler = async (req: Request): Promise<Response> => {
     );
   }
 
-  // ==> ADD THE UPDATE LOGIC HERE <==
   try {
     const { error: updateError } = await serviceRoleClient
       .from("integration_keys")
@@ -152,13 +145,10 @@ export const handler = async (req: Request): Promise<Response> => {
 
     if (updateError) {
       console.error("Error updating last_used_at for integration key:", updateError);
-      // Non-critical error, so we don't return. Log and continue.
     }
   } catch (e: any) {
       console.error("Exception during last_used_at update for integration key:", e.message);
-      // Non-critical error, so we don't return. Log and continue.
   }
-  // ==> END OF ADDED LOGIC <==
 
   // Generate JWT
   const actualUserId = keyData.user_id;
@@ -212,15 +202,3 @@ export const handler = async (req: Request): Promise<Response> => {
 
 // Start the server
 Deno.serve(handler);
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/search-tasks-per-day' \
-    --header 'x-integration-id: your-integration-id' \
-    --header 'Content-Type: application/json' \
-    --data '{"date":"2025-05-23"}'
-
-*/
