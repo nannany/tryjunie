@@ -188,7 +188,7 @@
     - タスクは `tasks` テーブルに作成されてはなりません。
     - これにより、関数ロジックが別の `user_id` を設定しようと試みることができたとしても、Supabase によって強制される RLS ポリシー（JWT の `auth.uid()` を使用）がそれを防ぐことが確認されます。
 
-  - **`taskData.user_id` に関する注意**: 現在の関数では、`taskData.user_id` をオプションで渡すことができます。`x-integration-id` が `user_id` を_単独で_決定することが意図されている場合、関数ロジックは `taskData` 内のいかなる `user_id` も無視し、常に `actualUserId` を使用するように変更する必要があります。ただし、RLS ポリシーは強力な保護手段を提供します。
+  - **`taskData.user_id` に関する注意**: 現在の関数では、`taskData.user_id` をオプションで渡すことができます。`x-integration-id` が `user_id` を*単独で*決定することが意図されている場合、関数ロジックは `taskData` 内のいかなる `user_id` も無視し、常に `actualUserId` を使用するように変更する必要があります。ただし、RLS ポリシーは強力な保護手段を提供します。
 
 ## 3. クリーンアップ
 

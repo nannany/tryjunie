@@ -2,7 +2,6 @@ import {
   assert,
   assertEquals,
   assertExists,
-  assertObjectMatch,
 } from "https://deno.land/std@0.192.0/testing/asserts.ts"; // Using a specific version for stability
 import * as djwt from "https://deno.land/x/djwt@v2.8/mod.ts";
 import { createToken } from "./index.ts";
@@ -40,11 +39,7 @@ Deno.test("createToken generates a valid JWT with correct claims", async () => {
   try {
     // In a real test, you'd call the original createToken function from index.ts
     // For now, calling the adapted version:
-    token = await createToken(
-      mockUserId,
-      mockJwtSecret,
-      mockSupabaseUrl,
-    );
+    token = await createToken(mockUserId, mockJwtSecret, mockSupabaseUrl);
   } catch (e) {
     error = e;
   } finally {

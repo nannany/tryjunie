@@ -138,49 +138,54 @@ MCPクライアントがこのツールを（例えばstdioトランスポート
 
 - **Node.jsとnpmのインストール**: システムにNode.js（npmを含む）がインストールされていることを確認してください。
 - **GitHubパーソナルアクセストークン（PAT）**: `write:packages`スコープを持つPATが必要です。
-    - GitHubの開発者設定から生成します。
-    - **重要**: このPATはパスワードのように安全に保管してください。リポジトリにコミットしないでください。
+  - GitHubの開発者設定から生成します。
+  - **重要**: このPATはパスワードのように安全に保管してください。リポジトリにコミットしないでください。
 - **`package.json`の`name`フィールドのスコープ**: `mcp/package.json`の`name`フィールドは、GitHub Packages用に正しくスコープ設定されている必要があります（例: `@USER/mcp`）。
-    - **`USER`を実際のGitHubユーザー名または組織名に置き換えることを忘れないでください。**
+  - **`USER`を実際のGitHubユーザー名または組織名に置き換えることを忘れないでください。**
 - **`package.json` publishConfig**: `mcp/package.json`ファイルには、`publishConfig`セクションが含まれている必要があります:
-    ```json
-    "publishConfig": {
-      "registry": "https://npm.pkg.github.com/"
-    }
-    ```
+  ```json
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  }
+  ```
 - **`package.json`リポジトリURL**: `mcp/package.json`ファイルには、GitHubリポジトリを指す`repository`フィールドが必要です:
-    ```json
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/USER/MCP_REPO.git"
-    }
-    ```
-    - **`USER`をGitHubのユーザー名/組織、`MCP_REPO`をリポジトリ名に置き換えることを忘れないでください。**
+  ```json
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/USER/MCP_REPO.git"
+  }
+  ```
+  - **`USER`をGitHubのユーザー名/組織、`MCP_REPO`をリポジトリ名に置き換えることを忘れないでください。**
 
 ### 公開手順
 
 1.  **GitHub Packagesでの認証**:
     npmにGitHub Packagesへの公開にPATを使用するように指示する必要があります。`~/.npmrc`ファイル（または堅牢性のためにWindows/macOS/Linuxでは`$HOME/.npmrc`）を次の行で作成または更新します:
+
     ```bash
     echo "//npm.pkg.github.com/:_authToken=YOUR_PAT" > ~/.npmrc
     ```
+
     - `YOUR_PAT`を実際のパーソナルアクセストークンに置き換えます。
     - この手順は、PATが変更されない限り、マシン上で一度だけ実行する必要があります。
 
 2.  **mcpディレクトリへの移動**:
     ターミナルを開き、`mcp`パッケージディレクトリに変更します:
+
     ```bash
     cd /path/to/your/project/mcp
     ```
 
 3.  **依存関係のインストール**:
     すべての依存関係が最新であることを確認します:
+
     ```bash
     npm install
     ```
 
 4.  **パッケージのビルド**:
     TypeScriptコードをJavaScriptにコンパイルします。これは通常、`tsconfig.json`および`package.json`（"files"配列）で指定されているように、`build`または`dist`ディレクトリに出力されます。
+
     ```bash
     npm run build
     ```
@@ -197,9 +202,9 @@ MCPクライアントがこのツールを（例えばstdioトランスポート
 
 - **PAT権限の確認**: PATに`write:packages`スコープがあることを確認してください。
 - **`package.json`の確認**:
-    - パッケージの`name`が正しくスコープ設定されていること（例: `@USER/mcp`）を再確認してください。
-    - `publishConfig`セクションが存在し、正しいことを確認してください。
-    - `repository.url`が正確であることを確認してください。
+  - パッケージの`name`が正しくスコープ設定されていること（例: `@USER/mcp`）を再確認してください。
+  - `publishConfig`セクションが存在し、正しいことを確認してください。
+  - `repository.url`が正確であることを確認してください。
 - **正しいディレクトリ**: `npm publish`を`mcp`ディレクトリ内（つまり、公開したい`package.json`を含むディレクトリ）から実行していることを確認してください。
 - **npmバージョン**: まれに、古いnpmバージョンで問題が発生する場合があります。npmの更新を検討してください: `npm install -g npm@latest`。
 - **既存のパッケージバージョン**: 同じバージョンのパッケージを2回公開することはできません。再公開する場合は、`package.json`の`version`をインクリメントしてください。

@@ -1,6 +1,4 @@
-import {
-  assertEquals,
-} from "https://deno.land/std@0.220.0/assert/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.220.0/assert/mod.ts";
 import sinon from "npm:sinon";
 import { handler } from "./index.ts"; // Import the handler from index.ts
 
@@ -32,7 +30,8 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
   // Setup: Mock Deno.env.get
   await t.step("Setup: Mock Deno.env.get", () => {
     originalEnvGet = Deno.env.get;
-    Deno.env.get = (key: string) => mockEnv[key as keyof typeof mockEnv] || originalEnvGet(key);
+    Deno.env.get = (key: string) =>
+      mockEnv[key as keyof typeof mockEnv] || originalEnvGet(key);
   });
 
   // Mock Supabase client
@@ -55,7 +54,6 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
   // We will stub the global `createClient` which is not ideal but common in Deno tests without specific DI.
   let createClientStub: sinon.SinonStub;
 
-
   await t.step("Setup: Stub createClient", () => {
     // This is a bit of a hack. Ideally, createClient would be injectable.
     // We're trying to mock the `createClient` used within the handler.
@@ -65,40 +63,51 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
     // A common workaround is to have a utility module that exports `createClient` and mock that.
     // For now, let's assume we can stub it on a globally accessible object if it were structured that way,
     // or we accept this test will try to make actual network calls if not properly mocked.
-
     // Given the current structure of index.ts, we'll mock the behavior of the client methods directly.
     // The `createClient` itself won't be stubbed here, but its chained methods will be.
     // This means we rely on the `from`, `select`, `eq`, `single` stubs defined above
     // to be correctly configured for each test case.
   });
 
-
   await t.step("Valid Request (Tasks Found)", async () => {
     const requestDate = "2024-03-10";
     const integrationId = "valid-integration-id";
     const userId = "user-123";
-    const tasks = [{ id: 1, title: "Test Task", task_date: requestDate, user_id: userId }];
+    const tasks = [
+      { id: 1, title: "Test Task", task_date: requestDate, user_id: userId },
+    ];
 
     mockSupabaseClient.from.withArgs("integration_keys").returnsThis();
     mockSupabaseClient.select.withArgs("user_id, is_active").returnsThis();
     mockSupabaseClient.eq.withArgs("key", integrationId).returnsThis();
-    mockSupabaseClient.single.resolves({ data: { user_id: userId, is_active: true }, error: null });
+    mockSupabaseClient.single.resolves({
+      data: { user_id: userId, is_active: true },
+      error: null,
+    });
 
     mockSupabaseClient.from.withArgs("tasks").returnsThis();
     mockSupabaseClient.select.withArgs("*").returnsThis();
     mockSupabaseClient.eq.withArgs("task_date", requestDate).returnsThis();
-    mockSupabaseClient.eq.withArgs("user_id", userId).resolves({ data: tasks, error: null });
-
+    mockSupabaseClient.eq
+      .withArgs("user_id", userId)
+      .resolves({ data: tasks, error: null });
 
     // How to make createClient() return our mock? This is the tricky part.
     // For now, we'll assume the global stubs on mockSupabaseClient work if createClient
     // is not directly replaceable. This implies `index.ts` would somehow use this global mock.
     // This is a simplification.
-    const createClientModule = await import("https://esm.sh/@supabase/supabase-js@2");
-    createClientStub = sinon.stub(createClientModule, "createClient").returns(mockSupabaseClient);
+    const createClientModule = await import(
+      "https://esm.sh/@supabase/supabase-js@2"
+    );
+    createClientStub = sinon
+      .stub(createClientModule, "createClient")
+      .returns(mockSupabaseClient);
 
-
-    const req = createMockRequest("POST", { date: requestDate }, { "x-integration-id": integrationId });
+    const req = createMockRequest(
+      "POST",
+      { date: requestDate },
+      { "x-integration-id": integrationId },
+    );
     const res = await handler(req);
     const resBody = await res.json();
 
@@ -115,17 +124,30 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
     mockSupabaseClient.from.withArgs("integration_keys").returnsThis();
     mockSupabaseClient.select.withArgs("user_id, is_active").returnsThis();
     mockSupabaseClient.eq.withArgs("key", integrationId).returnsThis();
-    mockSupabaseClient.single.resolves({ data: { user_id: userId, is_active: true }, error: null });
+    mockSupabaseClient.single.resolves({
+      data: { user_id: userId, is_active: true },
+      error: null,
+    });
 
     mockSupabaseClient.from.withArgs("tasks").returnsThis();
     mockSupabaseClient.select.withArgs("*").returnsThis();
     mockSupabaseClient.eq.withArgs("task_date", requestDate).returnsThis();
-    mockSupabaseClient.eq.withArgs("user_id", userId).resolves({ data: null, error: null }); // No tasks
+    mockSupabaseClient.eq
+      .withArgs("user_id", userId)
+      .resolves({ data: null, error: null }); // No tasks
 
-    const createClientModule = await import("https://esm.sh/@supabase/supabase-js@2");
-    createClientStub = sinon.stub(createClientModule, "createClient").returns(mockSupabaseClient);
+    const createClientModule = await import(
+      "https://esm.sh/@supabase/supabase-js@2"
+    );
+    createClientStub = sinon
+      .stub(createClientModule, "createClient")
+      .returns(mockSupabaseClient);
 
-    const req = createMockRequest("POST", { date: requestDate }, { "x-integration-id": integrationId });
+    const req = createMockRequest(
+      "POST",
+      { date: requestDate },
+      { "x-integration-id": integrationId },
+    );
     const res = await handler(req);
     const resBody = await res.json();
 
@@ -144,7 +166,11 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
   });
 
   await t.step("Invalid Date Format", async () => {
-    const req = createMockRequest("POST", { date: "invalid-date" }, { "x-integration-id": "any-id" });
+    const req = createMockRequest(
+      "POST",
+      { date: "invalid-date" },
+      { "x-integration-id": "any-id" },
+    );
     const res = await handler(req);
     const resBody = await res.json();
 
@@ -166,12 +192,23 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
     mockSupabaseClient.from.withArgs("integration_keys").returnsThis();
     mockSupabaseClient.select.withArgs("user_id, is_active").returnsThis();
     mockSupabaseClient.eq.withArgs("key", integrationId).returnsThis();
-    mockSupabaseClient.single.resolves({ data: null, error: { message: "Not found" } }); // Simulate not found
+    mockSupabaseClient.single.resolves({
+      data: null,
+      error: { message: "Not found" },
+    }); // Simulate not found
 
-    const createClientModule = await import("https://esm.sh/@supabase/supabase-js@2");
-    createClientStub = sinon.stub(createClientModule, "createClient").returns(mockSupabaseClient);
+    const createClientModule = await import(
+      "https://esm.sh/@supabase/supabase-js@2"
+    );
+    createClientStub = sinon
+      .stub(createClientModule, "createClient")
+      .returns(mockSupabaseClient);
 
-    const req = createMockRequest("POST", { date: "2024-03-10" }, { "x-integration-id": integrationId });
+    const req = createMockRequest(
+      "POST",
+      { date: "2024-03-10" },
+      { "x-integration-id": integrationId },
+    );
     const res = await handler(req);
     const resBody = await res.json();
 
@@ -186,12 +223,23 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
     mockSupabaseClient.from.withArgs("integration_keys").returnsThis();
     mockSupabaseClient.select.withArgs("user_id, is_active").returnsThis();
     mockSupabaseClient.eq.withArgs("key", integrationId).returnsThis();
-    mockSupabaseClient.single.resolves({ data: { user_id: userId, is_active: false }, error: null }); // Inactive key
+    mockSupabaseClient.single.resolves({
+      data: { user_id: userId, is_active: false },
+      error: null,
+    }); // Inactive key
 
-    const createClientModule = await import("https://esm.sh/@supabase/supabase-js@2");
-    createClientStub = sinon.stub(createClientModule, "createClient").returns(mockSupabaseClient);
+    const createClientModule = await import(
+      "https://esm.sh/@supabase/supabase-js@2"
+    );
+    createClientStub = sinon
+      .stub(createClientModule, "createClient")
+      .returns(mockSupabaseClient);
 
-    const req = createMockRequest("POST", { date: "2024-03-10" }, { "x-integration-id": integrationId });
+    const req = createMockRequest(
+      "POST",
+      { date: "2024-03-10" },
+      { "x-integration-id": integrationId },
+    );
     const res = await handler(req);
     const resBody = await res.json();
 
@@ -201,20 +249,28 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
   });
 
   await t.step("Incorrect HTTP Method", async () => {
-    const req = createMockRequest("GET", { date: "2024-03-10" }, { "x-integration-id": "any-id" });
+    const req = createMockRequest(
+      "GET",
+      { date: "2024-03-10" },
+      { "x-integration-id": "any-id" },
+    );
     const res = await handler(req);
     const resBody = await res.json();
 
     assertEquals(res.status, 405);
     assertEquals(resBody.error, "Method not allowed");
   });
-  
+
   await t.step("Server Configuration Error (Missing Env Vars)", async () => {
     // Temporarily undefine a required env var
     const originalSupabaseUrl = mockEnv.SUPABASE_URL;
     mockEnv.SUPABASE_URL = ""; // Make it empty to simulate missing
 
-    const req = createMockRequest("POST", { date: "2024-03-10" }, { "x-integration-id": "any-id" });
+    const req = createMockRequest(
+      "POST",
+      { date: "2024-03-10" },
+      { "x-integration-id": "any-id" },
+    );
     const res = await handler(req);
     const resBody = await res.json();
 
@@ -228,8 +284,8 @@ Deno.test("search-tasks-per-day function tests", async (t) => {
   await t.step("Teardown: Restore Deno.env.get", () => {
     Deno.env.get = originalEnvGet;
     // Ensure all stubs are restored if they were global
-    if (createClientStub && typeof createClientStub.restore === 'function') {
-        createClientStub.restore();
+    if (createClientStub && typeof createClientStub.restore === "function") {
+      createClientStub.restore();
     }
     // Restore individual method stubs on mockSupabaseClient if necessary, though sinon typically handles this
     // if the stubbed object itself is local to the test.

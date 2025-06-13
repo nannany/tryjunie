@@ -1,4 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as djwt from "https://deno.land/x/djwt@v2.8/mod.ts";
@@ -33,7 +33,7 @@ export async function createToken(
   return await djwt.create({ alg: "HS256", typ: "JWT" }, payload, key);
 }
 
-console.log("Hello from Functions!")
+console.log("Hello from Functions!");
 
 // Exported handler for testing
 export const handler = async (req: Request): Promise<Response> => {
@@ -50,7 +50,9 @@ export const handler = async (req: Request): Promise<Response> => {
       !serviceRoleKey ? "SUPABASE_SERVICE_ROLE_KEY" : null,
       !anonKey ? "SUPABASE_ANON_KEY" : null,
       !jwtSecret ? "X_SUPABASE_JWT_SECRET" : null,
-    ].filter(Boolean).join(", ");
+    ]
+      .filter(Boolean)
+      .join(", ");
     console.error(`Missing environment variables: ${missing}`);
     return new Response(
       JSON.stringify({ error: "Server configuration error." }),
@@ -60,10 +62,10 @@ export const handler = async (req: Request): Promise<Response> => {
 
   // Method check
   if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   let requestData: RequestData;
@@ -71,10 +73,10 @@ export const handler = async (req: Request): Promise<Response> => {
     requestData = await req.json();
   } catch (error) {
     console.error("Error parsing request body:", error);
-    return new Response(
-      JSON.stringify({ error: "Invalid JSON format" }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   if (!requestData || typeof requestData.date !== "string") {
@@ -88,10 +90,10 @@ export const handler = async (req: Request): Promise<Response> => {
   const date = new Date(dateString);
 
   if (isNaN(date.getTime())) {
-    return new Response(
-      JSON.stringify({ error: "Invalid date format" }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: "Invalid date format" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // Retrieve x-integration-id header
@@ -144,10 +146,16 @@ export const handler = async (req: Request): Promise<Response> => {
       .eq("user_id", keyData.user_id); // <== ADD THIS CONDITION
 
     if (updateError) {
-      console.error("Error updating last_used_at for integration key:", updateError);
+      console.error(
+        "Error updating last_used_at for integration key:",
+        updateError,
+      );
     }
   } catch (e: any) {
-      console.error("Exception during last_used_at update for integration key:", e.message);
+    console.error(
+      "Exception during last_used_at update for integration key:",
+      e.message,
+    );
   }
 
   // Generate JWT
@@ -189,7 +197,10 @@ export const handler = async (req: Request): Promise<Response> => {
   if (tasksError) {
     console.error("Error fetching tasks:", tasksError);
     return new Response(
-      JSON.stringify({ error: "Failed to fetch tasks", details: tasksError.message }),
+      JSON.stringify({
+        error: "Failed to fetch tasks",
+        details: tasksError.message,
+      }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -197,7 +208,7 @@ export const handler = async (req: Request): Promise<Response> => {
   return new Response(
     JSON.stringify({ tasks: tasksData === null ? [] : tasksData }),
     { headers: { "Content-Type": "application/json" }, status: 200 },
-  )
+  );
 };
 
 // Start the server

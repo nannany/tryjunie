@@ -7,10 +7,10 @@ on:
     branches:
       - main # Or your default branch
     paths:
-      - 'supabase/functions/**'
+      - "supabase/functions/**"
   pull_request:
     paths:
-      - 'supabase/functions/**'
+      - "supabase/functions/**"
 
 jobs:
   test:
