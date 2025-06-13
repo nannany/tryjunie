@@ -1,36 +1,21 @@
-import React, { useState, useEffect, useReducer } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { useSupabaseUser } from "@/lib/supabase/hooks/useSupabaseUser";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { ja } from "date-fns/locale";
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import React, {Suspense, useEffect, useReducer, useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Calendar} from "lucide-react";
+import {createClient} from "@/lib/supabase/client";
+import {useSupabaseUser} from "@/lib/supabase/hooks/useSupabaseUser";
+import {Input} from "@/components/ui/input";
+import {useToast} from "@/components/ui/use-toast";
+import {Calendar as CalendarComponent} from "@/components/ui/calendar";
+import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
+import {cn} from "@/lib/utils";
+import {format} from "date-fns";
+import {ja} from "date-fns/locale";
+import {closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors,} from "@dnd-kit/core";
+import {arrayMove, SortableContext, verticalListSortingStrategy,} from "@dnd-kit/sortable";
 import SortableTask from "@/components/SortableTask";
-import { Task } from "@/types/task";
-import { taskReducer } from "@/reducers/taskReducer";
+import {Task} from "@/types/task";
+import {taskReducer} from "@/reducers/taskReducer";
 
 const supabase = createClient();
 
@@ -43,7 +28,6 @@ interface EditingField {
 const TaskList = () => {
   const { user } = useSupabaseUser();
   const [tasks, dispatch] = useReducer(taskReducer, []);
-  const [isLoading, setIsLoading] = useState(true);
   const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -82,8 +66,6 @@ const TaskList = () => {
   }, [selectedDate]);
 
   const fetchTasks = async (date: Date) => {
-    setIsLoading(true);
-
     const { data, error } = await supabase
       .from("tasks")
       .select("*")
@@ -103,8 +85,6 @@ const TaskList = () => {
     } else if (data) {
       dispatch({ type: "SET_TASKS", payload: data as Task[] });
     }
-
-    setIsLoading(false);
   };
 
   // 完了予定時刻を計算
@@ -129,8 +109,7 @@ const TaskList = () => {
   // 2025/4/4 のような文字列をpostgresのdate型として扱える文字列(2025-04-04)に変換
   const convertDateStringToDate = (dateString: string) => {
     const [year, month, day] = dateString.split("/");
-    const formatted = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    return formatted;
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
   // 編集モードを開始
@@ -439,11 +418,13 @@ const TaskList = () => {
           <CardTitle>タスク一覧</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <p className="text-center text-muted-foreground">
-              タスクを読み込み中...
-            </p>
-          ) : (
+          <Suspense
+            fallback={
+              <p className="text-center text-muted-foreground">
+                タスクを読み込み中...
+              </p>
+            }
+          >
             <div className="space-y-4">
               {tasks.length > 0 ? (
                 <DndContext
@@ -481,7 +462,7 @@ const TaskList = () => {
                 </p>
               )}
             </div>
-          )}
+          </Suspense>
         </CardContent>
       </Card>
     </div>
