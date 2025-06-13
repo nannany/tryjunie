@@ -61,31 +61,30 @@ const TaskList = () => {
   // タスクを取得
   useEffect(() => {
     if (selectedDate) {
-      fetchTasks(selectedDate);
+      (async (date: Date) => {
+        const { data, error } = await supabase
+          .from("tasks")
+          .select("*")
+          .eq(
+            "task_date",
+            convertDateStringToDate(
+              date
+                .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+                .split(" ")[0]
+            )
+          )
+          .order("start_time", { ascending: true, nullsFirst: true })
+          .order("task_order", { ascending: true, nullsFirst: true });
+
+        if (error) {
+          console.error("Error fetching tasks:", error);
+        } else if (data) {
+          dispatch({ type: "SET_TASKS", payload: data as Task[] });
+        }
+      })(selectedDate);
     }
   }, [selectedDate]);
 
-  const fetchTasks = async (date: Date) => {
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("*")
-      .eq(
-        "task_date",
-        convertDateStringToDate(
-          date
-            .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
-            .split(" ")[0],
-        ),
-      )
-      .order("start_time", { ascending: true, nullsFirst: true })
-      .order("task_order", { ascending: true, nullsFirst: true });
-
-    if (error) {
-      console.error("Error fetching tasks:", error);
-    } else if (data) {
-      dispatch({ type: "SET_TASKS", payload: data as Task[] });
-    }
-  };
 
   // 完了予定時刻を計算
   const calculateEndTime = (minutes: number | null) => {
