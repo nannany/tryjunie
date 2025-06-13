@@ -27,7 +27,9 @@ interface EditingField {
 
 const TaskList = () => {
   const { user } = useSupabaseUser();
+
   const [tasks, dispatch] = useReducer(taskReducer, []);
+
   const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [isAddingTask, setIsAddingTask] = useState(false);
