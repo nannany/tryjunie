@@ -8,41 +8,35 @@ import { TaskTitleField } from "./TaskTitleField";
 import { TaskEstimatedTimeField } from "./TaskEstimatedTimeField";
 import { TaskTimeField } from "./TaskTimeField";
 import { TaskMetaInfo } from "./TaskMetaInfo";
-import { Task, EditingField } from "./types";
+import { Task } from "./types";
 
-interface SortableTaskProps {
-  task: Task;
-  onEditStart: (
-    taskId: string,
-    field: "title" | "estimated_minute" | "start_time" | "end_time",
-    value: string,
-  ) => void;
-  onDelete: (taskId: string) => void;
-  onTaskTimer: (taskId: string, action: "start" | "stop" | "complete") => void;
-  editingField: EditingField | null;
+interface TaskEditActions {
+  editingField: any;
   editValue: string;
+  handleEditStart: (taskId: string, field: "title" | "estimated_minute" | "start_time" | "end_time", value: string) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleEditSave: () => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   setEditValue: (value: string) => void;
-  setEditingField: (field: EditingField | null) => void;
-  updateLocalTask: (taskId: string, updateData: any) => void;
+  setEditingField: (field: any) => void;
+}
+
+interface TaskActions {
+  handleDelete: (taskId: string) => void;
+  handleTaskTimer: (taskId: string, action: "start" | "stop" | "complete") => void;
+}
+
+interface SortableTaskProps {
+  task: Task;
+  taskEdit: TaskEditActions;
+  taskActions: TaskActions;
   lastTaskEndTime: string | null;
 }
 
 const SortableTask = ({
   task,
-  onEditStart,
-  onDelete,
-  onTaskTimer,
-  editingField,
-  editValue,
-  handleEditChange,
-  handleEditSave,
-  handleKeyDown,
-  setEditValue,
-  setEditingField,
-  updateLocalTask,
+  taskEdit,
+  taskActions,
   lastTaskEndTime,
 }: SortableTaskProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -58,26 +52,26 @@ const SortableTask = ({
   // キーボードショートカットの処理
   const handleTaskKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     // 編集中の場合はショートカットを無効化
-    if (editingField?.taskId === task.id) return;
+    if (taskEdit.editingField?.taskId === task.id) return;
 
     switch (e.key.toLowerCase()) {
       case "s": {
         if (!task.start_time) {
           e.preventDefault();
-          onTaskTimer(task.id, "start");
+          taskActions.handleTaskTimer(task.id, "start");
         }
         break;
       }
       case "e": {
         if (task.start_time && !task.end_time) {
           e.preventDefault();
-          onTaskTimer(task.id, "stop");
+          taskActions.handleTaskTimer(task.id, "stop");
         }
         break;
       }
       case "d": {
         e.preventDefault();
-        onDelete(task.id);
+        taskActions.handleDelete(task.id);
         break;
       }
       case "arrowup":
@@ -116,15 +110,14 @@ const SortableTask = ({
 
   const taskEditProps = {
     task,
-    editingField,
-    editValue,
-    onEditStart,
-    handleEditChange,
-    handleEditSave,
-    handleKeyDown,
-    setEditValue,
-    setEditingField,
-    updateLocalTask,
+    editingField: taskEdit.editingField,
+    editValue: taskEdit.editValue,
+    onEditStart: taskEdit.handleEditStart,
+    handleEditChange: taskEdit.handleEditChange,
+    handleEditSave: taskEdit.handleEditSave,
+    handleKeyDown: taskEdit.handleKeyDown,
+    setEditValue: taskEdit.setEditValue,
+    setEditingField: taskEdit.setEditingField,
   };
 
   return (
@@ -142,7 +135,7 @@ const SortableTask = ({
           <GripVertical className="h-4 w-4 text-gray-400" />
         </div>
 
-        <TaskTimerButton task={task} onTaskTimer={onTaskTimer} />
+        <TaskTimerButton task={task} onTaskTimer={taskActions.handleTaskTimer} />
 
         <div className="flex-grow">
           <TaskTitleField {...taskEditProps} />
@@ -167,7 +160,7 @@ const SortableTask = ({
         <Button
           size="icon"
           variant="outline"
-          onClick={() => onDelete(task.id)}
+          onClick={() => taskActions.handleDelete(task.id)}
           className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
         >
           <Trash2 className="h-4 w-4" />

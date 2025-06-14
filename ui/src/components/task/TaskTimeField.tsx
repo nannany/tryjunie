@@ -26,7 +26,6 @@ export const TaskTimeField = ({
   onEditStart,
   setEditValue,
   setEditingField,
-  updateLocalTask,
   lastTaskEndTime,
 }: TaskTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -99,7 +98,8 @@ export const TaskTimeField = ({
   // 時刻オプション選択時の処理
   const handleTimeSelect = (isoString: string) => {
     setPopoverOpen(false);
-
+    setEditValue(isoString);
+    // handleEditSaveはisoStringをそのまま使用
     if (editingField) {
       const { taskId, field } = editingField;
       const updateData: any = {};
@@ -114,13 +114,11 @@ export const TaskTimeField = ({
         if (error) {
           console.error(`Error updating task ${field}:`, error);
         } else {
-          updateLocalTask(taskId, updateData);
           setEditingField(null);
         }
       };
 
       updateTask();
-      setEditValue(isoString);
     }
   };
 
@@ -153,7 +151,6 @@ export const TaskTimeField = ({
         if (error) {
           console.error(`Error updating task ${field}:`, error);
         } else {
-          updateLocalTask(taskId, updateData);
           setEditingField(null);
         }
       };

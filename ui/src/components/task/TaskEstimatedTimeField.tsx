@@ -7,10 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { TaskEditProps } from "./types";
-
-const supabase = createClient();
 
 interface TaskEstimatedTimeFieldProps extends TaskEditProps {}
 
@@ -23,7 +20,6 @@ export const TaskEstimatedTimeField = ({
   handleEditSave,
   setEditValue,
   setEditingField,
-  updateLocalTask,
 }: TaskEstimatedTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -47,29 +43,8 @@ export const TaskEstimatedTimeField = ({
   // 時間オプション選択時の処理
   const handleTimeOptionSelect = (value: string) => {
     setPopoverOpen(false);
-
-    if (editingField) {
-      const { taskId, field } = editingField;
-      const updateData: any = {};
-      updateData[field] = value ? parseInt(value) : null;
-
-      const updateTask = async () => {
-        const { error } = await supabase
-          .from("tasks")
-          .update(updateData)
-          .eq("id", taskId);
-
-        if (error) {
-          console.error("Error updating task:", error);
-        } else {
-          updateLocalTask(taskId, updateData);
-          setEditingField(null);
-        }
-      };
-
-      updateTask();
-      setEditValue(value);
-    }
+    setEditValue(value);
+    handleEditSave();
   };
 
   // 見積もり時間をフォーマット

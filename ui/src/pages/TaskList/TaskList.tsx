@@ -37,28 +37,27 @@ import {
 import { SortableTask } from "@/components/task";
 import { Task } from "@/types/task";
 import { taskReducer } from "@/reducers/taskReducer";
+import { useTaskEdit } from "@/hooks/useTaskEdit";
+import { useTaskActions } from "@/hooks/useTaskActions";
 
 const supabase = createClient();
 
-// 編集中のフィールドの型
-interface EditingField {
-  taskId: string;
-  field: "title" | "estimated_minute" | "start_time" | "end_time";
-}
 
 const TaskList = () => {
   const { user } = useSupabaseUser();
 
   const [tasks, dispatch] = useReducer(taskReducer, []);
 
-  const [editingField, setEditingField] = useState<EditingField | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date(),
   );
 
   const { toast } = useToast();
+
+  // フックを使用
+  const taskEdit = useTaskEdit(dispatch);
+  const taskActions = useTaskActions(dispatch);
 
   // 最終タスクの終了時間を取得
   // tasksのうち、最も終了時間が遅いタスクの終了時間を取得
@@ -133,92 +132,7 @@ const TaskList = () => {
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
-  // 編集モードを開始
-  const handleEditStart = (
-    taskId: string,
-    field: "title" | "estimated_minute" | "start_time" | "end_time",
-    value: string,
-  ) => {
-    setEditingField({ taskId, field });
-    setEditValue(value);
-  };
 
-  // 編集内容の変更
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditValue(e.target.value);
-  };
-
-  // 編集内容を保存
-  const handleEditSave = async () => {
-    if (!editingField) return;
-
-    const { taskId, field } = editingField;
-
-    // バリデーション
-    if (field === "title" && !editValue.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Title is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const updateData: any = {};
-    if (field === "title") {
-      updateData.title = editValue;
-    } else if (field === "estimated_minute") {
-      updateData.estimated_minute = editValue ? parseInt(editValue) : null;
-    } else if (field === "start_time" || field === "end_time") {
-      updateData[field] = editValue ? new Date(editValue).toISOString() : null;
-    }
-
-    const { error } = await supabase
-      .from("tasks")
-      .update(updateData)
-      .eq("id", taskId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: `Failed to update ${field}`,
-        variant: "destructive",
-      });
-      console.error("Error updating task:", error);
-    } else {
-      // ローカル状態で更新したタスクの値を更新
-      dispatch({ type: "UPDATE_TASK", payload: { id: taskId, ...updateData } });
-    }
-
-    // 編集モードを終了
-    setEditingField(null);
-  };
-
-  // キーボードイベント処理
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleEditSave();
-    } else if (e.key === "Escape") {
-      setEditingField(null);
-    }
-  };
-
-  // タスクを削除
-  const handleDelete = async (taskId: string) => {
-    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete task",
-        variant: "destructive",
-      });
-      console.error("Error deleting task:", error);
-    } else {
-      // ローカル状態から削除したタスクを除外
-      dispatch({ type: "DELETE_TASK", payload: taskId });
-    }
-  };
 
   // クイックタスク追加
   const handleAddTask = async () => {
@@ -295,35 +209,6 @@ const TaskList = () => {
     }
   };
 
-  // タスクの開始/停止を処理
-  const handleTaskTimer = async (
-    taskId: string,
-    action: "start" | "stop" | "complete",
-  ) => {
-    const updateData: any = {};
-
-    if (action === "start") {
-      updateData.start_time = new Date().toISOString();
-    } else if (action === "stop") {
-      updateData.end_time = new Date().toISOString();
-    }
-
-    const { error } = await supabase
-      .from("tasks")
-      .update(updateData)
-      .eq("id", taskId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: `Failed to ${action} task`,
-        variant: "destructive",
-      });
-      console.error(`Error ${action}ing task:`, error);
-    } else {
-      dispatch({ type: "UPDATE_TASK", payload: { id: taskId, ...updateData } });
-    }
-  };
 
   // ドラッグ&ドロップの処理
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -358,10 +243,6 @@ const TaskList = () => {
     }
   };
 
-  // タスクの更新を処理するヘルパー関数を追加
-  const updateLocalTask = (taskId: string, updateData: any) => {
-    dispatch({ type: "UPDATE_TASK", payload: { id: taskId, ...updateData } });
-  };
 
   return (
     <div className="space-y-6">
@@ -454,18 +335,9 @@ const TaskList = () => {
                       <SortableTask
                         key={task.id}
                         task={task}
-                        onEditStart={handleEditStart}
-                        onDelete={handleDelete}
-                        onTaskTimer={handleTaskTimer}
-                        editingField={editingField}
-                        editValue={editValue}
-                        handleEditChange={handleEditChange}
-                        handleEditSave={handleEditSave}
-                        handleKeyDown={handleKeyDown}
-                        setEditValue={setEditValue}
-                        setEditingField={setEditingField}
-                        updateLocalTask={updateLocalTask}
-                        lastTaskEndTime={lastTaskEndTime} // 最終タスクの終了時間を渡す
+                        taskEdit={taskEdit}
+                        taskActions={taskActions}
+                        lastTaskEndTime={lastTaskEndTime}
                       />
                     ))}
                   </SortableContext>

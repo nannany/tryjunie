@@ -24,5 +24,4 @@ export interface TaskEditProps {
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   setEditValue: (value: string) => void;
   setEditingField: (field: EditingField | null) => void;
-  updateLocalTask: (taskId: string, updateData: any) => void;
 }
