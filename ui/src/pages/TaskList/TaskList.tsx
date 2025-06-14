@@ -1,4 +1,4 @@
-import React, {Suspense, useEffect, useReducer, useState} from "react";
+import React, {Suspense, useEffect, useReducer, useState, startTransition} from "react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Calendar} from "lucide-react";
@@ -32,7 +32,6 @@ const TaskList = () => {
 
   const [editingField, setEditingField] = useState<EditingField | null>(null);
   const [editValue, setEditValue] = useState<string>("");
-  const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date(),
@@ -221,8 +220,6 @@ const TaskList = () => {
       return;
     }
 
-    setIsAddingTask(true);
-
     // ユーザー情報を取得
     const userId = user?.id;
 
@@ -232,44 +229,43 @@ const TaskList = () => {
         description: "User not authenticated",
         variant: "destructive",
       });
-      setIsAddingTask(false);
       return;
     }
 
-    // 新しいタスクを作成
-    const newTask = {
-      title: newTaskTitle,
-      description: "",
-      user_id: userId,
-      estimated_minute: null,
-      task_date: convertDateStringToDate(
-        selectedDate
-          .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
-          .split(" ")[0],
-      ),
-    };
+    startTransition(async () => {
+      // 新しいタスクを作成
+      const newTask = {
+        title: newTaskTitle,
+        description: "",
+        user_id: userId,
+        estimated_minute: null,
+        task_date: convertDateStringToDate(
+          selectedDate
+            .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+            .split(" ")[0],
+        ),
+      };
 
-    const { data, error } = await supabase
-      .from("tasks")
-      .insert(newTask)
-      .select();
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert(newTask)
+        .select();
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add task",
-        variant: "destructive",
-      });
-      console.error("Error adding task:", error);
-    } else {
-      // 新しく追加されたタスクをリストの先頭に追加
-      dispatch({ type: "ADD_TASK", payload: data[0] as Task });
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to add task",
+          variant: "destructive",
+        });
+        console.error("Error adding task:", error);
+      } else {
+        // 新しく追加されたタスクをリストの先頭に追加
+        dispatch({ type: "ADD_TASK", payload: data[0] as Task });
 
-      // 入力フィールドをリセット
-      setNewTaskTitle("");
-    }
-
-    setIsAddingTask(false);
+        // 入力フィールドをリセット
+        setNewTaskTitle("");
+      }
+    });
   };
 
   // キー入力イベントを処理
@@ -402,14 +398,13 @@ const TaskList = () => {
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
               onKeyDown={handleNewTaskKeyDown}
-              disabled={isAddingTask}
               className="flex-1"
             />
             <Button
               onClick={handleAddTask}
-              disabled={isAddingTask || !newTaskTitle.trim()}
+              disabled={!newTaskTitle.trim()}
             >
-              {isAddingTask ? "追加中..." : "クイック追加"}
+              クイック追加
             </Button>
           </div>
         </CardContent>
