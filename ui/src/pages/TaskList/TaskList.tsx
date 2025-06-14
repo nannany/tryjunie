@@ -1,21 +1,42 @@
-import React, {Suspense, useEffect, useReducer, useState, startTransition} from "react";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Calendar} from "lucide-react";
-import {createClient} from "@/lib/supabase/client";
-import {useSupabaseUser} from "@/lib/supabase/hooks/useSupabaseUser";
-import {Input} from "@/components/ui/input";
-import {useToast} from "@/components/ui/use-toast";
-import {Calendar as CalendarComponent} from "@/components/ui/calendar";
-import {Popover, PopoverContent, PopoverTrigger,} from "@/components/ui/popover";
-import {cn} from "@/lib/utils";
-import {format} from "date-fns";
-import {ja} from "date-fns/locale";
-import {closestCenter, DndContext, DragEndEvent, PointerSensor, useSensor, useSensors,} from "@dnd-kit/core";
-import {arrayMove, SortableContext, verticalListSortingStrategy,} from "@dnd-kit/sortable";
-import SortableTask from "@/components/SortableTask";
-import {Task} from "@/types/task";
-import {taskReducer} from "@/reducers/taskReducer";
+import React, {
+  Suspense,
+  useEffect,
+  useReducer,
+  useState,
+  startTransition,
+} from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useSupabaseUser } from "@/lib/supabase/hooks/useSupabaseUser";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { SortableTask } from "@/components/task";
+import { Task } from "@/types/task";
+import { taskReducer } from "@/reducers/taskReducer";
 
 const supabase = createClient();
 
@@ -72,8 +93,8 @@ const TaskList = () => {
             convertDateStringToDate(
               date
                 .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
-                .split(" ")[0]
-            )
+                .split(" ")[0],
+            ),
           )
           .order("start_time", { ascending: true, nullsFirst: true })
           .order("task_order", { ascending: true, nullsFirst: true });
@@ -86,7 +107,6 @@ const TaskList = () => {
       })(selectedDate);
     }
   }, [selectedDate]);
-
 
   // 完了予定時刻を計算
   const calculateEndTime = (minutes: number | null) => {
@@ -400,10 +420,7 @@ const TaskList = () => {
               onKeyDown={handleNewTaskKeyDown}
               className="flex-1"
             />
-            <Button
-              onClick={handleAddTask}
-              disabled={!newTaskTitle.trim()}
-            >
+            <Button onClick={handleAddTask} disabled={!newTaskTitle.trim()}>
               クイック追加
             </Button>
           </div>
