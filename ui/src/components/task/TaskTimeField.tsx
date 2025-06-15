@@ -26,6 +26,7 @@ export const TaskTimeField = ({
   onEditStart,
   setEditValue,
   setEditingField,
+  handleEditSave,
   lastTaskEndTime,
 }: TaskTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -127,36 +128,22 @@ export const TaskTimeField = ({
   };
 
   const handleTimeSave = () => {
+    let finalValue = editValue;
+    
+    // 入力値がある場合は時刻フォーマットに変換
     if (editValue && editValue.trim() !== "") {
       const dateTimeValue = parseTimeInputToISOString(
         editValue,
         task.task_date,
       );
       if (dateTimeValue) {
+        finalValue = dateTimeValue;
         setEditValue(dateTimeValue);
       }
     }
-    // 親コンポーネントの保存処理を呼び出す
-    if (editingField) {
-      const { taskId, field } = editingField;
-      const updateData: any = {};
-      updateData[field] = editValue ? new Date(editValue).toISOString() : null;
-
-      const updateTask = async () => {
-        const { error } = await supabase
-          .from("tasks")
-          .update(updateData)
-          .eq("id", taskId);
-
-        if (error) {
-          console.error(`Error updating task ${field}:`, error);
-        } else {
-          setEditingField(null);
-        }
-      };
-
-      updateTask();
-    }
+    
+    // 変換された値を直接handleEditSaveに渡してグローバル状態を更新
+    handleEditSave(finalValue);
   };
 
   const displayValue = editValue

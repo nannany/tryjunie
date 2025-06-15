@@ -20,7 +20,7 @@ export interface TaskEditProps {
     value: string,
   ) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleEditSave: () => void;
+  handleEditSave: (customValue?: string) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   setEditValue: (value: string) => void;
   setEditingField: (field: EditingField | null) => void;

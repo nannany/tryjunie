@@ -27,13 +27,14 @@ export const useTaskEdit = (dispatch: React.Dispatch<TaskAction>) => {
   };
 
   // 編集内容を保存
-  const handleEditSave = async () => {
+  const handleEditSave = async (customValue?: string) => {
     if (!editingField) return;
 
     const { taskId, field } = editingField;
+    const valueToSave = customValue !== undefined ? customValue : editValue;
 
     // バリデーション
-    if (field === "title" && !editValue.trim()) {
+    if (field === "title" && !valueToSave.trim()) {
       toast({
         title: "Validation Error",
         description: "Title is required",
@@ -44,11 +45,11 @@ export const useTaskEdit = (dispatch: React.Dispatch<TaskAction>) => {
 
     const updateData: any = {};
     if (field === "title") {
-      updateData.title = editValue;
+      updateData.title = valueToSave;
     } else if (field === "estimated_minute") {
-      updateData.estimated_minute = editValue ? parseInt(editValue) : null;
+      updateData.estimated_minute = valueToSave ? parseInt(valueToSave) : null;
     } else if (field === "start_time" || field === "end_time") {
-      updateData[field] = editValue ? new Date(editValue).toISOString() : null;
+      updateData[field] = valueToSave ? new Date(valueToSave).toISOString() : null;
     }
 
     const { error } = await supabase

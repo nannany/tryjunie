@@ -20,7 +20,7 @@ export const TaskTitleField = ({
       <Input
         value={editValue}
         onChange={handleEditChange}
-        onBlur={handleEditSave}
+        onBlur={() => handleEditSave()}
         onKeyDown={handleKeyDown}
         className="font-medium mb-2"
         autoFocus
