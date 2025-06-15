@@ -10,39 +10,14 @@ export const parseTimeInputToISOString = (
   baseDateString: string,
 ): string | null => {
   try {
-    // 時間形式を検出して対応（例：「13:45」や「13時45分」など）
-    let hours: number;
-    let minutes: number;
-
-    if (textInput.includes(":")) {
-      // 「13:45」形式。コロンは1つだけ、分は必ず2桁
-      const parts = textInput.split(":");
-      if (
-        parts.length !== 2 ||
-        parts[0] === "" ||
-        parts[1].length !== 2 ||
-        !/^\d+$/.test(parts[0]) ||
-        !/^\d+$/.test(parts[1])
-      ) {
-        return null;
-      }
-      const [h, m] = parts;
-      hours = parseInt(h);
-      minutes = parseInt(m);
-    } else if (textInput.includes("時")) {
-      // 「13時45分」形式
-      let parts = textInput.split("時");
-      hours = parseInt(parts[0]);
-      minutes = parts[1] ? parseInt(parts[1].replace("分", "")) : 0;
-    } else if (textInput.length === 4 && /^\d+$/.test(textInput)) {
-      // 「1730」形式
-      hours = parseInt(textInput.substring(0, 2));
-      minutes = parseInt(textInput.substring(2, 4));
-    } else {
-      // 数字だけの場合は時間として解釈（例：「13」→「13:00」）
-      hours = parseInt(textInput);
-      minutes = 0;
+    // 4桁の数字形式のみを許可（例：「1715」）
+    if (textInput.length !== 4 || !/^\d{4}$/.test(textInput)) {
+      return null;
     }
+
+    // 「1715」形式から時間と分を抽出
+    const hours = parseInt(textInput.substring(0, 2));
+    const minutes = parseInt(textInput.substring(2, 4));
 
     if (isNaN(hours) || isNaN(minutes)) {
       return null;
@@ -54,7 +29,7 @@ export const parseTimeInputToISOString = (
     }
 
     // タスクの日付を使用して日時を設定
-    const taskDate = new Date(baseDateString); // Changed from task.task_date
+    const taskDate = new Date(baseDateString);
     const date = new Date(taskDate);
     date.setHours(hours, minutes, 0, 0);
     return date.toISOString();
