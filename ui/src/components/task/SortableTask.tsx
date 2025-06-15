@@ -6,7 +6,8 @@ import React from "react";
 import { TaskTimerButton } from "./TaskTimerButton";
 import { TaskTitleField } from "./TaskTitleField";
 import { TaskEstimatedTimeField } from "./TaskEstimatedTimeField";
-import { TaskTimeField } from "./TaskTimeField";
+import { StartTimeField } from "./StartTimeField";
+import { EndTimeField } from "./EndTimeField";
 import { TaskMetaInfo } from "./TaskMetaInfo";
 import { Task } from "./types";
 
@@ -153,13 +154,12 @@ const SortableTask = ({
           <div className="flex gap-3 text-sm text-muted-foreground">
             <TaskEstimatedTimeField {...taskEditProps} />
 
-            <TaskTimeField
+            <StartTimeField
               {...taskEditProps}
-              field="start_time"
               lastTaskEndTime={lastTaskEndTime}
             />
 
-            <TaskTimeField {...taskEditProps} field="end_time" />
+            <EndTimeField {...taskEditProps} />
 
             <TaskMetaInfo task={task} />
           </div>

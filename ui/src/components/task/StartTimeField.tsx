@@ -7,21 +7,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
-import { cn, parseTimeInputToISOString } from "@/lib/utils";
+import { parseTimeInputToISOString } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { TaskEditProps } from "./types";
 
 const supabase = createClient();
 
-interface TaskTimeFieldProps extends TaskEditProps {
-  field: "start_time" | "end_time";
+interface StartTimeFieldProps extends TaskEditProps {
   lastTaskEndTime?: string | null;
 }
 
-export const TaskTimeField = ({
+export const StartTimeField = ({
   task,
-  field,
   editingField,
   editValue,
   onEditStart,
@@ -29,14 +27,13 @@ export const TaskTimeField = ({
   setEditingField,
   handleEditSave,
   lastTaskEndTime,
-}: TaskTimeFieldProps) => {
+}: StartTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { toast } = useToast();
 
   const isEditing =
-    editingField?.taskId === task.id && editingField?.field === field;
-  const fieldValue = task[field];
-  const isStartTime = field === "start_time";
+    editingField?.taskId === task.id && editingField?.field === "start_time";
+  const fieldValue = task.start_time;
 
   // 日時をフォーマット
   const formatDateTime = (dateString: string | null) => {
@@ -48,10 +45,8 @@ export const TaskTimeField = ({
     });
   };
 
-  // 開始時刻オプションの生成（start_timeの場合のみ）
+  // 開始時刻オプションの生成
   const getStartTimeOptions = () => {
-    if (!isStartTime) return [];
-
     const now = new Date();
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60000);
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
@@ -166,105 +161,71 @@ export const TaskTimeField = ({
       : editValue
     : "";
 
-  const label = isStartTime ? "開始" : "終了";
-
   if (isEditing) {
-    if (isStartTime) {
-      return (
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-          <PopoverTrigger asChild>
-            <div className="flex items-center cursor-pointer">
-              <span>{label}: </span>
-              <div className="relative flex items-center">
-                <Input
-                  type="text"
-                  placeholder="HHmm"
-                  value={displayValue}
-                  onChange={handleTimeChange}
-                  onFocus={() => setPopoverOpen(true)}
-                  onBlur={(e) => {
-                    const related = e.relatedTarget as HTMLElement;
-                    if (related?.closest("[data-popover-content]")) return;
-                    handleTimeSave();
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleTimeSave();
-                    } else if (e.key === "Escape") {
-                      setEditingField(null);
-                    } else if (e.key === "ArrowDown") {
-                      e.preventDefault();
-                      setPopoverOpen(true);
-                    }
-                  }}
-                  className="w-24 h-6 text-xs mx-1 pr-7"
-                  autoFocus
-                />
-                <ChevronDown className="absolute right-2 h-4 w-4 opacity-50" />
-              </div>
-            </div>
-          </PopoverTrigger>
-          <PopoverContent
-            data-popover-content
-            className="w-48 p-0"
-            align="start"
-          >
-            <div className="grid">
-              {getStartTimeOptions().map((option) => (
-                <Button
-                  key={option.value}
-                  variant="ghost"
-                  className="justify-start text-left px-3 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
-                  onClick={() => handleTimeSelect(option.value)}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      );
-    }
-
-    // end_timeの場合
     return (
-      <div className="flex items-center">
-        <span>{label}: </span>
-        <Input
-          type="text"
-          placeholder="HHmm"
-          value={displayValue}
-          onChange={handleTimeChange}
-          onBlur={handleTimeSave}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleTimeSave();
-            } else if (e.key === "Escape") {
-              setEditingField(null);
-            }
-          }}
-          className="w-24 h-6 text-xs mx-1"
-          autoFocus
-        />
-      </div>
+      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <PopoverTrigger asChild>
+          <div className="flex items-center cursor-pointer">
+            <span>開始: </span>
+            <div className="relative flex items-center">
+              <Input
+                type="text"
+                placeholder="HHmm"
+                value={displayValue}
+                onChange={handleTimeChange}
+                onFocus={() => setPopoverOpen(true)}
+                onBlur={(e) => {
+                  const related = e.relatedTarget as HTMLElement;
+                  if (related?.closest("[data-popover-content]")) return;
+                  handleTimeSave();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleTimeSave();
+                  } else if (e.key === "Escape") {
+                    setEditingField(null);
+                  } else if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setPopoverOpen(true);
+                  }
+                }}
+                className="w-24 h-6 text-xs mx-1 pr-7"
+                autoFocus
+              />
+              <ChevronDown className="absolute right-2 h-4 w-4 opacity-50" />
+            </div>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent
+          data-popover-content
+          className="w-48 p-0"
+          align="start"
+        >
+          <div className="grid">
+            {getStartTimeOptions().map((option) => (
+              <Button
+                key={option.value}
+                variant="ghost"
+                className="justify-start text-left px-3 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                onClick={() => handleTimeSelect(option.value)}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   }
 
-  const isDisabled = !isStartTime && !task.start_time;
-
   return (
     <p
-      className={cn(
-        "cursor-pointer hover:bg-gray-50 p-1 rounded",
-        isDisabled && "text-gray-400 cursor-not-allowed",
-      )}
+      className="cursor-pointer hover:bg-gray-50 p-1 rounded"
       onClick={() => {
-        if (!isDisabled) {
-          onEditStart(task.id, field, fieldValue || "");
-        }
+        onEditStart(task.id, "start_time", fieldValue || "");
       }}
     >
-      {label}: {formatDateTime(fieldValue) || `(クリックして設定)`}
+      開始: {formatDateTime(fieldValue) || `(クリックして設定)`}
     </p>
   );
 };
