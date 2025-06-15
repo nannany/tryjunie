@@ -36,6 +36,7 @@ export const TaskEstimatedTimeField = ({
       { value: "30", label: "30分" },
       { value: "45", label: "45分" },
       { value: "60", label: "1時間" },
+      { value: "120", label: "2時間" },
     ];
     return [...options];
   };
