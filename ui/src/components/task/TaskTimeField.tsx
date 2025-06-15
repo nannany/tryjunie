@@ -168,7 +168,7 @@ export const TaskTimeField = ({
               <div className="relative flex items-center">
                 <Input
                   type="text"
-                  placeholder="--:--"
+                  placeholder="HHmm"
                   value={displayValue}
                   onChange={handleTimeChange}
                   onFocus={() => setPopoverOpen(true)}
@@ -222,7 +222,7 @@ export const TaskTimeField = ({
         <span>{label}: </span>
         <Input
           type="text"
-          placeholder="--:--"
+          placeholder="HHmm"
           value={displayValue}
           onChange={handleTimeChange}
           onBlur={handleTimeSave}
