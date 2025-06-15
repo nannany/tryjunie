@@ -9,6 +9,7 @@ import {
 import { ChevronDown } from "lucide-react";
 import { cn, parseTimeInputToISOString } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 import { TaskEditProps } from "./types";
 
 const supabase = createClient();
@@ -30,6 +31,7 @@ export const TaskTimeField = ({
   lastTaskEndTime,
 }: TaskTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const { toast } = useToast();
 
   const isEditing =
     editingField?.taskId === task.id && editingField?.field === field;
@@ -139,6 +141,14 @@ export const TaskTimeField = ({
       if (dateTimeValue) {
         finalValue = dateTimeValue;
         setEditValue(dateTimeValue);
+      } else {
+        // 変換に失敗した場合はエラーメッセージを表示
+        toast({
+          title: "入力エラー",
+          description: "時刻は4桁の形式で入力してください（例：0930、1715）",
+          variant: "destructive",
+        });
+        return; // 保存処理を中止
       }
     }
 
