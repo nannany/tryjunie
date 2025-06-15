@@ -42,7 +42,6 @@ import { useTaskActions } from "@/hooks/useTaskActions";
 
 const supabase = createClient();
 
-
 const TaskList = () => {
   const { user } = useSupabaseUser();
 
@@ -132,8 +131,6 @@ const TaskList = () => {
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
-
-
   // クイックタスク追加
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) {
@@ -209,7 +206,6 @@ const TaskList = () => {
     }
   };
 
-
   // ドラッグ&ドロップの処理
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -242,7 +238,6 @@ const TaskList = () => {
       }
     }
   };
-
 
   return (
     <div className="space-y-6">

@@ -129,7 +129,7 @@ export const TaskTimeField = ({
 
   const handleTimeSave = () => {
     let finalValue = editValue;
-    
+
     // 入力値がある場合は時刻フォーマットに変換
     if (editValue && editValue.trim() !== "") {
       const dateTimeValue = parseTimeInputToISOString(
@@ -141,7 +141,7 @@ export const TaskTimeField = ({
         setEditValue(dateTimeValue);
       }
     }
-    
+
     // 変換された値を直接handleEditSaveに渡してグローバル状態を更新
     handleEditSave(finalValue);
   };

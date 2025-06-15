@@ -13,7 +13,11 @@ import { Task } from "./types";
 interface TaskEditActions {
   editingField: any;
   editValue: string;
-  handleEditStart: (taskId: string, field: "title" | "estimated_minute" | "start_time" | "end_time", value: string) => void;
+  handleEditStart: (
+    taskId: string,
+    field: "title" | "estimated_minute" | "start_time" | "end_time",
+    value: string,
+  ) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleEditSave: () => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
@@ -23,7 +27,10 @@ interface TaskEditActions {
 
 interface TaskActions {
   handleDelete: (taskId: string) => void;
-  handleTaskTimer: (taskId: string, action: "start" | "stop" | "complete") => void;
+  handleTaskTimer: (
+    taskId: string,
+    action: "start" | "stop" | "complete",
+  ) => void;
 }
 
 interface SortableTaskProps {
@@ -135,7 +142,10 @@ const SortableTask = ({
           <GripVertical className="h-4 w-4 text-gray-400" />
         </div>
 
-        <TaskTimerButton task={task} onTaskTimer={taskActions.handleTaskTimer} />
+        <TaskTimerButton
+          task={task}
+          onTaskTimer={taskActions.handleTaskTimer}
+        />
 
         <div className="flex-grow">
           <TaskTitleField {...taskEditProps} />

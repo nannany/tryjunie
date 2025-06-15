@@ -49,7 +49,9 @@ export const useTaskEdit = (dispatch: React.Dispatch<TaskAction>) => {
     } else if (field === "estimated_minute") {
       updateData.estimated_minute = valueToSave ? parseInt(valueToSave) : null;
     } else if (field === "start_time" || field === "end_time") {
-      updateData[field] = valueToSave ? new Date(valueToSave).toISOString() : null;
+      updateData[field] = valueToSave
+        ? new Date(valueToSave).toISOString()
+        : null;
     }
 
     const { error } = await supabase
