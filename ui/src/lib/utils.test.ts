@@ -11,23 +11,17 @@ describe("parseTimeInputToISOString", () => {
     return date.toISOString(); // Converts to UTC ISO string
   };
 
-  // Valid Test Cases
-  it('should parse "HH:mm" format (e.g., "17:30")', () => {
-    expect(parseTimeInputToISOString("17:30", baseDate)).toBe(
-      getExpectedISO(17, 30),
-    );
+  // Valid Test Cases - Only 4-digit format is supported
+  it('should return null for "HH:mm" format (e.g., "17:30") - no longer supported', () => {
+    expect(parseTimeInputToISOString("17:30", baseDate)).toBeNull();
   });
 
-  it('should parse "HH時MM分" format (e.g., "17時30分")', () => {
-    expect(parseTimeInputToISOString("17時30分", baseDate)).toBe(
-      getExpectedISO(17, 30),
-    );
+  it('should return null for "HH時MM分" format (e.g., "17時30分") - no longer supported', () => {
+    expect(parseTimeInputToISOString("17時30分", baseDate)).toBeNull();
   });
 
-  it('should parse "HH時" format (e.g., "17時")', () => {
-    expect(parseTimeInputToISOString("17時", baseDate)).toBe(
-      getExpectedISO(17, 0),
-    );
+  it('should return null for "HH時" format (e.g., "17時") - no longer supported', () => {
+    expect(parseTimeInputToISOString("17時", baseDate)).toBeNull();
   });
 
   it('should parse "HHMM" 4-digit format (e.g., "1730")', () => {
@@ -42,26 +36,20 @@ describe("parseTimeInputToISOString", () => {
     );
   });
 
-  it('should parse single-digit hour format (e.g., "9")', () => {
-    expect(parseTimeInputToISOString("9", baseDate)).toBe(getExpectedISO(9, 0));
+  it('should return null for single-digit hour format (e.g., "9") - no longer supported', () => {
+    expect(parseTimeInputToISOString("9", baseDate)).toBeNull();
   });
 
-  it('should parse double-digit hour format (e.g., "17")', () => {
-    expect(parseTimeInputToISOString("17", baseDate)).toBe(
-      getExpectedISO(17, 0),
-    );
+  it('should return null for double-digit hour format (e.g., "17") - no longer supported', () => {
+    expect(parseTimeInputToISOString("17", baseDate)).toBeNull();
   });
 
-  it('should parse "00:00"', () => {
-    expect(parseTimeInputToISOString("00:00", baseDate)).toBe(
-      getExpectedISO(0, 0),
-    );
+  it('should return null for "00:00" - no longer supported', () => {
+    expect(parseTimeInputToISOString("00:00", baseDate)).toBeNull();
   });
 
-  it('should parse "23:59"', () => {
-    expect(parseTimeInputToISOString("23:59", baseDate)).toBe(
-      getExpectedISO(23, 59),
-    );
+  it('should return null for "23:59" - no longer supported', () => {
+    expect(parseTimeInputToISOString("23:59", baseDate)).toBeNull();
   });
 
   it('should parse "0000" 4-digit format for midnight', () => {
@@ -111,11 +99,25 @@ describe("parseTimeInputToISOString", () => {
     expect(parseTimeInputToISOString("", baseDate)).toBeNull();
   });
 
-  it('should return null for "24:00" (invalid hour)', () => {
+  it('should return null for "24:00" (invalid format)', () => {
     expect(parseTimeInputToISOString("24:00", baseDate)).toBeNull();
   });
 
-  it('should return null for "12:60" (invalid minute)', () => {
+  it('should return null for "12:60" (invalid format)', () => {
     expect(parseTimeInputToISOString("12:60", baseDate)).toBeNull();
+  });
+
+  it('should return null for "2400" (invalid hour in 4-digit format)', () => {
+    expect(parseTimeInputToISOString("2400", baseDate)).toBeNull();
+  });
+
+  it('should return null for "1260" (invalid minute in 4-digit format)', () => {
+    expect(parseTimeInputToISOString("1260", baseDate)).toBeNull();
+  });
+
+  it('should parse "2359" 4-digit format for 23:59', () => {
+    expect(parseTimeInputToISOString("2359", baseDate)).toBe(
+      getExpectedISO(23, 59),
+    );
   });
 });
