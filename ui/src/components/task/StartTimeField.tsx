@@ -196,11 +196,7 @@ export const StartTimeField = ({
             </div>
           </div>
         </PopoverTrigger>
-        <PopoverContent
-          data-popover-content
-          className="w-48 p-0"
-          align="start"
-        >
+        <PopoverContent data-popover-content className="w-48 p-0" align="start">
           <div className="grid">
             {getStartTimeOptions().map((option) => (
               <Button
