@@ -12,12 +12,14 @@ create table if not exists public.tasks (
   task_date date not null default current_date,
   start_time timestamp with time zone,
   end_time timestamp with time zone,
+  category_id uuid references public.categories(id) on delete set null,
   created_at timestamp with time zone not null default now(),
   updated_at timestamp with time zone not null default now()
 );
 
 -- インデックス
 create index if not exists tasks_user_id_idx on public.tasks (user_id);
+create index if not exists tasks_category_id_idx on public.tasks (category_id);
 
 -- RLS (Row Level Security)
 alter table public.tasks enable row level security;
@@ -97,4 +99,5 @@ comment on column public.tasks.estimated_minute is 'タスクの見積もり時�
 comment on column public.tasks.start_time is 'タスクの開始時間';
 comment on column public.tasks.end_time is 'タスクの終了時間';
 comment on column public.tasks.created_at is 'タスク作成日時';
-comment on column public.tasks.updated_at is 'タスク更新日時'; 
+comment on column public.tasks.updated_at is 'タスク更新日時';
+comment on column public.tasks.category_id is 'タスクが属するカテゴリID'; 
