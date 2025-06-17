@@ -102,3 +102,4 @@ X_INTEGRATION_ID=your_integration_id
 
 ## Memories
 - Be sure to run test as a completion check.
+- As a condition for completion, make sure that the npm run build succeeds

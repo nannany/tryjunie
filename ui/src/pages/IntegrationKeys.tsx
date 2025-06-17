@@ -42,11 +42,11 @@ const IntegrationKeysPage = () => {
       const { data, error } = await supabase
         .from("integration_keys")
         .select("*")
-        .eq("user_id", user?.id)
+        .eq("user_id", user?.id!)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setKeys(data || []);
+      setKeys((data as unknown as IntegrationKey[]) || []);
     } catch (error: any) {
       toast({
         variant: "destructive",
