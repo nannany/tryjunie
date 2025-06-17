@@ -117,7 +117,10 @@ const TaskList = () => {
         if (error) {
           console.error("Error fetching tasks:", error);
         } else if (data) {
-          dispatch({ type: "SET_TASKS", payload: (data as unknown as Task[]) || [] });
+          dispatch({
+            type: "SET_TASKS",
+            payload: (data as unknown as Task[]) || [],
+          });
         }
       })(selectedDate);
     }
@@ -208,7 +211,10 @@ const TaskList = () => {
         console.error("Error adding task:", error);
       } else {
         // 新しく追加されたタスクをリストの先頭に追加
-        dispatch({ type: "ADD_TASK", payload: (data?.[0] as unknown as Task) || {} as Task });
+        dispatch({
+          type: "ADD_TASK",
+          payload: (data?.[0] as unknown as Task) || ({} as Task),
+        });
 
         // 入力フィールドをリセット
         setNewTaskTitle("");
