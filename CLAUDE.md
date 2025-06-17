@@ -99,3 +99,6 @@ X_INTEGRATION_ID=your_integration_id
 - Frontend: Vitest with React Testing Library
 - Edge Functions: Deno test framework
 - Manual testing guide available for task-management function
+
+## Memories
+- Be sure to run test as a completion check.
