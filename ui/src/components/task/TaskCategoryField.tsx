@@ -37,7 +37,7 @@ export const TaskCategoryField = ({
   const handleCategorySelect = (categoryId: string) => {
     setPopoverOpen(false);
     setEditValue(categoryId);
-    
+
     if (editingField) {
       const { taskId } = editingField;
       const updateData = { category_id: categoryId };
@@ -81,7 +81,10 @@ export const TaskCategoryField = ({
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <div className="flex items-center cursor-pointer">
-            <Tag className="h-4 w-4 mr-1" style={getCategoryIconStyle(selectedCategory)} />
+            <Tag
+              className="h-4 w-4 mr-1"
+              style={getCategoryIconStyle(selectedCategory)}
+            />
             <span>カテゴリ: </span>
             <div className="relative flex items-center">
               <Button
@@ -95,11 +98,7 @@ export const TaskCategoryField = ({
             </div>
           </div>
         </PopoverTrigger>
-        <PopoverContent
-          data-popover-content
-          className="w-48 p-0"
-          align="start"
-        >
+        <PopoverContent data-popover-content className="w-48 p-0" align="start">
           <div className="grid">
             <Button
               variant="ghost"
@@ -117,7 +116,10 @@ export const TaskCategoryField = ({
                 onClick={() => handleCategorySelect(category.id)}
                 style={getCategoryTextStyle(category)}
               >
-                <Tag className="h-4 w-4 mr-2" style={getCategoryIconStyle(category)} />
+                <Tag
+                  className="h-4 w-4 mr-2"
+                  style={getCategoryIconStyle(category)}
+                />
                 {category.name}
               </Button>
             ))}
@@ -134,7 +136,10 @@ export const TaskCategoryField = ({
         onEditStart(task.id, "category_id", fieldValue || "");
       }}
     >
-      <Tag className="h-4 w-4 mr-1" style={getCategoryIconStyle(selectedCategory)} />
+      <Tag
+        className="h-4 w-4 mr-1"
+        style={getCategoryIconStyle(selectedCategory)}
+      />
       <span style={getCategoryTextStyle(selectedCategory)}>
         カテゴリ: {selectedCategory?.name || "(未選択)"}
       </span>

@@ -14,7 +14,12 @@ export const useTaskEdit = (dispatch: React.Dispatch<TaskAction>) => {
   // 編集モードを開始
   const handleEditStart = (
     taskId: string,
-    field: "title" | "estimated_minute" | "start_time" | "end_time" | "category_id",
+    field:
+      | "title"
+      | "estimated_minute"
+      | "start_time"
+      | "end_time"
+      | "category_id",
     value: string,
   ) => {
     setEditingField({ taskId, field });

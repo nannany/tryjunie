@@ -17,7 +17,12 @@ interface TaskEditActions {
   editValue: string;
   handleEditStart: (
     taskId: string,
-    field: "title" | "estimated_minute" | "start_time" | "end_time" | "category_id",
+    field:
+      | "title"
+      | "estimated_minute"
+      | "start_time"
+      | "end_time"
+      | "category_id",
     value: string,
   ) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
