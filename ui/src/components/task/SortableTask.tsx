@@ -8,15 +8,16 @@ import { TaskTitleField } from "./TaskTitleField";
 import { TaskEstimatedTimeField } from "./TaskEstimatedTimeField";
 import { StartTimeField } from "./StartTimeField";
 import { EndTimeField } from "./EndTimeField";
+import { TaskCategoryField } from "./TaskCategoryField";
 import { TaskMetaInfo } from "./TaskMetaInfo";
-import { Task } from "./types";
+import { Task, Category } from "@/types/task";
 
 interface TaskEditActions {
   editingField: any;
   editValue: string;
   handleEditStart: (
     taskId: string,
-    field: "title" | "estimated_minute" | "start_time" | "end_time",
+    field: "title" | "estimated_minute" | "start_time" | "end_time" | "category_id",
     value: string,
   ) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -39,6 +40,7 @@ interface SortableTaskProps {
   taskEdit: TaskEditActions;
   taskActions: TaskActions;
   lastTaskEndTime: string | null;
+  categories: Category[];
 }
 
 const SortableTask = ({
@@ -46,6 +48,7 @@ const SortableTask = ({
   taskEdit,
   taskActions,
   lastTaskEndTime,
+  categories,
 }: SortableTaskProps) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
@@ -160,6 +163,8 @@ const SortableTask = ({
             />
 
             <EndTimeField {...taskEditProps} />
+
+            <TaskCategoryField {...taskEditProps} categories={categories} />
 
             <TaskMetaInfo task={task} />
           </div>

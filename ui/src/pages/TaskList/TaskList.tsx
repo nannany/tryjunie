@@ -35,7 +35,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { SortableTask } from "@/components/task";
-import { Task } from "@/types/task";
+import { Task, Category } from "@/types/task";
 import { taskReducer } from "@/reducers/taskReducer";
 import { useTaskEdit } from "@/hooks/useTaskEdit";
 import { useTaskActions } from "@/hooks/useTaskActions";
@@ -46,6 +46,7 @@ const TaskList = () => {
   const { user } = useSupabaseUser();
 
   const [tasks, dispatch] = useReducer(taskReducer, []);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
@@ -78,6 +79,22 @@ const TaskList = () => {
       },
     }),
   );
+
+  // カテゴリを取得
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+      } else if (data) {
+        setCategories(data as Category[]);
+      }
+    })();
+  }, []);
 
   // タスクを取得
   useEffect(() => {
@@ -333,6 +350,7 @@ const TaskList = () => {
                         taskEdit={taskEdit}
                         taskActions={taskActions}
                         lastTaskEndTime={lastTaskEndTime}
+                        categories={categories}
                       />
                     ))}
                   </SortableContext>

@@ -8,8 +8,19 @@ export interface Task {
   task_order: number | null;
   start_time: string | null;
   end_time: string | null;
+  category_id: string | null;
   created_at: string;
   task_date: string;
+}
+
+// Category型の定義
+export interface Category {
+  id: string;
+  name: string;
+  color: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 // Action Types

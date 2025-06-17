@@ -6,7 +6,7 @@ export type { Task } from "@/types/task";
 // 編集中のフィールドの型
 export interface EditingField {
   taskId: string;
-  field: "title" | "estimated_minute" | "start_time" | "end_time";
+  field: "title" | "estimated_minute" | "start_time" | "end_time" | "category_id";
 }
 
 // 共通のプロップス型
@@ -16,7 +16,7 @@ export interface TaskEditProps {
   editValue: string;
   onEditStart: (
     taskId: string,
-    field: "title" | "estimated_minute" | "start_time" | "end_time",
+    field: "title" | "estimated_minute" | "start_time" | "end_time" | "category_id",
     value: string,
   ) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
