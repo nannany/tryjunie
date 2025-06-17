@@ -103,3 +103,4 @@ X_INTEGRATION_ID=your_integration_id
 ## Memories
 - Be sure to run test as a completion check.
 - As a condition for completion, make sure that the npm run build succeeds
+- As a condition for completion, make sure that the `npx prettier --check "ui/**/*.{ts,tsx,js,jsx,json,md,yml}"` succeeds
