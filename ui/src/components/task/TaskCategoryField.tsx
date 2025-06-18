@@ -35,7 +35,7 @@ export const TaskCategoryField = ({
   const handleCategorySelect = (categoryId: string) => {
     setPopoverOpen(false);
     setEditValue(categoryId);
-    
+
     // useTaskEditのhandleEditSaveを使用してグローバル状態も更新
     handleEditSave(categoryId);
   };
