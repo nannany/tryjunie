@@ -14,9 +14,6 @@ create table if not exists public.categories (
 -- インデックス
 create index if not exists categories_name_idx on public.categories (name);
 
--- RLS (Row Level Security)
-alter table public.categories enable row level security;
-
 -- コメント
 comment on table public.categories is 'タスクカテゴリマスターテーブル';
 comment on column public.categories.id is 'カテゴリの一意識別子';
