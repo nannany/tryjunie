@@ -37,3 +37,10 @@
 # supabase functions deploy
 
 本番環境に supabase functions をデプロイする。
+
+
+# 注記
+
+- seedデータをlocalに入れる場合は、`supabase db reset`を実行する必要がある。そのとき、既存のローカルデータは消える。
+  - `supabase start`で実行される、というのを見たが、できず。
+- 本番へのseedデータ投入は直接consoleからsql実行をしている。cliでやる方法は要調査。
