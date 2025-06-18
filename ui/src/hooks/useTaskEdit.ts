@@ -57,6 +57,8 @@ export const useTaskEdit = (dispatch: React.Dispatch<TaskAction>) => {
       updateData[field] = valueToSave
         ? new Date(valueToSave).toISOString()
         : null;
+    } else if (field === "category_id") {
+      updateData.category_id = valueToSave || null;
     }
 
     const { error } = await supabase

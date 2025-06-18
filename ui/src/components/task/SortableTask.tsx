@@ -11,10 +11,13 @@ import { EndTimeField } from "./EndTimeField";
 import { TaskCategoryField } from "./TaskCategoryField";
 import { TaskMetaInfo } from "./TaskMetaInfo";
 import { Task, Category } from "@/types/task";
+import { EditingField } from "./types";
 
 interface TaskEditActions {
-  editingField: any;
+  editingField: EditingField | null;
   editValue: string;
+  setEditingField: (field: EditingField | null) => void;
+  setEditValue: (value: string) => void;
   handleEditStart: (
     taskId: string,
     field:
@@ -26,10 +29,8 @@ interface TaskEditActions {
     value: string,
   ) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleEditSave: () => void;
+  handleEditSave: (customValue?: string) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  setEditValue: (value: string) => void;
-  setEditingField: (field: any) => void;
 }
 
 interface TaskActions {

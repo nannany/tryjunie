@@ -113,6 +113,71 @@ X_INTEGRATION_ID=your_integration_id
 - Edge Functions: Deno test framework
 - Manual testing guide available for task-management function
 
+## Build Requirements and Quality Gates
+
+**CRITICAL**: Before completing any task, ALL of the following must pass:
+
+### 1. TypeScript Compilation
+```bash
+cd ui
+npm run build
+```
+- **Must succeed without errors**
+- **Must not use `any` types** - Use proper TypeScript interfaces
+- **Must not have unsafe type assertions** - Prefer type guards over `as unknown as`
+
+### 2. Code Formatting
+```bash
+npx prettier --check "ui/**/*.{ts,tsx,js,jsx,json,md,yml}"
+```
+- **Must pass without formatting issues**
+
+### 3. Tests
+```bash
+cd ui
+npm test
+```
+- **All tests must pass**
+
+### Common TypeScript Issues to Avoid
+
+1. **Never use `any` types**:
+   ```typescript
+   // ❌ Bad
+   editingField: any;
+   
+   // ✅ Good
+   editingField: EditingField | null;
+   ```
+
+2. **Use proper type imports**:
+   ```typescript
+   // ✅ Import types when needed
+   import { EditingField } from "./types";
+   ```
+
+3. **Avoid unsafe type assertions**:
+   ```typescript
+   // ❌ Avoid this pattern
+   (data as unknown as Category[])
+   
+   // ✅ Prefer type guards or proper types
+   data as Category[]
+   ```
+
+4. **Ensure prop interfaces match usage**:
+   - When adding new props, update both interface definitions and component usage
+   - TaskEditProps should match actual component prop requirements
+
+### Build Failure Recovery
+
+If `npm run build` fails:
+1. Read the TypeScript error carefully
+2. Fix type issues systematically
+3. Never suppress errors with `any` types
+4. Update interfaces to match actual usage
+5. Test the build again before considering task complete
+
 ## Memories
 
 - Be sure to run test as a completion check.

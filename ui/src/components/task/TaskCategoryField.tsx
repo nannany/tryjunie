@@ -6,11 +6,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown, Tag } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { TaskEditProps } from "./types";
 import { Category } from "@/types/task";
-
-const supabase = createClient();
 
 interface TaskCategoryFieldProps extends TaskEditProps {
   categories: Category[];
@@ -21,7 +18,8 @@ export const TaskCategoryField = ({
   editingField,
   onEditStart,
   setEditValue,
-  setEditingField,
+  setEditingField: _setEditingField,
+  handleEditSave,
   categories,
 }: TaskCategoryFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -37,26 +35,9 @@ export const TaskCategoryField = ({
   const handleCategorySelect = (categoryId: string) => {
     setPopoverOpen(false);
     setEditValue(categoryId);
-
-    if (editingField) {
-      const { taskId } = editingField;
-      const updateData = { category_id: categoryId };
-
-      const updateTask = async () => {
-        const { error } = await supabase
-          .from("tasks")
-          .update(updateData)
-          .eq("id", taskId);
-
-        if (error) {
-          console.error("Error updating task category:", error);
-        } else {
-          setEditingField(null);
-        }
-      };
-
-      updateTask();
-    }
+    
+    // useTaskEditのhandleEditSaveを使用してグローバル状態も更新
+    handleEditSave(categoryId);
   };
 
   // カテゴリの色を取得
