@@ -4,7 +4,9 @@ import { cn, parseTimeInputToISOString } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { TaskEditProps } from "./types";
 
-interface EndTimeFieldProps extends TaskEditProps {}
+interface EndTimeFieldProps extends TaskEditProps {
+  categoryColor?: string;
+}
 
 export const EndTimeField = ({
   task,
@@ -14,6 +16,7 @@ export const EndTimeField = ({
   setEditValue,
   setEditingField,
   handleEditSave,
+  categoryColor = "#6b7280",
 }: EndTimeFieldProps) => {
   const { toast } = useToast();
 
@@ -75,7 +78,7 @@ export const EndTimeField = ({
   if (isEditing) {
     return (
       <div className="flex items-center">
-        <span>終了: </span>
+        <span style={{ color: categoryColor }}>終了: </span>
         <Input
           type="text"
           placeholder="HHmm"
@@ -110,7 +113,10 @@ export const EndTimeField = ({
         }
       }}
     >
-      終了: {formatDateTime(fieldValue) || `(クリックして設定)`}
+      <span style={{ color: isDisabled ? "#9ca3af" : categoryColor }}>終了: </span>
+      <span style={{ color: isDisabled ? "#9ca3af" : categoryColor }}>
+        {formatDateTime(fieldValue) || `(クリックして設定)`}
+      </span>
     </p>
   );
 };

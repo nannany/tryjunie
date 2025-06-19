@@ -16,6 +16,7 @@ const supabase = createClient();
 
 interface StartTimeFieldProps extends TaskEditProps {
   lastTaskEndTime?: string | null;
+  categoryColor?: string;
 }
 
 export const StartTimeField = ({
@@ -27,6 +28,7 @@ export const StartTimeField = ({
   setEditingField,
   handleEditSave,
   lastTaskEndTime,
+  categoryColor = "#6b7280",
 }: StartTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { toast } = useToast();
@@ -166,7 +168,7 @@ export const StartTimeField = ({
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <div className="flex items-center cursor-pointer">
-            <span>開始: </span>
+            <span style={{ color: categoryColor }}>開始: </span>
             <div className="relative flex items-center">
               <Input
                 type="text"
@@ -221,7 +223,10 @@ export const StartTimeField = ({
         onEditStart(task.id, "start_time", fieldValue || "");
       }}
     >
-      開始: {formatDateTime(fieldValue) || `(クリックして設定)`}
+      <span style={{ color: categoryColor }}>開始: </span>
+      <span style={{ color: categoryColor }}>
+        {formatDateTime(fieldValue) || `(クリックして設定)`}
+      </span>
     </p>
   );
 };

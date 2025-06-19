@@ -9,7 +9,9 @@ import {
 import { ChevronDown } from "lucide-react";
 import { TaskEditProps } from "./types";
 
-interface TaskEstimatedTimeFieldProps extends TaskEditProps {}
+interface TaskEstimatedTimeFieldProps extends TaskEditProps {
+  categoryColor?: string;
+}
 
 export const TaskEstimatedTimeField = ({
   task,
@@ -20,6 +22,7 @@ export const TaskEstimatedTimeField = ({
   handleEditSave,
   setEditValue,
   setEditingField,
+  categoryColor = "#6b7280",
 }: TaskEstimatedTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -59,7 +62,7 @@ export const TaskEstimatedTimeField = ({
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <div className="flex items-center cursor-pointer">
-            <span>見積もり: </span>
+            <span style={{ color: categoryColor }}>見積もり: </span>
             <div className="relative flex items-center">
               <Input
                 type="text"
@@ -86,7 +89,7 @@ export const TaskEstimatedTimeField = ({
               />
               <ChevronDown className="absolute right-2 h-4 w-4 opacity-50" />
             </div>
-            <span>分</span>
+            <span style={{ color: categoryColor }}>分</span>
           </div>
         </PopoverTrigger>
         <PopoverContent data-popover-content className="w-48 p-0" align="start">
@@ -118,8 +121,10 @@ export const TaskEstimatedTimeField = ({
         )
       }
     >
-      見積もり:{" "}
-      {formatEstimatedTime(task.estimated_minute) || "0分 (クリックして設定)"}
+      <span style={{ color: categoryColor }}>見積もり:{" "}</span>
+      <span style={{ color: categoryColor }}>
+        {formatEstimatedTime(task.estimated_minute) || "0分 (クリックして設定)"}
+      </span>
     </p>
   );
 };

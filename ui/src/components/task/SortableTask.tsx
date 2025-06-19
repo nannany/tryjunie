@@ -172,14 +172,15 @@ const SortableTask = ({
           <TaskTitleField {...taskEditProps} categoryColor={categoryColor} />
 
           <div className="flex gap-3 text-sm text-muted-foreground">
-            <TaskEstimatedTimeField {...taskEditProps} />
+            <TaskEstimatedTimeField {...taskEditProps} categoryColor={categoryColor} />
 
             <StartTimeField
               {...taskEditProps}
               lastTaskEndTime={lastTaskEndTime}
+              categoryColor={categoryColor}
             />
 
-            <EndTimeField {...taskEditProps} />
+            <EndTimeField {...taskEditProps} categoryColor={categoryColor} />
 
             <TaskCategoryField {...taskEditProps} categories={categories} />
 
