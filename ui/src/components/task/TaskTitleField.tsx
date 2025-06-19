@@ -1,7 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { TaskEditProps } from "./types";
 
-interface TaskTitleFieldProps extends TaskEditProps {}
+interface TaskTitleFieldProps extends TaskEditProps {
+  categoryColor?: string;
+}
 
 export const TaskTitleField = ({
   task,
@@ -11,6 +13,7 @@ export const TaskTitleField = ({
   handleEditChange,
   handleEditSave,
   handleKeyDown,
+  categoryColor = "#374151",
 }: TaskTitleFieldProps) => {
   const isEditing =
     editingField?.taskId === task.id && editingField?.field === "title";
@@ -31,6 +34,7 @@ export const TaskTitleField = ({
   return (
     <p
       className="font-medium mb-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+      style={{ color: categoryColor }}
       onClick={() => onEditStart(task.id, "title", task.title)}
     >
       {task.title}

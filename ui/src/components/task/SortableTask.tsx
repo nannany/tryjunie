@@ -125,6 +125,10 @@ const SortableTask = ({
     }
   };
 
+  // カテゴリの色を取得
+  const selectedCategory = categories.find((cat) => cat.id === task.category_id);
+  const categoryColor = selectedCategory?.color || "#6b7280";
+
   const taskEditProps = {
     task,
     editingField: taskEdit.editingField,
@@ -140,7 +144,10 @@ const SortableTask = ({
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        borderLeft: `4px solid ${categoryColor}`,
+      }}
       className="flex items-center justify-between rounded-md border p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       onKeyDown={handleTaskKeyDown}
       data-task-id={task.id}
@@ -149,16 +156,20 @@ const SortableTask = ({
     >
       <div className="flex items-center gap-4">
         <div className="cursor-grab active:cursor-grabbing">
-          <GripVertical className="h-4 w-4 text-gray-400" />
+          <GripVertical 
+            className="h-4 w-4" 
+            style={{ color: categoryColor }}
+          />
         </div>
 
         <TaskTimerButton
           task={task}
           onTaskTimer={taskActions.handleTaskTimer}
+          categoryColor={categoryColor}
         />
 
         <div className="flex-grow">
-          <TaskTitleField {...taskEditProps} />
+          <TaskTitleField {...taskEditProps} categoryColor={categoryColor} />
 
           <div className="flex gap-3 text-sm text-muted-foreground">
             <TaskEstimatedTimeField {...taskEditProps} />
