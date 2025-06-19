@@ -224,7 +224,7 @@ const TaskList = () => {
 
   // キー入力イベントを処理
   const handleNewTaskKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       handleAddTask();
     }
   };
