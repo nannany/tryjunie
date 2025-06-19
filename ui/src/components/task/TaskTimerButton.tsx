@@ -20,10 +20,10 @@ export const TaskTimerButton = ({
         variant="outline"
         onClick={() => onTaskTimer(task.id, "start")}
         className="h-8 w-8 hover:bg-opacity-10"
-        style={{ 
+        style={{
           color: categoryColor,
           borderColor: categoryColor,
-          backgroundColor: `${categoryColor}10`
+          backgroundColor: `${categoryColor}10`,
         }}
       >
         <Play className="h-4 w-4" />
@@ -38,10 +38,10 @@ export const TaskTimerButton = ({
         variant="outline"
         onClick={() => onTaskTimer(task.id, "stop")}
         className="h-8 w-8 hover:bg-opacity-10"
-        style={{ 
+        style={{
           color: categoryColor,
           borderColor: categoryColor,
-          backgroundColor: `${categoryColor}10`
+          backgroundColor: `${categoryColor}10`,
         }}
       >
         <Square className="h-4 w-4" />
@@ -54,10 +54,10 @@ export const TaskTimerButton = ({
       size="icon"
       variant="outline"
       className="h-8 w-8"
-      style={{ 
+      style={{
         color: categoryColor,
         borderColor: categoryColor,
-        backgroundColor: `${categoryColor}20`
+        backgroundColor: `${categoryColor}20`,
       }}
       disabled
     >

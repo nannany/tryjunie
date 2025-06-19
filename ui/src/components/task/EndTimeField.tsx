@@ -113,7 +113,9 @@ export const EndTimeField = ({
         }
       }}
     >
-      <span style={{ color: isDisabled ? "#9ca3af" : categoryColor }}>終了: </span>
+      <span style={{ color: isDisabled ? "#9ca3af" : categoryColor }}>
+        終了:{" "}
+      </span>
       <span style={{ color: isDisabled ? "#9ca3af" : categoryColor }}>
         {formatDateTime(fieldValue) || `(クリックして設定)`}
       </span>

@@ -5,7 +5,10 @@ interface TaskMetaInfoProps {
   categoryColor?: string;
 }
 
-export const TaskMetaInfo = ({ task, categoryColor = "#6b7280" }: TaskMetaInfoProps) => {
+export const TaskMetaInfo = ({
+  task,
+  categoryColor = "#6b7280",
+}: TaskMetaInfoProps) => {
   // 所要時間を計算（分単位）
   const calculateDuration = (
     start: string | null,
@@ -32,7 +35,7 @@ export const TaskMetaInfo = ({ task, categoryColor = "#6b7280" }: TaskMetaInfoPr
 
   return (
     <p className="text-sm p-1">
-      <span style={{ color: categoryColor }}>所要時間:{" "}</span>
+      <span style={{ color: categoryColor }}>所要時間: </span>
       <span style={{ color: categoryColor }}>
         {formatDuration(calculateDuration(task.start_time, task.end_time))}
       </span>

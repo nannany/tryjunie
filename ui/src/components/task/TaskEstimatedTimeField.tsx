@@ -121,7 +121,7 @@ export const TaskEstimatedTimeField = ({
         )
       }
     >
-      <span style={{ color: categoryColor }}>見積もり:{" "}</span>
+      <span style={{ color: categoryColor }}>見積もり: </span>
       <span style={{ color: categoryColor }}>
         {formatEstimatedTime(task.estimated_minute) || "0分 (クリックして設定)"}
       </span>
