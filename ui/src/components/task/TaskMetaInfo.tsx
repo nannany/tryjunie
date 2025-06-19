@@ -2,9 +2,10 @@ import { Task } from "./types";
 
 interface TaskMetaInfoProps {
   task: Task;
+  categoryColor?: string;
 }
 
-export const TaskMetaInfo = ({ task }: TaskMetaInfoProps) => {
+export const TaskMetaInfo = ({ task, categoryColor = "#6b7280" }: TaskMetaInfoProps) => {
   // 所要時間を計算（分単位）
   const calculateDuration = (
     start: string | null,
@@ -30,9 +31,11 @@ export const TaskMetaInfo = ({ task }: TaskMetaInfoProps) => {
   }
 
   return (
-    <p className="text-sm text-muted-foreground p-1">
-      所要時間:{" "}
-      {formatDuration(calculateDuration(task.start_time, task.end_time))}
+    <p className="text-sm p-1">
+      <span style={{ color: categoryColor }}>所要時間:{" "}</span>
+      <span style={{ color: categoryColor }}>
+        {formatDuration(calculateDuration(task.start_time, task.end_time))}
+      </span>
     </p>
   );
 };

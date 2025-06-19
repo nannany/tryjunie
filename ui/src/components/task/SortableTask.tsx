@@ -184,7 +184,7 @@ const SortableTask = ({
 
             <TaskCategoryField {...taskEditProps} categories={categories} />
 
-            <TaskMetaInfo task={task} />
+            <TaskMetaInfo task={task} categoryColor={categoryColor} />
           </div>
         </div>
       </div>
