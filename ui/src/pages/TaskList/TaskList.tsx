@@ -4,6 +4,8 @@ import React, {
   useReducer,
   useState,
   startTransition,
+  useCallback,
+  useRef,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,12 +54,53 @@ const TaskList = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date(),
   );
+  const [taskSuggestions, setTaskSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const debounceTimeoutRef = useRef<number | null>(null);
 
   const { toast } = useToast();
 
   // フックを使用
   const taskEdit = useTaskEdit(dispatch);
   const taskActions = useTaskActions(dispatch);
+
+  // 過去のタスク名を検索
+  const searchTaskNames = useCallback(async (query: string) => {
+    if (!query.trim() || !user?.id) {
+      setTaskSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("title")
+      .eq("user_id", user.id)
+      .ilike("title", `%${query}%`)
+      .neq("title", query)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      console.error("Error searching task names:", error);
+      return;
+    }
+
+    const uniqueTitles = Array.from(new Set(data?.map(task => task.title as string) || []));
+    setTaskSuggestions(uniqueTitles);
+    setShowSuggestions(uniqueTitles.length > 0);
+  }, [user?.id]);
+
+  // デバウンス付きの検索
+  const debouncedSearch = useCallback((query: string) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = window.setTimeout(() => {
+      searchTaskNames(query);
+    }, 300);
+  }, [searchTaskNames]);
 
   // 最終タスクの終了時間を取得
   // tasksのうち、最も終了時間が遅いタスクの終了時間を取得
@@ -222,11 +265,84 @@ const TaskList = () => {
     });
   };
 
+  // 提案を選択
+  const selectSuggestion = async (suggestion: string) => {
+    setShowSuggestions(false);
+    setSelectedSuggestionIndex(-1);
+    setNewTaskTitle("");
+    
+    // 提案されたタスク名で直接タスクを追加
+    if (!selectedDate || !user?.id) return;
+
+    startTransition(async () => {
+      const newTask = {
+        title: suggestion,
+        description: "",
+        user_id: user.id,
+        estimated_minute: null,
+        task_date: convertDateStringToDate(
+          selectedDate
+            .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+            .split(" ")[0],
+        ),
+      };
+
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert(newTask)
+        .select();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to add task",
+          variant: "destructive",
+        });
+        console.error("Error adding task:", error);
+      } else {
+        dispatch({
+          type: "ADD_TASK",
+          payload: (data?.[0] as unknown as Task) || ({} as Task),
+        });
+      }
+    });
+  };
+
   // キー入力イベントを処理
   const handleNewTaskKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+    if (showSuggestions) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev < taskSuggestions.length - 1 ? prev + 1 : 0
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedSuggestionIndex(prev => 
+          prev > 0 ? prev - 1 : taskSuggestions.length - 1
+        );
+      } else if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        if (selectedSuggestionIndex >= 0) {
+          selectSuggestion(taskSuggestions[selectedSuggestionIndex]);
+        } else {
+          handleAddTask();
+        }
+      } else if (e.key === "Escape") {
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+      }
+    } else if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       handleAddTask();
     }
+  };
+
+  // 入力変更処理
+  const handleTaskTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewTaskTitle(value);
+    setSelectedSuggestionIndex(-1);
+    debouncedSearch(value);
   };
 
   // ドラッグ&ドロップの処理
@@ -311,13 +427,40 @@ const TaskList = () => {
       <Card className="border-dashed border-2">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <Input
-              placeholder="新しいタスク名を入力"
-              value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
-              onKeyDown={handleNewTaskKeyDown}
-              className="flex-1"
-            />
+            <div className="relative flex-1">
+              <Input
+                placeholder="新しいタスク名を入力"
+                value={newTaskTitle}
+                onChange={handleTaskTitleChange}
+                onKeyDown={handleNewTaskKeyDown}
+                className="w-full"
+                onBlur={() => {
+                  // 少し遅延してから非表示にする（クリックイベントを処理するため）
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }}
+                onFocus={() => {
+                  if (taskSuggestions.length > 0) {
+                    setShowSuggestions(true);
+                  }
+                }}
+              />
+              {showSuggestions && taskSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                  {taskSuggestions.map((suggestion, index) => (
+                    <div
+                      key={suggestion}
+                      className={cn(
+                        "px-3 py-2 cursor-pointer hover:bg-gray-100",
+                        selectedSuggestionIndex === index && "bg-blue-50 text-blue-600"
+                      )}
+                      onClick={() => selectSuggestion(suggestion)}
+                    >
+                      {suggestion}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <Button onClick={handleAddTask} disabled={!newTaskTitle.trim()}>
               クイック追加
             </Button>
