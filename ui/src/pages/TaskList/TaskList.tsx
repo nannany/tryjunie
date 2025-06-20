@@ -66,41 +66,49 @@ const TaskList = () => {
   const taskActions = useTaskActions(dispatch);
 
   // 過去のタスク名を検索
-  const searchTaskNames = useCallback(async (query: string) => {
-    if (!query.trim() || !user?.id) {
-      setTaskSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
+  const searchTaskNames = useCallback(
+    async (query: string) => {
+      if (!query.trim() || !user?.id) {
+        setTaskSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
 
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("title")
-      .eq("user_id", user.id)
-      .ilike("title", `%${query}%`)
-      .neq("title", query)
-      .order("created_at", { ascending: false })
-      .limit(5);
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("title")
+        .eq("user_id", user.id)
+        .ilike("title", `%${query}%`)
+        .neq("title", query)
+        .order("created_at", { ascending: false })
+        .limit(5);
 
-    if (error) {
-      console.error("Error searching task names:", error);
-      return;
-    }
+      if (error) {
+        console.error("Error searching task names:", error);
+        return;
+      }
 
-    const uniqueTitles = Array.from(new Set(data?.map(task => task.title as string) || []));
-    setTaskSuggestions(uniqueTitles);
-    setShowSuggestions(uniqueTitles.length > 0);
-  }, [user?.id]);
+      const uniqueTitles = Array.from(
+        new Set(data?.map((task) => task.title as string) || []),
+      );
+      setTaskSuggestions(uniqueTitles);
+      setShowSuggestions(uniqueTitles.length > 0);
+    },
+    [user?.id],
+  );
 
   // デバウンス付きの検索
-  const debouncedSearch = useCallback((query: string) => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-    debounceTimeoutRef.current = window.setTimeout(() => {
-      searchTaskNames(query);
-    }, 300);
-  }, [searchTaskNames]);
+  const debouncedSearch = useCallback(
+    (query: string) => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      debounceTimeoutRef.current = window.setTimeout(() => {
+        searchTaskNames(query);
+      }, 300);
+    },
+    [searchTaskNames],
+  );
 
   // 最終タスクの終了時間を取得
   // tasksのうち、最も終了時間が遅いタスクの終了時間を取得
@@ -270,7 +278,7 @@ const TaskList = () => {
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
     setNewTaskTitle("");
-    
+
     // 提案されたタスク名で直接タスクを追加
     if (!selectedDate || !user?.id) return;
 
@@ -313,13 +321,13 @@ const TaskList = () => {
     if (showSuggestions) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
-          prev < taskSuggestions.length - 1 ? prev + 1 : 0
+        setSelectedSuggestionIndex((prev) =>
+          prev < taskSuggestions.length - 1 ? prev + 1 : 0,
         );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
-          prev > 0 ? prev - 1 : taskSuggestions.length - 1
+        setSelectedSuggestionIndex((prev) =>
+          prev > 0 ? prev - 1 : taskSuggestions.length - 1,
         );
       } else if (e.key === "Enter" && !e.nativeEvent.isComposing) {
         e.preventDefault();
@@ -451,7 +459,8 @@ const TaskList = () => {
                       key={suggestion}
                       className={cn(
                         "px-3 py-2 cursor-pointer hover:bg-gray-100",
-                        selectedSuggestionIndex === index && "bg-blue-50 text-blue-600"
+                        selectedSuggestionIndex === index &&
+                          "bg-blue-50 text-blue-600",
                       )}
                       onClick={() => selectSuggestion(suggestion)}
                     >
