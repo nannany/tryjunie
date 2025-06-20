@@ -41,6 +41,7 @@ import { Task, Category } from "@/types/task";
 import { taskReducer } from "@/reducers/taskReducer";
 import { useTaskEdit } from "@/hooks/useTaskEdit";
 import { useTaskActions } from "@/hooks/useTaskActions";
+import { CurrentTaskFooter } from "@/components/CurrentTaskFooter";
 
 const supabase = createClient();
 
@@ -120,6 +121,11 @@ const TaskList = () => {
     }
     return latest;
   }, null);
+
+  // 現在実行中のタスクを取得（start_timeがあってend_timeがないタスク）
+  const currentRunningTask = tasks.find(
+    (task) => task.start_time && !task.end_time
+  );
 
   // ドラッグ&ドロップのセンサーを設定
   const sensors = useSensors(
@@ -387,7 +393,8 @@ const TaskList = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <>
+    <div className="space-y-6 pb-20">
       <div className="flex items-center justify-between">
         <div>
           {totalEstimatedMinutes > 0 && (
@@ -522,6 +529,14 @@ const TaskList = () => {
         </CardContent>
       </Card>
     </div>
+    
+    {/* 現在実行中のタスクフッター */}
+    <CurrentTaskFooter
+      currentTask={currentRunningTask || null}
+      categories={categories}
+      onTaskTimer={taskActions.handleTaskTimer}
+    />
+    </>
   );
 };
 
