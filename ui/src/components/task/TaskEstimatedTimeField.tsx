@@ -48,7 +48,7 @@ export const TaskEstimatedTimeField = ({
   const handleTimeOptionSelect = (value: string) => {
     setPopoverOpen(false);
     setEditValue(value);
-    handleEditSave();
+    handleEditSave(value);
   };
 
   // 見積もり時間をフォーマット
