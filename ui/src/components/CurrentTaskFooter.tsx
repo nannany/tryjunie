@@ -30,7 +30,9 @@ export const CurrentTaskFooter = ({
   useEffect(() => {
     if (currentTask?.start_time) {
       const startTime = new Date(currentTask.start_time);
-      const elapsed = Math.floor((currentTime.getTime() - startTime.getTime()) / 1000);
+      const elapsed = Math.floor(
+        (currentTime.getTime() - startTime.getTime()) / 1000,
+      );
       setElapsedTime(elapsed);
     } else {
       setElapsedTime(0);
@@ -57,13 +59,13 @@ export const CurrentTaskFooter = ({
   const categoryColor = category?.color || "#6b7280";
 
   return (
-    <div 
+    <div
       className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-50"
       style={{ borderTopColor: categoryColor }}
     >
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div 
+          <div
             className="w-3 h-3 rounded-full animate-pulse"
             style={{ backgroundColor: categoryColor }}
           />
@@ -71,27 +73,31 @@ export const CurrentTaskFooter = ({
             <p className="font-medium text-gray-900">{currentTask.title}</p>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               {category && (
-                <span style={{ color: categoryColor }}>
-                  {category.name}
-                </span>
+                <span style={{ color: categoryColor }}>{category.name}</span>
               )}
               <span>•</span>
-              <span>開始: {new Date(currentTask.start_time!).toLocaleTimeString("ja-JP", {
-                hour: "2-digit",
-                minute: "2-digit"
-              })}</span>
+              <span>
+                開始:{" "}
+                {new Date(currentTask.start_time!).toLocaleTimeString("ja-JP", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-2xl font-mono font-bold" style={{ color: categoryColor }}>
+            <p
+              className="text-2xl font-mono font-bold"
+              style={{ color: categoryColor }}
+            >
               {formatElapsedTime(elapsedTime)}
             </p>
             <p className="text-xs text-gray-500">経過時間</p>
           </div>
-          
+
           <Button
             size="sm"
             variant="outline"

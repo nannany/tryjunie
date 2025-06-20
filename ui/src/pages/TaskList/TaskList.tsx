@@ -124,7 +124,7 @@ const TaskList = () => {
 
   // 現在実行中のタスクを取得（start_timeがあってend_timeがないタスク）
   const currentRunningTask = tasks.find(
-    (task) => task.start_time && !task.end_time
+    (task) => task.start_time && !task.end_time,
   );
 
   // ドラッグ&ドロップのセンサーを設定
@@ -394,148 +394,148 @@ const TaskList = () => {
 
   return (
     <>
-    <div className="space-y-6 pb-20">
-      <div className="flex items-center justify-between">
-        <div>
-          {totalEstimatedMinutes > 0 && (
-            <p className="text-sm text-muted-foreground mt-1">
-              {totalEstimatedMinutes > 0 && (
-                <span className="ml-2">
-                  完了予定: {calculateEndTime(totalEstimatedMinutes)}
-                </span>
-              )}
-            </p>
-          )}
+      <div className="space-y-6 pb-20">
+        <div className="flex items-center justify-between">
+          <div>
+            {totalEstimatedMinutes > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {totalEstimatedMinutes > 0 && (
+                  <span className="ml-2">
+                    完了予定: {calculateEndTime(totalEstimatedMinutes)}
+                  </span>
+                )}
+              </p>
+            )}
+          </div>
+          <div className="text-right">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground",
+                  )}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {selectedDate ? (
+                    format(selectedDate, "PPP", { locale: ja })
+                  ) : (
+                    <span>日付を選択</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <CalendarComponent
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                  locale={ja}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
-        <div className="text-right">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-[240px] justify-start text-left font-normal",
-                  !selectedDate && "text-muted-foreground",
+
+        {/* クイックタスク追加フォーム */}
+        <Card className="border-dashed border-2">
+          <CardContent className="pt-6">
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Input
+                  placeholder="新しいタスク名を入力"
+                  value={newTaskTitle}
+                  onChange={handleTaskTitleChange}
+                  onKeyDown={handleNewTaskKeyDown}
+                  className="w-full"
+                  onBlur={() => {
+                    // 少し遅延してから非表示にする（クリックイベントを処理するため）
+                    setTimeout(() => setShowSuggestions(false), 200);
+                  }}
+                  onFocus={() => {
+                    if (taskSuggestions.length > 0) {
+                      setShowSuggestions(true);
+                    }
+                  }}
+                />
+                {showSuggestions && taskSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {taskSuggestions.map((suggestion, index) => (
+                      <div
+                        key={suggestion}
+                        className={cn(
+                          "px-3 py-2 cursor-pointer hover:bg-gray-100",
+                          selectedSuggestionIndex === index &&
+                            "bg-blue-50 text-blue-600",
+                        )}
+                        onClick={() => selectSuggestion(suggestion)}
+                      >
+                        {suggestion}
+                      </div>
+                    ))}
+                  </div>
                 )}
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                {selectedDate ? (
-                  format(selectedDate, "PPP", { locale: ja })
-                ) : (
-                  <span>日付を選択</span>
-                )}
+              </div>
+              <Button onClick={handleAddTask} disabled={!newTaskTitle.trim()}>
+                クイック追加
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <CalendarComponent
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                initialFocus
-                locale={ja}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>タスク一覧</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Suspense
+              fallback={
+                <p className="text-center text-muted-foreground">
+                  タスクを読み込み中...
+                </p>
+              }
+            >
+              <div className="space-y-4">
+                {tasks.length > 0 ? (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={tasks.map((task) => task.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {tasks.map((task) => (
+                        <SortableTask
+                          key={task.id}
+                          task={task}
+                          taskEdit={taskEdit}
+                          taskActions={taskActions}
+                          lastTaskEndTime={lastTaskEndTime}
+                          categories={categories}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                ) : (
+                  <p className="text-center text-muted-foreground">
+                    タスクが見つかりません
+                  </p>
+                )}
+              </div>
+            </Suspense>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* クイックタスク追加フォーム */}
-      <Card className="border-dashed border-2">
-        <CardContent className="pt-6">
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <Input
-                placeholder="新しいタスク名を入力"
-                value={newTaskTitle}
-                onChange={handleTaskTitleChange}
-                onKeyDown={handleNewTaskKeyDown}
-                className="w-full"
-                onBlur={() => {
-                  // 少し遅延してから非表示にする（クリックイベントを処理するため）
-                  setTimeout(() => setShowSuggestions(false), 200);
-                }}
-                onFocus={() => {
-                  if (taskSuggestions.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
-              />
-              {showSuggestions && taskSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                  {taskSuggestions.map((suggestion, index) => (
-                    <div
-                      key={suggestion}
-                      className={cn(
-                        "px-3 py-2 cursor-pointer hover:bg-gray-100",
-                        selectedSuggestionIndex === index &&
-                          "bg-blue-50 text-blue-600",
-                      )}
-                      onClick={() => selectSuggestion(suggestion)}
-                    >
-                      {suggestion}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Button onClick={handleAddTask} disabled={!newTaskTitle.trim()}>
-              クイック追加
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>タスク一覧</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Suspense
-            fallback={
-              <p className="text-center text-muted-foreground">
-                タスクを読み込み中...
-              </p>
-            }
-          >
-            <div className="space-y-4">
-              {tasks.length > 0 ? (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={tasks.map((task) => task.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {tasks.map((task) => (
-                      <SortableTask
-                        key={task.id}
-                        task={task}
-                        taskEdit={taskEdit}
-                        taskActions={taskActions}
-                        lastTaskEndTime={lastTaskEndTime}
-                        categories={categories}
-                      />
-                    ))}
-                  </SortableContext>
-                </DndContext>
-              ) : (
-                <p className="text-center text-muted-foreground">
-                  タスクが見つかりません
-                </p>
-              )}
-            </div>
-          </Suspense>
-        </CardContent>
-      </Card>
-    </div>
-    
-    {/* 現在実行中のタスクフッター */}
-    <CurrentTaskFooter
-      currentTask={currentRunningTask || null}
-      categories={categories}
-      onTaskTimer={taskActions.handleTaskTimer}
-    />
+      {/* 現在実行中のタスクフッター */}
+      <CurrentTaskFooter
+        currentTask={currentRunningTask || null}
+        categories={categories}
+        onTaskTimer={taskActions.handleTaskTimer}
+      />
     </>
   );
 };
