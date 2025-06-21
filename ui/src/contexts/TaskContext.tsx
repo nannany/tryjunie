@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode } from "react";
+import React, { createContext, useContext } from "react";
 import { Task, Category } from "@/types/task";
 import { EditingField } from "@/components/task/types";
 
@@ -47,7 +47,9 @@ export interface TaskContextType {
 }
 
 // コンテキストの作成
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+export const TaskContext = createContext<TaskContextType | undefined>(
+  undefined,
+);
 
 // TaskContextを使用するためのカスタムフック
 export const useTaskContext = (): TaskContextType => {
@@ -56,18 +58,4 @@ export const useTaskContext = (): TaskContextType => {
     throw new Error("useTaskContext must be used within a TaskProvider");
   }
   return context;
-};
-
-// TaskProviderのプロパティ
-interface TaskProviderProps {
-  children: ReactNode;
-  value: TaskContextType;
-}
-
-// TaskProvider コンポーネント
-export const TaskProvider: React.FC<TaskProviderProps> = ({
-  children,
-  value,
-}) => {
-  return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
 };

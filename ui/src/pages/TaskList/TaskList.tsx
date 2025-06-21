@@ -42,7 +42,8 @@ import { taskReducer } from "@/reducers/taskReducer";
 import { useTaskEdit } from "@/hooks/useTaskEdit";
 import { useTaskActions } from "@/hooks/useTaskActions";
 import { CurrentTaskFooter } from "@/components/CurrentTaskFooter";
-import { TaskProvider, TaskContextType } from "@/contexts/TaskContext";
+import { TaskContextType } from "@/contexts/TaskContext";
+import { TaskProvider } from "@/contexts/TaskProvider";
 
 const supabase = createClient();
 
