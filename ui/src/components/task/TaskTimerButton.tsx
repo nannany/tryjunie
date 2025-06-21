@@ -54,42 +54,30 @@ export const TaskTimerButton = ({
   }
 
   return (
-    <div
-      className="relative"
+    <Button
+      size="icon"
+      variant="outline"
+      className="h-8 w-8 hover:bg-opacity-10"
+      style={{
+        color: categoryColor,
+        borderColor: categoryColor,
+        backgroundColor: `${categoryColor}20`,
+      }}
+      disabled={!onRepeatTask}
+      onClick={(e) => {
+        if (onRepeatTask) {
+          e.stopPropagation();
+          onRepeatTask(task);
+        }
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Button
-        size="icon"
-        variant="outline"
-        className="h-8 w-8"
-        style={{
-          color: categoryColor,
-          borderColor: categoryColor,
-          backgroundColor: `${categoryColor}20`,
-        }}
-        disabled
-      >
+      {isHovered && onRepeatTask ? (
+        <RotateCcw className="h-4 w-4" />
+      ) : (
         <CheckCircle2 className="h-4 w-4" />
-      </Button>
-
-      {isHovered && onRepeatTask && (
-        <Button
-          size="icon"
-          variant="outline"
-          className="absolute -top-2 -right-2 h-6 w-6 bg-white shadow-md hover:bg-gray-50"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRepeatTask(task);
-          }}
-          style={{
-            color: categoryColor,
-            borderColor: categoryColor,
-          }}
-        >
-          <RotateCcw className="h-3 w-3" />
-        </Button>
       )}
-    </div>
+    </Button>
   );
 };
