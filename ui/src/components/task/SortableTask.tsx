@@ -39,6 +39,7 @@ interface TaskActions {
     taskId: string,
     action: "start" | "stop" | "complete",
   ) => void;
+  handleRepeatTask: (task: Task) => void;
 }
 
 interface SortableTaskProps {
@@ -164,6 +165,7 @@ const SortableTask = ({
         <TaskTimerButton
           task={task}
           onTaskTimer={taskActions.handleTaskTimer}
+          onRepeatTask={taskActions.handleRepeatTask}
           categoryColor={categoryColor}
         />
 

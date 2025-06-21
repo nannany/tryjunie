@@ -208,6 +208,64 @@ const TaskList = () => {
     return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
+  // タスク繰り返し機能
+  const handleRepeatTask = async (originalTask: Task) => {
+    if (!selectedDate || !user?.id) {
+      toast({
+        title: "Error",
+        description: "User not authenticated or date not selected",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    startTransition(async () => {
+      // 同じ名前、同じカテゴリーで新しいタスクを作成
+      const newTask = {
+        title: originalTask.title,
+        description: originalTask.description,
+        user_id: user.id,
+        estimated_minute: originalTask.estimated_minute,
+        category_id: originalTask.category_id,
+        task_date: convertDateStringToDate(
+          selectedDate
+            .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+            .split(" ")[0],
+        ),
+      };
+
+      const { data, error } = await supabase
+        .from("tasks")
+        .insert(newTask)
+        .select();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to repeat task",
+          variant: "destructive",
+        });
+        console.error("Error repeating task:", error);
+      } else {
+        const createdTask = (data?.[0] as unknown as Task) || ({} as Task);
+
+        // 新しく作成したタスクをリストに追加
+        dispatch({
+          type: "ADD_TASK",
+          payload: createdTask,
+        });
+
+        // 新しいタスクを自動的に開始
+        taskActions.handleTaskTimer(createdTask.id, "start");
+
+        toast({
+          title: "Success",
+          description: `タスク "${originalTask.title}" を繰り返し作成し、開始しました`,
+        });
+      }
+    });
+  };
+
   // クイックタスク追加
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) {
@@ -512,7 +570,10 @@ const TaskList = () => {
                           key={task.id}
                           task={task}
                           taskEdit={taskEdit}
-                          taskActions={taskActions}
+                          taskActions={{
+                            ...taskActions,
+                            handleRepeatTask,
+                          }}
                           lastTaskEndTime={lastTaskEndTime}
                           categories={categories}
                         />

@@ -1,18 +1,22 @@
 import { Button } from "@/components/ui/button";
-import { Play, Square, CheckCircle2 } from "lucide-react";
+import { Play, Square, CheckCircle2, RotateCcw } from "lucide-react";
 import { Task } from "./types";
+import { useState } from "react";
 
 interface TaskTimerButtonProps {
   task: Task;
   onTaskTimer: (taskId: string, action: "start" | "stop" | "complete") => void;
+  onRepeatTask?: (task: Task) => void;
   categoryColor?: string;
 }
 
 export const TaskTimerButton = ({
   task,
   onTaskTimer,
+  onRepeatTask,
   categoryColor = "#6b7280",
 }: TaskTimerButtonProps) => {
+  const [isHovered, setIsHovered] = useState(false);
   if (!task.start_time) {
     return (
       <Button
@@ -50,18 +54,42 @@ export const TaskTimerButton = ({
   }
 
   return (
-    <Button
-      size="icon"
-      variant="outline"
-      className="h-8 w-8"
-      style={{
-        color: categoryColor,
-        borderColor: categoryColor,
-        backgroundColor: `${categoryColor}20`,
-      }}
-      disabled
+    <div
+      className="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      <CheckCircle2 className="h-4 w-4" />
-    </Button>
+      <Button
+        size="icon"
+        variant="outline"
+        className="h-8 w-8"
+        style={{
+          color: categoryColor,
+          borderColor: categoryColor,
+          backgroundColor: `${categoryColor}20`,
+        }}
+        disabled
+      >
+        <CheckCircle2 className="h-4 w-4" />
+      </Button>
+
+      {isHovered && onRepeatTask && (
+        <Button
+          size="icon"
+          variant="outline"
+          className="absolute -top-2 -right-2 h-6 w-6 bg-white shadow-md hover:bg-gray-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRepeatTask(task);
+          }}
+          style={{
+            color: categoryColor,
+            borderColor: categoryColor,
+          }}
+        >
+          <RotateCcw className="h-3 w-3" />
+        </Button>
+      )}
+    </div>
   );
 };
