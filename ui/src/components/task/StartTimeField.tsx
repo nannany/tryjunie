@@ -10,28 +10,33 @@ import { ChevronDown } from "lucide-react";
 import { parseTimeInputToISOString } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { TaskEditProps } from "./types";
+import { Task } from "./types";
+import { useTaskContext } from "@/contexts/TaskContext";
 
 const supabase = createClient();
 
-interface StartTimeFieldProps extends TaskEditProps {
+interface StartTimeFieldProps {
+  task: Task;
   lastTaskEndTime?: string | null;
   categoryColor?: string;
 }
 
 export const StartTimeField = ({
   task,
-  editingField,
-  editValue,
-  onEditStart,
-  setEditValue,
-  setEditingField,
-  handleEditSave,
   lastTaskEndTime,
   categoryColor = "#6b7280",
 }: StartTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { toast } = useToast();
+  const { taskEdit } = useTaskContext();
+  const {
+    editingField,
+    editValue,
+    handleEditStart,
+    setEditValue,
+    setEditingField,
+    handleEditSave,
+  } = taskEdit;
 
   const isEditing =
     editingField?.taskId === task.id && editingField?.field === "start_time";
@@ -220,7 +225,7 @@ export const StartTimeField = ({
     <p
       className="cursor-pointer hover:bg-gray-50 p-1 rounded"
       onClick={() => {
-        onEditStart(task.id, "start_time", fieldValue || "");
+        handleEditStart(task.id, "start_time", fieldValue || "");
       }}
     >
       <span style={{ color: categoryColor }}>開始: </span>

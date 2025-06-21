@@ -10,53 +10,17 @@ import { StartTimeField } from "./StartTimeField";
 import { EndTimeField } from "./EndTimeField";
 import { TaskCategoryField } from "./TaskCategoryField";
 import { TaskMetaInfo } from "./TaskMetaInfo";
-import { Task, Category } from "@/types/task";
-import { EditingField } from "./types";
-
-interface TaskEditActions {
-  editingField: EditingField | null;
-  editValue: string;
-  setEditingField: (field: EditingField | null) => void;
-  setEditValue: (value: string) => void;
-  handleEditStart: (
-    taskId: string,
-    field:
-      | "title"
-      | "estimated_minute"
-      | "start_time"
-      | "end_time"
-      | "category_id",
-    value: string,
-  ) => void;
-  handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleEditSave: (customValue?: string) => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-}
-
-interface TaskActions {
-  handleDelete: (taskId: string) => void;
-  handleTaskTimer: (
-    taskId: string,
-    action: "start" | "stop" | "complete",
-  ) => void;
-  handleRepeatTask: (task: Task) => void;
-}
+import { Task } from "@/types/task";
+import { useTaskContext } from "@/contexts/TaskContext";
 
 interface SortableTaskProps {
   task: Task;
-  taskEdit: TaskEditActions;
-  taskActions: TaskActions;
-  lastTaskEndTime: string | null;
-  categories: Category[];
 }
 
-const SortableTask = ({
-  task,
-  taskEdit,
-  taskActions,
-  lastTaskEndTime,
-  categories,
-}: SortableTaskProps) => {
+const SortableTask = ({ task }: SortableTaskProps) => {
+  // TaskContextから必要な値を取得
+  const { taskEdit, taskActions, lastTaskEndTime, categories } =
+    useTaskContext();
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id: task.id,
@@ -132,18 +96,6 @@ const SortableTask = ({
   );
   const categoryColor = selectedCategory?.color || "#6b7280";
 
-  const taskEditProps = {
-    task,
-    editingField: taskEdit.editingField,
-    editValue: taskEdit.editValue,
-    onEditStart: taskEdit.handleEditStart,
-    handleEditChange: taskEdit.handleEditChange,
-    handleEditSave: taskEdit.handleEditSave,
-    handleKeyDown: taskEdit.handleKeyDown,
-    setEditValue: taskEdit.setEditValue,
-    setEditingField: taskEdit.setEditingField,
-  };
-
   return (
     <div
       ref={setNodeRef}
@@ -162,31 +114,23 @@ const SortableTask = ({
           <GripVertical className="h-4 w-4" style={{ color: categoryColor }} />
         </div>
 
-        <TaskTimerButton
-          task={task}
-          onTaskTimer={taskActions.handleTaskTimer}
-          onRepeatTask={taskActions.handleRepeatTask}
-          categoryColor={categoryColor}
-        />
+        <TaskTimerButton task={task} categoryColor={categoryColor} />
 
         <div className="flex-grow">
-          <TaskTitleField {...taskEditProps} categoryColor={categoryColor} />
+          <TaskTitleField task={task} categoryColor={categoryColor} />
 
           <div className="flex gap-3 text-sm text-muted-foreground">
-            <TaskEstimatedTimeField
-              {...taskEditProps}
-              categoryColor={categoryColor}
-            />
+            <TaskEstimatedTimeField task={task} categoryColor={categoryColor} />
 
             <StartTimeField
-              {...taskEditProps}
+              task={task}
               lastTaskEndTime={lastTaskEndTime}
               categoryColor={categoryColor}
             />
 
-            <EndTimeField {...taskEditProps} categoryColor={categoryColor} />
+            <EndTimeField task={task} categoryColor={categoryColor} />
 
-            <TaskCategoryField {...taskEditProps} categories={categories} />
+            <TaskCategoryField task={task} categories={categories} />
 
             <TaskMetaInfo task={task} categoryColor={categoryColor} />
           </div>

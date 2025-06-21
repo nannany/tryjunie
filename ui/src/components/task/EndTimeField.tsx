@@ -2,23 +2,28 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { cn, parseTimeInputToISOString } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { TaskEditProps } from "./types";
+import { Task } from "./types";
+import { useTaskContext } from "@/contexts/TaskContext";
 
-interface EndTimeFieldProps extends TaskEditProps {
+interface EndTimeFieldProps {
+  task: Task;
   categoryColor?: string;
 }
 
 export const EndTimeField = ({
   task,
-  editingField,
-  editValue,
-  onEditStart,
-  setEditValue,
-  setEditingField,
-  handleEditSave,
   categoryColor = "#6b7280",
 }: EndTimeFieldProps) => {
   const { toast } = useToast();
+  const { taskEdit } = useTaskContext();
+  const {
+    editingField,
+    editValue,
+    handleEditStart,
+    setEditValue,
+    setEditingField,
+    handleEditSave,
+  } = taskEdit;
 
   const isEditing =
     editingField?.taskId === task.id && editingField?.field === "end_time";
@@ -109,7 +114,7 @@ export const EndTimeField = ({
       )}
       onClick={() => {
         if (!isDisabled) {
-          onEditStart(task.id, "end_time", fieldValue || "");
+          handleEditStart(task.id, "end_time", fieldValue || "");
         }
       }}
     >

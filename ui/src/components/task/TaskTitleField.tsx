@@ -1,20 +1,26 @@
 import { Input } from "@/components/ui/input";
-import { TaskEditProps } from "./types";
+import { Task } from "@/types/task";
+import { useTaskContext } from "@/contexts/TaskContext";
 
-interface TaskTitleFieldProps extends TaskEditProps {
+interface TaskTitleFieldProps {
+  task: Task;
   categoryColor?: string;
 }
 
 export const TaskTitleField = ({
   task,
-  editingField,
-  editValue,
-  onEditStart,
-  handleEditChange,
-  handleEditSave,
-  handleKeyDown,
   categoryColor = "#374151",
 }: TaskTitleFieldProps) => {
+  // TaskContextから必要な値を取得
+  const { taskEdit } = useTaskContext();
+  const {
+    editingField,
+    editValue,
+    handleEditStart,
+    handleEditChange,
+    handleEditSave,
+    handleKeyDown,
+  } = taskEdit;
   const isEditing =
     editingField?.taskId === task.id && editingField?.field === "title";
 
@@ -35,7 +41,7 @@ export const TaskTitleField = ({
     <p
       className="font-medium mb-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
       style={{ color: categoryColor }}
-      onClick={() => onEditStart(task.id, "title", task.title)}
+      onClick={() => handleEditStart(task.id, "title", task.title)}
     >
       {task.title}
     </p>

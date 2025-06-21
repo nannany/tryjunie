@@ -6,23 +6,22 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown, Tag } from "lucide-react";
-import { TaskEditProps } from "./types";
-import { Category } from "@/types/task";
+import { Task, Category } from "@/types/task";
+import { useTaskContext } from "@/contexts/TaskContext";
 
-interface TaskCategoryFieldProps extends TaskEditProps {
+interface TaskCategoryFieldProps {
+  task: Task;
   categories: Category[];
 }
 
 export const TaskCategoryField = ({
   task,
-  editingField,
-  onEditStart,
-  setEditValue,
-  setEditingField: _setEditingField,
-  handleEditSave,
   categories,
 }: TaskCategoryFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const { taskEdit } = useTaskContext();
+  const { editingField, handleEditStart, setEditValue, handleEditSave } =
+    taskEdit;
 
   const isEditing =
     editingField?.taskId === task.id && editingField?.field === "category_id";
@@ -114,7 +113,7 @@ export const TaskCategoryField = ({
     <p
       className="cursor-pointer hover:bg-gray-50 p-1 rounded flex items-center"
       onClick={() => {
-        onEditStart(task.id, "category_id", fieldValue || "");
+        handleEditStart(task.id, "category_id", fieldValue || "");
       }}
     >
       <Tag

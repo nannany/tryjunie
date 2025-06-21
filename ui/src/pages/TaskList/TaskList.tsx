@@ -42,6 +42,7 @@ import { taskReducer } from "@/reducers/taskReducer";
 import { useTaskEdit } from "@/hooks/useTaskEdit";
 import { useTaskActions } from "@/hooks/useTaskActions";
 import { CurrentTaskFooter } from "@/components/CurrentTaskFooter";
+import { TaskProvider, TaskContextType } from "@/contexts/TaskContext";
 
 const supabase = createClient();
 
@@ -450,8 +451,21 @@ const TaskList = () => {
     }
   };
 
+  // TaskContextの値を準備
+  const taskContextValue: TaskContextType = {
+    tasks,
+    categories,
+    lastTaskEndTime,
+    currentRunningTask: currentRunningTask || null,
+    taskEdit,
+    taskActions: {
+      ...taskActions,
+      handleRepeatTask,
+    },
+  };
+
   return (
-    <>
+    <TaskProvider value={taskContextValue}>
       <div className="space-y-6 pb-20">
         <div className="flex items-center justify-between">
           <div>
@@ -566,17 +580,7 @@ const TaskList = () => {
                       strategy={verticalListSortingStrategy}
                     >
                       {tasks.map((task) => (
-                        <SortableTask
-                          key={task.id}
-                          task={task}
-                          taskEdit={taskEdit}
-                          taskActions={{
-                            ...taskActions,
-                            handleRepeatTask,
-                          }}
-                          lastTaskEndTime={lastTaskEndTime}
-                          categories={categories}
-                        />
+                        <SortableTask key={task.id} task={task} />
                       ))}
                     </SortableContext>
                   </DndContext>
@@ -597,7 +601,7 @@ const TaskList = () => {
         categories={categories}
         onTaskTimer={taskActions.handleTaskTimer}
       />
-    </>
+    </TaskProvider>
   );
 };
 

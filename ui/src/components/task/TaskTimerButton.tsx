@@ -2,27 +2,28 @@ import { Button } from "@/components/ui/button";
 import { Play, Square, CheckCircle2, RotateCcw } from "lucide-react";
 import { Task } from "./types";
 import { useState } from "react";
+import { useTaskContext } from "@/contexts/TaskContext";
 
 interface TaskTimerButtonProps {
   task: Task;
-  onTaskTimer: (taskId: string, action: "start" | "stop" | "complete") => void;
-  onRepeatTask?: (task: Task) => void;
   categoryColor?: string;
 }
 
 export const TaskTimerButton = ({
   task,
-  onTaskTimer,
-  onRepeatTask,
   categoryColor = "#6b7280",
 }: TaskTimerButtonProps) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  // TaskContextから必要な関数を取得
+  const { taskActions } = useTaskContext();
+  const { handleTaskTimer, handleRepeatTask } = taskActions;
   if (!task.start_time) {
     return (
       <Button
         size="icon"
         variant="outline"
-        onClick={() => onTaskTimer(task.id, "start")}
+        onClick={() => handleTaskTimer(task.id, "start")}
         className="h-8 w-8 hover:bg-opacity-10"
         style={{
           color: categoryColor,
@@ -40,7 +41,7 @@ export const TaskTimerButton = ({
       <Button
         size="icon"
         variant="outline"
-        onClick={() => onTaskTimer(task.id, "stop")}
+        onClick={() => handleTaskTimer(task.id, "stop")}
         className="h-8 w-8 hover:bg-opacity-10"
         style={{
           color: categoryColor,
@@ -63,17 +64,17 @@ export const TaskTimerButton = ({
         borderColor: categoryColor,
         backgroundColor: `${categoryColor}20`,
       }}
-      disabled={!onRepeatTask}
+      disabled={!handleRepeatTask}
       onClick={(e) => {
-        if (onRepeatTask) {
+        if (handleRepeatTask) {
           e.stopPropagation();
-          onRepeatTask(task);
+          handleRepeatTask(task);
         }
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {isHovered && onRepeatTask ? (
+      {isHovered ? (
         <RotateCcw className="h-4 w-4" />
       ) : (
         <CheckCircle2 className="h-4 w-4" />

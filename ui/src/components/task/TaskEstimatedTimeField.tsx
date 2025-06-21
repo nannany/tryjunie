@@ -7,24 +7,29 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
-import { TaskEditProps } from "./types";
+import { Task } from "./types";
+import { useTaskContext } from "@/contexts/TaskContext";
 
-interface TaskEstimatedTimeFieldProps extends TaskEditProps {
+interface TaskEstimatedTimeFieldProps {
+  task: Task;
   categoryColor?: string;
 }
 
 export const TaskEstimatedTimeField = ({
   task,
-  editingField,
-  editValue,
-  onEditStart,
-  handleEditChange,
-  handleEditSave,
-  setEditValue,
-  setEditingField,
   categoryColor = "#6b7280",
 }: TaskEstimatedTimeFieldProps) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const { taskEdit } = useTaskContext();
+  const {
+    editingField,
+    editValue,
+    handleEditStart,
+    handleEditChange,
+    handleEditSave,
+    setEditValue,
+    setEditingField,
+  } = taskEdit;
 
   const isEditing =
     editingField?.taskId === task.id &&
@@ -114,7 +119,7 @@ export const TaskEstimatedTimeField = ({
     <p
       className="cursor-pointer hover:bg-gray-50 p-1 rounded"
       onClick={() =>
-        onEditStart(
+        handleEditStart(
           task.id,
           "estimated_minute",
           task.estimated_minute ? task.estimated_minute.toString() : "",
