@@ -57,7 +57,9 @@ const TaskList = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date(),
   );
-  const [taskSuggestions, setTaskSuggestions] = useState<string[]>([]);
+  const [taskSuggestions, setTaskSuggestions] = useState<
+    { title: string; category_id: string | null }[]
+  >([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const debounceTimeoutRef = useRef<number | null>(null);
@@ -79,7 +81,7 @@ const TaskList = () => {
 
       const { data, error } = await supabase
         .from("tasks")
-        .select("title")
+        .select("title, category_id")
         .eq("user_id", user.id)
         .ilike("title", `%${query}%`)
         .neq("title", query)
@@ -91,11 +93,22 @@ const TaskList = () => {
         return;
       }
 
-      const uniqueTitles = Array.from(
-        new Set(data?.map((task) => task.title as string) || []),
-      );
-      setTaskSuggestions(uniqueTitles);
-      setShowSuggestions(uniqueTitles.length > 0);
+      const uniqueSuggestions =
+        data?.reduce(
+          (acc: { title: string; category_id: string | null }[], task) => {
+            const existing = acc.find((item) => item.title === task.title);
+            if (!existing) {
+              acc.push({
+                title: task.title as string,
+                category_id: task.category_id as string | null,
+              });
+            }
+            return acc;
+          },
+          [],
+        ) || [];
+      setTaskSuggestions(uniqueSuggestions);
+      setShowSuggestions(uniqueSuggestions.length > 0);
     },
     [user?.id],
   );
@@ -340,7 +353,10 @@ const TaskList = () => {
   };
 
   // 提案を選択
-  const selectSuggestion = async (suggestion: string) => {
+  const selectSuggestion = async (suggestion: {
+    title: string;
+    category_id: string | null;
+  }) => {
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
     setNewTaskTitle("");
@@ -350,10 +366,11 @@ const TaskList = () => {
 
     startTransition(async () => {
       const newTask = {
-        title: suggestion,
+        title: suggestion.title,
         description: "",
         user_id: user.id,
         estimated_minute: null,
+        category_id: suggestion.category_id,
         task_date: convertDateStringToDate(
           selectedDate
             .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
@@ -536,7 +553,7 @@ const TaskList = () => {
                   <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
                     {taskSuggestions.map((suggestion, index) => (
                       <div
-                        key={suggestion}
+                        key={suggestion.title}
                         className={cn(
                           "px-3 py-2 cursor-pointer hover:bg-gray-100",
                           selectedSuggestionIndex === index &&
@@ -544,7 +561,7 @@ const TaskList = () => {
                         )}
                         onClick={() => selectSuggestion(suggestion)}
                       >
-                        {suggestion}
+                        {suggestion.title}
                       </div>
                     ))}
                   </div>
