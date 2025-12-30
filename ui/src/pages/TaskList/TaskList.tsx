@@ -47,6 +47,12 @@ import { TaskProvider } from "@/contexts/TaskProvider";
 
 const supabase = createClient();
 
+type TaskSuggestion = {
+  title: string;
+  category_id: string | null;
+  estimated_minute: number | null;
+};
+
 const TaskList = () => {
   const { user } = useSupabaseUser();
 
@@ -57,9 +63,7 @@ const TaskList = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     new Date(),
   );
-  const [taskSuggestions, setTaskSuggestions] = useState<
-    { title: string; category_id: string | null }[]
-  >([]);
+  const [taskSuggestions, setTaskSuggestions] = useState<TaskSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const debounceTimeoutRef = useRef<number | null>(null);
@@ -81,7 +85,7 @@ const TaskList = () => {
 
       const { data, error } = await supabase
         .from("tasks")
-        .select("title, category_id")
+        .select("title, category_id, estimated_minute")
         .eq("user_id", user.id)
         .ilike("title", `%${query}%`)
         .neq("title", query)
@@ -95,12 +99,13 @@ const TaskList = () => {
 
       const uniqueSuggestions =
         data?.reduce(
-          (acc: { title: string; category_id: string | null }[], task) => {
+          (acc: TaskSuggestion[], task) => {
             const existing = acc.find((item) => item.title === task.title);
             if (!existing) {
               acc.push({
                 title: task.title as string,
                 category_id: task.category_id as string | null,
+                estimated_minute: task.estimated_minute as number | null,
               });
             }
             return acc;
@@ -353,10 +358,7 @@ const TaskList = () => {
   };
 
   // 提案を選択
-  const selectSuggestion = async (suggestion: {
-    title: string;
-    category_id: string | null;
-  }) => {
+  const selectSuggestion = async (suggestion: TaskSuggestion) => {
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
     setNewTaskTitle("");
@@ -369,7 +371,7 @@ const TaskList = () => {
         title: suggestion.title,
         description: "",
         user_id: user.id,
-        estimated_minute: null,
+        estimated_minute: suggestion.estimated_minute,
         category_id: suggestion.category_id,
         task_date: convertDateStringToDate(
           selectedDate
@@ -561,7 +563,14 @@ const TaskList = () => {
                         )}
                         onClick={() => selectSuggestion(suggestion)}
                       >
-                        {suggestion.title}
+                        <div className="flex items-center justify-between">
+                          <span>{suggestion.title}</span>
+                          {suggestion.estimated_minute !== null && (
+                            <span className="text-xs text-muted-foreground">
+                              目安 {suggestion.estimated_minute}分
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
