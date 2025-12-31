@@ -1,9 +1,47 @@
-import globals from "globals";
 import tseslint from "typescript-eslint";
 import pluginReact from "eslint-plugin-react";
 import eslintPluginReactHooks from "eslint-plugin-react-hooks";
 import eslintPluginReactRefresh from "eslint-plugin-react-refresh";
 import js from "@eslint/js"; // For eslint:recommended
+
+const nodeGlobals = {
+  __dirname: "readonly",
+  __filename: "readonly",
+  Buffer: "readonly",
+  console: "readonly",
+  exports: "readonly",
+  global: "readonly",
+  module: "writable",
+  process: "readonly",
+  require: "writable",
+  setImmediate: "readonly",
+  clearImmediate: "readonly",
+};
+
+const browserGlobals = {
+  window: "readonly",
+  document: "readonly",
+  navigator: "readonly",
+  localStorage: "readonly",
+  sessionStorage: "readonly",
+  fetch: "readonly",
+  Request: "readonly",
+  Response: "readonly",
+  Headers: "readonly",
+  AbortController: "readonly",
+  console: "readonly",
+  setTimeout: "readonly",
+  clearTimeout: "readonly",
+  setInterval: "readonly",
+  clearInterval: "readonly",
+};
+
+const es2021Globals = {
+  globalThis: "readonly",
+  BigInt: "readonly",
+  Atomics: "readonly",
+  SharedArrayBuffer: "readonly",
+};
 
 export default [
   {
@@ -16,7 +54,7 @@ export default [
       ecmaVersion: "latest",
       sourceType: "commonjs",
       globals: {
-        ...globals.node,
+        ...nodeGlobals,
         module: "writable",
         require: "writable",
         process: "readonly",
@@ -36,7 +74,7 @@ export default [
       ecmaVersion: "latest",
       sourceType: "module",
       globals: {
-        ...globals.node,
+        ...nodeGlobals,
         process: "readonly",
       },
     },
@@ -62,8 +100,8 @@ export default [
         sourceType: "module",
       },
       globals: {
-        ...globals.browser,
-        ...globals.es2021,
+        ...browserGlobals,
+        ...es2021Globals,
       },
     },
     plugins: {
@@ -112,7 +150,7 @@ export default [
       },
       globals: {
         // Adjust globals as needed for mcp project
-        ...globals.node, // Or browser, depending on mcp's environment
+        ...nodeGlobals, // Or browser, depending on mcp's environment
       },
     },
     plugins: {
@@ -135,7 +173,7 @@ export default [
         sourceType: "module",
       },
       globals: {
-        ...globals.node,
+        ...nodeGlobals,
       },
     },
     plugins: {
