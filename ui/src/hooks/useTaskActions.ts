@@ -74,6 +74,8 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
       console.error("Error moving task to today:", error);
     } else {
       // ローカル状態から削除（画面から消す）
+      // 注：タスクは別の日付に移動しただけなので、データベースからは削除されていません。
+      // 現在表示している日付から消すため、DELETE_TASkアクションを使用します。
       dispatch({ type: "DELETE_TASK", payload: taskId });
 
       toast({
