@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
-import { GripVertical, Trash2 } from "lucide-react";
+import { GripVertical, Trash2, CalendarCheck } from "lucide-react";
 import React from "react";
 import { TaskTimerButton } from "./TaskTimerButton";
 import { TaskTitleField } from "./TaskTitleField";
@@ -96,6 +96,19 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   );
   const categoryColor = selectedCategory?.color || "#6b7280";
 
+  // 今日の日付を取得（JST）
+  const today = new Date()
+    .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+    .split(" ")[0];
+  const [year, month, day] = today.split("/");
+  const todayFormatted = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+  // タスクが今日のものかどうか
+  const isToday = task.task_date === todayFormatted;
+
+  // タスクが完了しているかどうか
+  const isCompleted = !!task.end_time;
+
   return (
     <div
       ref={setNodeRef}
@@ -138,6 +151,18 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       </div>
 
       <div className="flex gap-2 items-center">
+        {/* 今日に移動ボタン：完了していない＆今日以外のタスクに表示 */}
+        {!isCompleted && !isToday && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => taskActions.handleMoveToToday(task.id)}
+            className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+            title="今日に移動"
+          >
+            <CalendarCheck className="h-4 w-4" />
+          </Button>
+        )}
         <Button
           size="icon"
           variant="outline"

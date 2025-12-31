@@ -55,8 +55,41 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
     }
   };
 
+  // タスクを今日に移動
+  const handleMoveToToday = async (taskId: string) => {
+    const today = new Date();
+    const todayString = today
+      .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+      .split(" ")[0];
+    const [year, month, day] = todayString.split("/");
+    const taskDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+    const { error } = await supabase
+      .from("tasks")
+      .update({ task_date: taskDate })
+      .eq("id", taskId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to move task to today",
+        variant: "destructive",
+      });
+      console.error("Error moving task to today:", error);
+    } else {
+      // ローカル状態から削除（画面から消す）
+      dispatch({ type: "DELETE_TASK", payload: taskId });
+      
+      toast({
+        title: "Success",
+        description: "タスクを今日に移動しました",
+      });
+    }
+  };
+
   return {
     handleDelete,
     handleTaskTimer,
+    handleMoveToToday,
   };
 };
