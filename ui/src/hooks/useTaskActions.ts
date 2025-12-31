@@ -2,6 +2,7 @@ import React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { TaskAction } from "@/types/task";
+import { getTodayDateString } from "@/lib/utils";
 
 const supabase = createClient();
 
@@ -57,12 +58,7 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
 
   // タスクを今日に移動
   const handleMoveToToday = async (taskId: string) => {
-    const today = new Date();
-    const todayString = today
-      .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
-      .split(" ")[0];
-    const [year, month, day] = todayString.split("/");
-    const taskDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    const taskDate = getTodayDateString();
 
     const { error } = await supabase
       .from("tasks")
@@ -79,7 +75,7 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
     } else {
       // ローカル状態から削除（画面から消す）
       dispatch({ type: "DELETE_TASK", payload: taskId });
-      
+
       toast({
         title: "Success",
         description: "タスクを今日に移動しました",

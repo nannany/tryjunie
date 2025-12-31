@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { parseTimeInputToISOString } from "./utils";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { parseTimeInputToISOString, getTodayDateString } from "./utils";
 
 describe("parseTimeInputToISOString", () => {
   const baseDate = "2024-07-31"; // This will be treated as YYYY-MM-DD 00:00:00 in the local timezone by new Date()
@@ -119,5 +119,54 @@ describe("parseTimeInputToISOString", () => {
     expect(parseTimeInputToISOString("2359", baseDate)).toBe(
       getExpectedISO(23, 59),
     );
+  });
+});
+
+describe("getTodayDateString", () => {
+  beforeEach(() => {
+    // Mock Date.prototype.toLocaleString
+    vi.spyOn(Date.prototype, "toLocaleString").mockImplementation(
+      // @ts-expect-error - Mocking Date.prototype.toLocaleString with simplified signature
+      function (
+        this: Date,
+        locales?: string | string[],
+        options?: Intl.DateTimeFormatOptions,
+      ) {
+        if (locales === "ja-JP" && options?.timeZone === "Asia/Tokyo") {
+          // Mock a specific date for testing
+          return "2024/12/31 12:00:00";
+        }
+        return "";
+      },
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("should return today's date in YYYY-MM-DD format", () => {
+    const result = getTodayDateString();
+    expect(result).toBe("2024-12-31");
+  });
+
+  it("should pad single-digit month and day with zero", () => {
+    // Mock a date with single-digit month and day
+    vi.spyOn(Date.prototype, "toLocaleString").mockImplementation(
+      // @ts-expect-error - Mocking Date.prototype.toLocaleString with simplified signature
+      function (
+        this: Date,
+        locales?: string | string[],
+        options?: Intl.DateTimeFormatOptions,
+      ) {
+        if (locales === "ja-JP" && options?.timeZone === "Asia/Tokyo") {
+          return "2024/1/5 12:00:00";
+        }
+        return "";
+      },
+    );
+
+    const result = getTodayDateString();
+    expect(result).toBe("2024-01-05");
   });
 });

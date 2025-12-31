@@ -12,6 +12,7 @@ import { TaskCategoryField } from "./TaskCategoryField";
 import { TaskMetaInfo } from "./TaskMetaInfo";
 import { Task } from "@/types/task";
 import { useTaskContext } from "@/contexts/TaskContext";
+import { getTodayDateString } from "@/lib/utils";
 
 interface SortableTaskProps {
   task: Task;
@@ -97,11 +98,7 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   const categoryColor = selectedCategory?.color || "#6b7280";
 
   // 今日の日付を取得（JST）
-  const today = new Date()
-    .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
-    .split(" ")[0];
-  const [year, month, day] = today.split("/");
-  const todayFormatted = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+  const todayFormatted = getTodayDateString();
 
   // タスクが今日のものかどうか
   const isToday = task.task_date === todayFormatted;

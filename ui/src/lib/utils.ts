@@ -38,3 +38,14 @@ export const parseTimeInputToISOString = (
     return null;
   }
 };
+
+/**
+ * 現在の日付を YYYY-MM-DD 形式で取得（JST）
+ */
+export const getTodayDateString = (): string => {
+  const today = new Date()
+    .toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+    .split(" ")[0];
+  const [year, month, day] = today.split("/");
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+};
