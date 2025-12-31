@@ -8,12 +8,9 @@ import {
 } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
 import { parseTimeInputToISOString } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Task } from "./types";
 import { useTaskContext } from "@/contexts/TaskContext";
-
-const supabase = createClient();
 
 interface StartTimeFieldProps {
   task: Task;
@@ -104,27 +101,8 @@ export const StartTimeField = ({
   const handleTimeSelect = (isoString: string) => {
     setPopoverOpen(false);
     setEditValue(isoString);
-    // handleEditSaveはisoStringをそのまま使用
-    if (editingField) {
-      const { taskId, field } = editingField;
-      const updateData: any = {};
-      updateData[field] = isoString;
-
-      const updateTask = async () => {
-        const { error } = await supabase
-          .from("tasks")
-          .update(updateData)
-          .eq("id", taskId);
-
-        if (error) {
-          console.error(`Error updating task ${field}:`, error);
-        } else {
-          setEditingField(null);
-        }
-      };
-
-      updateTask();
-    }
+    // handleEditSaveを使用してDBと状態を同期
+    handleEditSave(isoString);
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
