@@ -58,7 +58,11 @@ const TaskList = () => {
     new Date(),
   );
   const [taskSuggestions, setTaskSuggestions] = useState<
-    { title: string; category_id: string | null }[]
+    {
+      title: string;
+      category_id: string | null;
+      estimated_minute: number | null;
+    }[]
   >([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
@@ -81,7 +85,7 @@ const TaskList = () => {
 
       const { data, error } = await supabase
         .from("tasks")
-        .select("title, category_id")
+        .select("title, category_id, estimated_minute")
         .eq("user_id", user.id)
         .ilike("title", `%${query}%`)
         .neq("title", query)
@@ -95,12 +99,20 @@ const TaskList = () => {
 
       const uniqueSuggestions =
         data?.reduce(
-          (acc: { title: string; category_id: string | null }[], task) => {
+          (
+            acc: {
+              title: string;
+              category_id: string | null;
+              estimated_minute: number | null;
+            }[],
+            task,
+          ) => {
             const existing = acc.find((item) => item.title === task.title);
             if (!existing) {
               acc.push({
                 title: task.title as string,
                 category_id: task.category_id as string | null,
+                estimated_minute: task.estimated_minute as number | null,
               });
             }
             return acc;
@@ -356,6 +368,7 @@ const TaskList = () => {
   const selectSuggestion = async (suggestion: {
     title: string;
     category_id: string | null;
+    estimated_minute: number | null;
   }) => {
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
@@ -369,7 +382,7 @@ const TaskList = () => {
         title: suggestion.title,
         description: "",
         user_id: user.id,
-        estimated_minute: null,
+        estimated_minute: suggestion.estimated_minute,
         category_id: suggestion.category_id,
         task_date: convertDateStringToDate(
           selectedDate
