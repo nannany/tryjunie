@@ -113,7 +113,9 @@ const SortableTask = ({ task }: SortableTaskProps) => {
         ...style,
         borderLeft: `4px solid ${categoryColor}`,
       }}
-      className="flex items-center justify-between rounded-md border p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      className={`flex items-center justify-between rounded-md border p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+        isCompleted ? "bg-gray-50 opacity-70" : ""
+      }`}
       onKeyDown={handleTaskKeyDown}
       data-task-id={task.id}
       {...attributes}
@@ -127,7 +129,11 @@ const SortableTask = ({ task }: SortableTaskProps) => {
         <TaskTimerButton task={task} categoryColor={categoryColor} />
 
         <div className="flex-grow">
-          <TaskTitleField task={task} categoryColor={categoryColor} />
+          <TaskTitleField
+            task={task}
+            categoryColor={categoryColor}
+            isCompleted={isCompleted}
+          />
 
           <div className="flex gap-3 text-sm text-muted-foreground">
             <TaskEstimatedTimeField task={task} categoryColor={categoryColor} />
