@@ -67,6 +67,28 @@ describe("taskReducer", () => {
       expect(newState[2].start_time).toBe("2024-01-01T10:00:00Z");
     });
 
+    it("should re-sort tasks when start_time is set to null", () => {
+      const task1WithStart = { ...mockTask1, start_time: "2024-01-01T10:00:00Z" };
+      const initialState = [mockTask2, mockTask3, task1WithStart];
+
+      // Task1のstart_timeをnullに設定
+      const action = {
+        type: "UPDATE_TASK" as const,
+        payload: {
+          id: "1",
+          start_time: null,
+        },
+      };
+
+      const newState = taskReducer(initialState, action);
+
+      // Task1がstart_time: nullになるため、task_orderに基づいて先頭に移動
+      expect(newState[0].id).toBe("1");
+      expect(newState[1].id).toBe("2");
+      expect(newState[2].id).toBe("3");
+      expect(newState[0].start_time).toBeNull();
+    });
+
     it("should sort tasks by start_time when multiple tasks have start_time", () => {
       const task1WithStart = { ...mockTask1, start_time: "2024-01-01T12:00:00Z" };
       const task2WithStart = { ...mockTask2, start_time: "2024-01-01T10:00:00Z" };

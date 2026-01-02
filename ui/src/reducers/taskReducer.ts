@@ -38,7 +38,7 @@ export const taskReducer = (state: Task[], action: TaskAction): Task[] => {
         task.id === action.payload.id ? { ...task, ...action.payload } : task,
       );
       // start_timeが更新された場合、タスクを再ソート
-      if (action.payload.start_time !== undefined) {
+      if ("start_time" in action.payload) {
         return sortTasks(updatedTasks);
       }
       return updatedTasks;
