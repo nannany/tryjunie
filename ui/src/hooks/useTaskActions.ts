@@ -2,6 +2,7 @@ import React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { TaskAction } from "@/types/task";
+import { getTodayDateString } from "@/lib/utils";
 
 const supabase = createClient();
 
@@ -55,8 +56,38 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
     }
   };
 
+  // タスクを今日に移動
+  const handleMoveToToday = async (taskId: string) => {
+    const taskDate = getTodayDateString();
+
+    const { error } = await supabase
+      .from("tasks")
+      .update({ task_date: taskDate })
+      .eq("id", taskId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to move task to today",
+        variant: "destructive",
+      });
+      console.error("Error moving task to today:", error);
+    } else {
+      // ローカル状態から削除（画面から消す）
+      // 注：タスクは別の日付に移動しただけなので、データベースからは削除されていません。
+      // 現在表示している日付から消すため、DELETE_TASkアクションを使用します。
+      dispatch({ type: "DELETE_TASK", payload: taskId });
+
+      toast({
+        title: "Success",
+        description: "タスクを今日に移動しました",
+      });
+    }
+  };
+
   return {
     handleDelete,
     handleTaskTimer,
+    handleMoveToToday,
   };
 };
