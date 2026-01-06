@@ -308,7 +308,22 @@ const TaskList = () => {
     const markdown = formatTasksAsMarkdown(tasks);
 
     try {
-      await navigator.clipboard.writeText(markdown);
+      // navigator.clipboardが利用可能かチェック
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(markdown);
+      } else {
+        // フォールバック: 古いブラウザ向け
+        const textArea = document.createElement("textarea");
+        textArea.value = markdown;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
       toast({
         title: "コピー完了",
         description: "タスクをマークダウン形式でコピーしました",
@@ -535,6 +550,8 @@ const TaskList = () => {
               variant="outline"
               size="sm"
               className="flex items-center gap-1"
+              aria-label="タスクをマークダウン形式でクリップボードにコピー"
+              title="タスク一覧をマークダウンチェックボックス形式でコピーします"
             >
               <Clipboard className="h-4 w-4" />
               マークダウンでコピー
