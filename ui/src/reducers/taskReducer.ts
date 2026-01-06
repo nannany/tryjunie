@@ -13,11 +13,12 @@ const sortTasks = (tasks: Task[]): Task[] => {
     }
     if (a.start_time === null) return -1;
     if (b.start_time === null) return 1;
-    
+
     // start_timeで比較
-    const timeCompare = new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
+    const timeCompare =
+      new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
     if (timeCompare !== 0) return timeCompare;
-    
+
     // start_timeが同じ場合、task_orderで比較
     if (a.task_order === null && b.task_order === null) return 0;
     if (a.task_order === null) return -1;

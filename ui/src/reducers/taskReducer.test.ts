@@ -48,7 +48,7 @@ describe("taskReducer", () => {
   describe("UPDATE_TASK with start_time", () => {
     it("should re-sort tasks when a task's start_time is updated", () => {
       const initialState = [mockTask1, mockTask2, mockTask3];
-      
+
       // Task2のstart_timeを設定
       const action = {
         type: "UPDATE_TASK" as const,
@@ -68,7 +68,10 @@ describe("taskReducer", () => {
     });
 
     it("should re-sort tasks when start_time is set to null", () => {
-      const task1WithStart = { ...mockTask1, start_time: "2024-01-01T10:00:00Z" };
+      const task1WithStart = {
+        ...mockTask1,
+        start_time: "2024-01-01T10:00:00Z",
+      };
       const initialState = [mockTask2, mockTask3, task1WithStart];
 
       // Task1のstart_timeをnullに設定
@@ -90,8 +93,14 @@ describe("taskReducer", () => {
     });
 
     it("should sort tasks by start_time when multiple tasks have start_time", () => {
-      const task1WithStart = { ...mockTask1, start_time: "2024-01-01T12:00:00Z" };
-      const task2WithStart = { ...mockTask2, start_time: "2024-01-01T10:00:00Z" };
+      const task1WithStart = {
+        ...mockTask1,
+        start_time: "2024-01-01T12:00:00Z",
+      };
+      const task2WithStart = {
+        ...mockTask2,
+        start_time: "2024-01-01T10:00:00Z",
+      };
       const initialState = [task1WithStart, task2WithStart, mockTask3];
 
       // Task3のstart_timeを設定（最も早い時刻）
@@ -112,7 +121,10 @@ describe("taskReducer", () => {
     });
 
     it("should keep tasks without start_time at the beginning", () => {
-      const task1WithStart = { ...mockTask1, start_time: "2024-01-01T10:00:00Z" };
+      const task1WithStart = {
+        ...mockTask1,
+        start_time: "2024-01-01T10:00:00Z",
+      };
       const initialState = [mockTask2, mockTask3, task1WithStart];
 
       // Task2のstart_timeを設定
