@@ -1,6 +1,6 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
-import { cn, parseTimeInputToISOString } from "@/lib/utils";
+import { cn, parseTimeInputToISOString, formatTimeAsHHmm } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { Task } from "./types";
 import { useTaskContext } from "@/contexts/TaskContext";
@@ -28,16 +28,6 @@ export const EndTimeField = ({
   const isEditing =
     editingField?.taskId === task.id && editingField?.field === "end_time";
   const fieldValue = task.end_time;
-
-  // 日時をフォーマット
-  const formatDateTime = (dateString: string | null) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleString("ja-JP", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditValue(e.target.value);
@@ -72,11 +62,7 @@ export const EndTimeField = ({
 
   const displayValue = editValue
     ? editValue.includes("T")
-      ? new Date(editValue).toLocaleTimeString("ja-JP", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+      ? formatTimeAsHHmm(editValue) || ""
       : editValue
     : "";
 
@@ -122,7 +108,7 @@ export const EndTimeField = ({
         終了:{" "}
       </span>
       <span style={{ color: isDisabled ? "#9ca3af" : categoryColor }}>
-        {formatDateTime(fieldValue) || `(クリックして設定)`}
+        {formatTimeAsHHmm(fieldValue) || `(クリックして設定)`}
       </span>
     </p>
   );

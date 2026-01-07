@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown } from "lucide-react";
-import { parseTimeInputToISOString } from "@/lib/utils";
+import { parseTimeInputToISOString, formatTimeAsHHmm } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { Task } from "./types";
 import { useTaskContext } from "@/contexts/TaskContext";
@@ -39,16 +39,6 @@ export const StartTimeField = ({
     editingField?.taskId === task.id && editingField?.field === "start_time";
   const fieldValue = task.start_time;
 
-  // 日時をフォーマット
-  const formatDateTime = (dateString: string | null) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toLocaleString("ja-JP", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   // 開始時刻オプションの生成
   const getStartTimeOptions = () => {
     const now = new Date();
@@ -58,39 +48,22 @@ export const StartTimeField = ({
     const options = [
       {
         value: now.toISOString(),
-        label: `現在時刻 (${now.toLocaleTimeString("ja-JP", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        })})`,
+        label: `現在時刻 (${formatTimeAsHHmm(now.toISOString())})`,
       },
       {
         value: fiveMinutesAgo.toISOString(),
-        label: `5分前 (${fiveMinutesAgo.toLocaleTimeString("ja-JP", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        })})`,
+        label: `5分前 (${formatTimeAsHHmm(fiveMinutesAgo.toISOString())})`,
       },
       {
         value: tenMinutesAgo.toISOString(),
-        label: `10分前 (${tenMinutesAgo.toLocaleTimeString("ja-JP", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        })})`,
+        label: `10分前 (${formatTimeAsHHmm(tenMinutesAgo.toISOString())})`,
       },
     ];
 
     if (lastTaskEndTime) {
-      const endTime = new Date(lastTaskEndTime);
       options.push({
         value: lastTaskEndTime,
-        label: `前のタスクの終了時間 (${endTime.toLocaleTimeString("ja-JP", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        })})`,
+        label: `前のタスクの終了時間 (${formatTimeAsHHmm(lastTaskEndTime)})`,
       });
     }
 
@@ -138,11 +111,7 @@ export const StartTimeField = ({
 
   const displayValue = editValue
     ? editValue.includes("T")
-      ? new Date(editValue).toLocaleTimeString("ja-JP", {
-          hour12: false,
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+      ? formatTimeAsHHmm(editValue) || ""
       : editValue
     : "";
 
@@ -208,7 +177,7 @@ export const StartTimeField = ({
     >
       <span style={{ color: categoryColor }}>開始: </span>
       <span style={{ color: categoryColor }}>
-        {formatDateTime(fieldValue) || `(クリックして設定)`}
+        {formatTimeAsHHmm(fieldValue) || `(クリックして設定)`}
       </span>
     </p>
   );

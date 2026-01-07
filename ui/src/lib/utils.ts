@@ -40,6 +40,21 @@ export const parseTimeInputToISOString = (
 };
 
 /**
+ * ISO文字列をHHmm形式にフォーマット（例：1715）
+ * @param dateString - ISO 8601形式の日付文字列、またはnull
+ * @returns HHmm形式の時刻文字列、または入力がnull/無効な場合はnull
+ */
+export const formatTimeAsHHmm = (dateString: string | null): string | null => {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  // 無効な日付の場合はnullを返す
+  if (isNaN(date.getTime())) return null;
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  return `${hours}${minutes}`;
+};
+
+/**
  * 現在の日付を YYYY-MM-DD 形式で取得（JST）
  */
 export const getTodayDateString = (): string => {
