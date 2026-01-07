@@ -50,32 +50,25 @@ export const StartTimeField = ({
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60000);
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
 
-    const formatTime = (date: Date) => {
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-      return `${hours}${minutes}`;
-    };
-
     const options = [
       {
         value: now.toISOString(),
-        label: `現在時刻 (${formatTime(now)})`,
+        label: `現在時刻 (${formatTimeAsHHmm(now.toISOString())})`,
       },
       {
         value: fiveMinutesAgo.toISOString(),
-        label: `5分前 (${formatTime(fiveMinutesAgo)})`,
+        label: `5分前 (${formatTimeAsHHmm(fiveMinutesAgo.toISOString())})`,
       },
       {
         value: tenMinutesAgo.toISOString(),
-        label: `10分前 (${formatTime(tenMinutesAgo)})`,
+        label: `10分前 (${formatTimeAsHHmm(tenMinutesAgo.toISOString())})`,
       },
     ];
 
     if (lastTaskEndTime) {
-      const endTime = new Date(lastTaskEndTime);
       options.push({
         value: lastTaskEndTime,
-        label: `前のタスクの終了時間 (${formatTime(endTime)})`,
+        label: `前のタスクの終了時間 (${formatTimeAsHHmm(lastTaskEndTime)})`,
       });
     }
 
