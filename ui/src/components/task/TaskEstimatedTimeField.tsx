@@ -116,8 +116,9 @@ export const TaskEstimatedTimeField = ({
   }
 
   return (
-    <p
-      className="cursor-pointer hover:bg-gray-50 p-1 rounded"
+    <button
+      type="button"
+      className="cursor-pointer hover:bg-gray-50 p-1 rounded text-left"
       onClick={() =>
         handleEditStart(
           task.id,
@@ -130,6 +131,6 @@ export const TaskEstimatedTimeField = ({
       <span style={{ color: categoryColor }}>
         {formatEstimatedTime(task.estimated_minute) || "0分 (クリックして設定)"}
       </span>
-    </p>
+    </button>
   );
 };

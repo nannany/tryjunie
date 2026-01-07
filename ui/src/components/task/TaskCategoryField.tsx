@@ -110,8 +110,9 @@ export const TaskCategoryField = ({
   }
 
   return (
-    <p
-      className="cursor-pointer hover:bg-gray-50 p-1 rounded flex items-center"
+    <button
+      type="button"
+      className="cursor-pointer hover:bg-gray-50 p-1 rounded flex items-center text-left"
       onClick={() => {
         handleEditStart(task.id, "category_id", fieldValue || "");
       }}
@@ -123,6 +124,6 @@ export const TaskCategoryField = ({
       <span style={getCategoryTextStyle(selectedCategory)}>
         カテゴリ: {selectedCategory?.name || "(未選択)"}
       </span>
-    </p>
+    </button>
   );
 };
