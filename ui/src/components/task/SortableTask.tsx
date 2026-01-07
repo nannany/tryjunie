@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
-import { GripVertical, Trash2, CalendarCheck } from "lucide-react";
+import { GripVertical, Trash2, CalendarCheck, Pause } from "lucide-react";
 import React from "react";
 import { TaskTimerButton } from "./TaskTimerButton";
 import { TaskTitleField } from "./TaskTitleField";
@@ -106,6 +106,9 @@ const SortableTask = ({ task }: SortableTaskProps) => {
   // タスクが完了しているかどうか
   const isCompleted = !!task.end_time;
 
+  // タスクが実行中かどうか
+  const isRunning = !!task.start_time && !task.end_time;
+
   return (
     <div
       ref={setNodeRef}
@@ -154,6 +157,18 @@ const SortableTask = ({ task }: SortableTaskProps) => {
       </div>
 
       <div className="flex gap-2 items-center">
+        {/* 中断ボタン：実行中のタスクのみ表示 */}
+        {isRunning && (
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => taskActions.handlePauseTask(task)}
+            className="h-8 w-8 text-orange-500 hover:text-orange-700 hover:bg-orange-50"
+            title="中断"
+          >
+            <Pause className="h-4 w-4" />
+          </Button>
+        )}
         {/* 今日に移動ボタン：完了していない＆今日以外のタスクに表示 */}
         {!isCompleted && !isToday && (
           <Button

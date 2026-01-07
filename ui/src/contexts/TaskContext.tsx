@@ -32,6 +32,7 @@ export interface TaskActions {
   ) => void;
   handleRepeatTask: (task: Task) => void;
   handleMoveToToday: (taskId: string) => void;
+  handlePauseTask: (task: Task) => void;
 }
 
 // タスクコンテキストの型定義
