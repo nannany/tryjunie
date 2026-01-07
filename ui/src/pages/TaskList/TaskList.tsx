@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
+import { Calendar, Clipboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useSupabaseUser } from "@/lib/supabase/hooks/useSupabaseUser";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,7 @@ import { useTaskActions } from "@/hooks/useTaskActions";
 import { CurrentTaskFooter } from "@/components/CurrentTaskFooter";
 import { TaskContextType } from "@/contexts/TaskContext";
 import { TaskProvider } from "@/contexts/TaskProvider";
+import { formatTasksAsMarkdown } from "@/lib/formatTasksAsMarkdown";
 
 const supabase = createClient();
 
@@ -293,6 +294,50 @@ const TaskList = () => {
     });
   };
 
+  // クリップボードにマークダウン形式でコピー
+  const handleCopyToClipboard = async () => {
+    if (tasks.length === 0) {
+      toast({
+        title: "コピー失敗",
+        description: "コピーするタスクがありません",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const markdown = formatTasksAsMarkdown(tasks);
+
+    try {
+      // navigator.clipboardが利用可能かチェック
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(markdown);
+      } else {
+        // フォールバック: 古いブラウザ向け
+        const textArea = document.createElement("textarea");
+        textArea.value = markdown;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
+      toast({
+        title: "コピー完了",
+        description: "タスクをマークダウン形式でコピーしました",
+      });
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      toast({
+        title: "コピー失敗",
+        description: "クリップボードへのコピーに失敗しました",
+        variant: "destructive",
+      });
+    }
+  };
+
   // クイックタスク追加
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) {
@@ -499,14 +544,21 @@ const TaskList = () => {
     <TaskProvider value={taskContextValue}>
       <div className="space-y-6 pb-20">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleCopyToClipboard}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1"
+              aria-label="タスクをマークダウン形式でクリップボードにコピー"
+              title="タスク一覧をマークダウンチェックボックス形式でコピーします"
+            >
+              <Clipboard className="h-4 w-4" />
+              マークダウンでコピー
+            </Button>
             {totalEstimatedMinutes > 0 && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {totalEstimatedMinutes > 0 && (
-                  <span className="ml-2">
-                    完了予定: {calculateEndTime(totalEstimatedMinutes)}
-                  </span>
-                )}
+              <p className="text-sm text-muted-foreground">
+                完了予定: {calculateEndTime(totalEstimatedMinutes)}
               </p>
             )}
           </div>
