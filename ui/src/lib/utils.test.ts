@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { parseTimeInputToISOString, getTodayDateString } from "./utils";
+import {
+  parseTimeInputToISOString,
+  getTodayDateString,
+  formatTimeAsHHmm,
+} from "./utils";
 
 describe("parseTimeInputToISOString", () => {
   const baseDate = "2024-07-31"; // This will be treated as YYYY-MM-DD 00:00:00 in the local timezone by new Date()
@@ -168,5 +172,48 @@ describe("getTodayDateString", () => {
 
     const result = getTodayDateString();
     expect(result).toBe("2024-01-05");
+  });
+});
+
+describe("formatTimeAsHHmm", () => {
+  it("should format valid ISO string to HHmm format", () => {
+    // Create a date: 2024-07-31 17:30 in local timezone
+    const date = new Date("2024-07-31");
+    date.setHours(17, 30, 0, 0);
+    const isoString = date.toISOString();
+
+    const result = formatTimeAsHHmm(isoString);
+    expect(result).toBe("1730");
+  });
+
+  it("should format midnight as 0000", () => {
+    const date = new Date("2024-07-31");
+    date.setHours(0, 0, 0, 0);
+    const isoString = date.toISOString();
+
+    const result = formatTimeAsHHmm(isoString);
+    expect(result).toBe("0000");
+  });
+
+  it("should format morning time with leading zeros", () => {
+    const date = new Date("2024-07-31");
+    date.setHours(9, 5, 0, 0);
+    const isoString = date.toISOString();
+
+    const result = formatTimeAsHHmm(isoString);
+    expect(result).toBe("0905");
+  });
+
+  it("should return null for null input", () => {
+    expect(formatTimeAsHHmm(null)).toBeNull();
+  });
+
+  it("should format 23:59 as 2359", () => {
+    const date = new Date("2024-07-31");
+    date.setHours(23, 59, 0, 0);
+    const isoString = date.toISOString();
+
+    const result = formatTimeAsHHmm(isoString);
+    expect(result).toBe("2359");
   });
 });

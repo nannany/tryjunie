@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Task, Category } from "@/types/task";
 import { Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatTimeAsHHmm } from "@/lib/utils";
 
 interface CurrentTaskFooterProps {
   currentTask: Task | null;
@@ -76,13 +77,7 @@ export const CurrentTaskFooter = ({
                 <span style={{ color: categoryColor }}>{category.name}</span>
               )}
               <span>•</span>
-              <span>
-                開始:{" "}
-                {new Date(currentTask.start_time!).toLocaleTimeString("ja-JP", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
+              <span>開始: {formatTimeAsHHmm(currentTask.start_time!)}</span>
             </div>
           </div>
         </div>
