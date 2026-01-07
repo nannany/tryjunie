@@ -29,11 +29,6 @@ export const EndTimeField = ({
     editingField?.taskId === task.id && editingField?.field === "end_time";
   const fieldValue = task.end_time;
 
-  // 日時をフォーマット（HHmm形式）
-  const formatDateTime = (dateString: string | null) => {
-    return formatTimeAsHHmm(dateString);
-  };
-
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditValue(e.target.value);
   };
@@ -113,7 +108,7 @@ export const EndTimeField = ({
         終了:{" "}
       </span>
       <span style={{ color: isDisabled ? "#9ca3af" : categoryColor }}>
-        {formatDateTime(fieldValue) || `(クリックして設定)`}
+        {formatTimeAsHHmm(fieldValue) || `(クリックして設定)`}
       </span>
     </p>
   );

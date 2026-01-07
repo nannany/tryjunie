@@ -41,6 +41,8 @@ export const parseTimeInputToISOString = (
 
 /**
  * ISO文字列をHHmm形式にフォーマット（例：1715）
+ * @param dateString - ISO 8601形式の日付文字列、またはnull
+ * @returns HHmm形式の時刻文字列、または入力がnull/無効な場合はnull
  */
 export const formatTimeAsHHmm = (dateString: string | null): string | null => {
   if (!dateString) return null;

@@ -39,11 +39,6 @@ export const StartTimeField = ({
     editingField?.taskId === task.id && editingField?.field === "start_time";
   const fieldValue = task.start_time;
 
-  // 日時をフォーマット（HHmm形式）
-  const formatDateTime = (dateString: string | null) => {
-    return formatTimeAsHHmm(dateString);
-  };
-
   // 開始時刻オプションの生成
   const getStartTimeOptions = () => {
     const now = new Date();
@@ -182,7 +177,7 @@ export const StartTimeField = ({
     >
       <span style={{ color: categoryColor }}>開始: </span>
       <span style={{ color: categoryColor }}>
-        {formatDateTime(fieldValue) || `(クリックして設定)`}
+        {formatTimeAsHHmm(fieldValue) || `(クリックして設定)`}
       </span>
     </p>
   );
