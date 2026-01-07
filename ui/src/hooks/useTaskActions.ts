@@ -118,6 +118,7 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
       estimated_minute: task.estimated_minute,
       category_id: task.category_id,
       task_date: task.task_date,
+      task_order: null,
     };
 
     const { data, error: insertError } = await supabase
@@ -135,8 +136,18 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
       return;
     }
 
+    if (!data || data.length === 0) {
+      toast({
+        title: "Error",
+        description: "新しいタスクの作成に失敗しました",
+        variant: "destructive",
+      });
+      console.error("Error creating new task: No data returned");
+      return;
+    }
+
     // 新しく作成したタスクをリストに追加
-    const createdTask = (data?.[0] as unknown as Task) || ({} as Task);
+    const createdTask = data[0] as unknown as Task;
     dispatch({
       type: "ADD_TASK",
       payload: createdTask,
