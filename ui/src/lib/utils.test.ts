@@ -216,4 +216,8 @@ describe("formatTimeAsHHmm", () => {
     const result = formatTimeAsHHmm(isoString);
     expect(result).toBe("2359");
   });
+
+  it("should return null for invalid date string", () => {
+    expect(formatTimeAsHHmm("invalid-date")).toBeNull();
+  });
 });

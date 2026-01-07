@@ -45,6 +45,8 @@ export const parseTimeInputToISOString = (
 export const formatTimeAsHHmm = (dateString: string | null): string | null => {
   if (!dateString) return null;
   const date = new Date(dateString);
+  // 無効な日付の場合はnullを返す
+  if (isNaN(date.getTime())) return null;
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}${minutes}`;
