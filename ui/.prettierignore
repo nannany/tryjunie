@@ -1,0 +1,12 @@
+# Build artifacts
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+
+# Generated files
+*.log
