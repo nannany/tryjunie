@@ -1,7 +1,7 @@
 import React from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { TaskAction } from "@/types/task";
+import { TaskAction, Task } from "@/types/task";
 import { getTodayDateString } from "@/lib/utils";
 
 const supabase = createClient();
@@ -85,9 +85,84 @@ export const useTaskActions = (dispatch: React.Dispatch<TaskAction>) => {
     }
   };
 
+  // タスクを中断
+  const handlePauseTask = async (task: Task) => {
+    // 1. 現在のタスクに終了時刻を設定して完了させる
+    const endTime = new Date().toISOString();
+    const { error: updateError } = await supabase
+      .from("tasks")
+      .update({ end_time: endTime })
+      .eq("id", task.id);
+
+    if (updateError) {
+      toast({
+        title: "Error",
+        description: "タスクの中断に失敗しました",
+        variant: "destructive",
+      });
+      console.error("Error pausing task:", updateError);
+      return;
+    }
+
+    // ローカル状態を更新
+    dispatch({
+      type: "UPDATE_TASK",
+      payload: { id: task.id, end_time: endTime },
+    });
+
+    // 2. 同じ属性で新しいタスクを作成
+    const newTask = {
+      title: task.title,
+      description: task.description,
+      user_id: task.user_id,
+      estimated_minute: task.estimated_minute,
+      category_id: task.category_id,
+      task_date: task.task_date,
+      task_order: null,
+    };
+
+    const { data, error: insertError } = await supabase
+      .from("tasks")
+      .insert(newTask)
+      .select();
+
+    if (insertError) {
+      toast({
+        title: "Error",
+        description: "新しいタスクの作成に失敗しました",
+        variant: "destructive",
+      });
+      console.error("Error creating new task:", insertError);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      toast({
+        title: "Error",
+        description: "新しいタスクの作成に失敗しました",
+        variant: "destructive",
+      });
+      console.error("Error creating new task: No data returned");
+      return;
+    }
+
+    // 新しく作成したタスクをリストに追加
+    const createdTask = data[0] as unknown as Task;
+    dispatch({
+      type: "ADD_TASK",
+      payload: createdTask,
+    });
+
+    toast({
+      title: "Success",
+      description: `タスク "${task.title}" を中断しました`,
+    });
+  };
+
   return {
     handleDelete,
     handleTaskTimer,
     handleMoveToToday,
+    handlePauseTask,
   };
 };

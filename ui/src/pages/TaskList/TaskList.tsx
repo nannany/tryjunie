@@ -683,6 +683,7 @@ const TaskList = () => {
         currentTask={currentRunningTask || null}
         categories={categories}
         onTaskTimer={taskActions.handleTaskTimer}
+        onPauseTask={taskActions.handlePauseTask}
       />
     </TaskProvider>
   );

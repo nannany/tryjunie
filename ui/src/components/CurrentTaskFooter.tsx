@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Task, Category } from "@/types/task";
-import { Square } from "lucide-react";
+import { Square, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatTimeAsHHmm } from "@/lib/utils";
 
@@ -8,12 +8,14 @@ interface CurrentTaskFooterProps {
   currentTask: Task | null;
   categories: Category[];
   onTaskTimer: (taskId: string, action: "start" | "stop" | "complete") => void;
+  onPauseTask: (task: Task) => void;
 }
 
 export const CurrentTaskFooter = ({
   currentTask,
   categories,
   onTaskTimer,
+  onPauseTask,
 }: CurrentTaskFooterProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -92,6 +94,20 @@ export const CurrentTaskFooter = ({
             </p>
             <p className="text-xs text-gray-500">経過時間</p>
           </div>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onPauseTask(currentTask)}
+            className="hover:bg-orange-50"
+            style={{
+              color: "#ea580c",
+              borderColor: "#ea580c",
+            }}
+          >
+            <Pause className="h-4 w-4 mr-1" />
+            中断
+          </Button>
 
           <Button
             size="sm"
