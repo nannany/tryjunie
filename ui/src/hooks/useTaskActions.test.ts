@@ -81,7 +81,9 @@ describe("Task Pause Functionality", () => {
       const addedTask = newState.find((t) => t.id === "3");
       expect(addedTask).toBeDefined();
       expect(addedTask?.title).toBe(mockRunningTask.title);
-      expect(addedTask?.estimated_minute).toBe(mockRunningTask.estimated_minute);
+      expect(addedTask?.estimated_minute).toBe(
+        mockRunningTask.estimated_minute,
+      );
       expect(addedTask?.category_id).toBe(mockRunningTask.category_id);
       expect(addedTask?.start_time).toBeNull();
       expect(addedTask?.end_time).toBeNull();
