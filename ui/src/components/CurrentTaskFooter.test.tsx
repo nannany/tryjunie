@@ -27,7 +27,9 @@ class MockAudioContext {
 }
 
 // グローバルな AudioContext を置き換え
-global.AudioContext = MockAudioContext as any;
+// eslint-disable-next-line no-undef
+(global as { AudioContext: typeof MockAudioContext }).AudioContext =
+  MockAudioContext;
 
 describe("CurrentTaskFooter - 見積もり時間超過時の通知", () => {
   beforeEach(() => {

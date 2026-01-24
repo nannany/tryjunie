@@ -86,6 +86,11 @@ export const CurrentTaskFooter = ({
       // 音を再生
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.5);
+
+      // 再生終了後にAudioContextをクローズ
+      setTimeout(() => {
+        audioContext.close();
+      }, 600);
     } catch (error) {
       console.error("通知音の再生に失敗しました:", error);
     }
