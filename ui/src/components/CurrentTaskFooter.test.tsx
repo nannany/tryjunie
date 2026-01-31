@@ -28,8 +28,9 @@ class MockAudioContext {
 
 // グローバルな AudioContext を置き換え
 // eslint-disable-next-line no-undef
-(globalThis as unknown as { AudioContext: typeof MockAudioContext }).AudioContext =
-  MockAudioContext;
+(
+  globalThis as unknown as { AudioContext: typeof MockAudioContext }
+).AudioContext = MockAudioContext;
 
 describe("CurrentTaskFooter - 見積もり時間超過時の通知", () => {
   beforeEach(() => {
@@ -90,4 +91,3 @@ describe("CurrentTaskFooter - 見積もり時間超過時の通知", () => {
     expect(gainNode.connect).toHaveBeenCalledWith(audioContext.destination);
   });
 });
-

@@ -45,11 +45,7 @@ export const CurrentTaskFooter = ({
 
   // 見積もり時間を超えた場合にサウンドを再生
   useEffect(() => {
-    if (
-      currentTask?.estimated_minute &&
-      elapsedTime > 0 &&
-      !hasPlayedSound
-    ) {
+    if (currentTask?.estimated_minute && elapsedTime > 0 && !hasPlayedSound) {
       const estimatedSeconds = currentTask.estimated_minute * 60;
       if (elapsedTime >= estimatedSeconds) {
         // サウンドを再生
@@ -80,7 +76,10 @@ export const CurrentTaskFooter = ({
 
       // 音量の設定（フェードイン・フェードアウト）
       gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
+      gainNode.gain.linearRampToValueAtTime(
+        0.3,
+        audioContext.currentTime + 0.1,
+      );
       gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.5);
 
       // 音を再生
@@ -155,9 +154,7 @@ export const CurrentTaskFooter = ({
             <p className="text-xs text-gray-500">
               経過時間
               {currentTask.estimated_minute && (
-                <span className="ml-1">
-                  / {currentTask.estimated_minute}分
-                </span>
+                <span className="ml-1">/ {currentTask.estimated_minute}分</span>
               )}
             </p>
           </div>
