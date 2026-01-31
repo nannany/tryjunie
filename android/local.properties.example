@@ -1,0 +1,11 @@
+## Supabase 設定
+## このファイルを local.properties にコピーして、実際の値を設定してください
+
+# Supabase プロジェクトの URL
+SUPABASE_URL=your-supabase-project-url
+
+# Supabase の匿名キー（公開用）
+SUPABASE_ANON_KEY=your-supabase-anon-key
+
+## Android SDK の場所（通常は Android Studio が自動設定）
+# sdk.dir=/path/to/Android/Sdk
