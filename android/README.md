@@ -184,13 +184,46 @@ adb devices
 
 ```
 android/
-├── src/              # React アプリケーションのソースコード（ui/ からコピー）
-├── public/           # 静的アセット
-├── android/          # Capacitorが生成したAndroidネイティブプロジェクト
-├── dist/             # ビルドされたWebアセット（git無視）
-├── capacitor.config.ts  # Capacitor設定
-├── package.json      # 依存関係とスクリプト
-└── README.md         # このファイル
+├── src/                      # React アプリケーションのソースコード（ui/ からコピー）
+├── public/                   # 静的アセット
+├── android/                  # Capacitorが生成したAndroidネイティブプロジェクト（git無視）
+├── dist/                     # ビルドされたWebアセット（git無視）
+├── node_modules/             # npmパッケージ（git無視）
+├── capacitor.config.ts       # Capacitor設定
+├── package.json              # 依存関係とスクリプト
+├── vite.config.ts            # Viteビルド設定
+├── tailwind.config.cjs       # Tailwind CSS設定
+├── .env.local.example        # 環境変数テンプレート
+├── check-requirements.sh     # 環境チェックスクリプト
+└── README.md                 # このファイル
+```
+
+## クイックスタート
+
+初めての方は、以下の手順で最速セットアップできます：
+
+```bash
+# 1. android ディレクトリに移動
+cd android
+
+# 2. 環境チェック（オプション）
+./check-requirements.sh
+
+# 3. 依存関係をインストール
+npm install --legacy-peer-deps
+
+# 4. 環境変数を設定
+cp .env.local.example .env.local
+# .env.local を編集して、Supabase の URL とキーを設定
+
+# 5. ビルド
+npm run build
+
+# 6. Android プロジェクトと同期
+npm run android:sync
+
+# 7. Android Studio で開く
+npm run android:open
 ```
 
 ## 参考リンク
@@ -198,6 +231,8 @@ android/
 - [Capacitor公式ドキュメント](https://capacitorjs.com/)
 - [Android Developer Guide](https://developer.android.com/)
 - [Capacitor Android Documentation](https://capacitorjs.com/docs/android)
+- [React公式ドキュメント](https://react.dev/)
+- [Vite公式ドキュメント](https://vitejs.dev/)
 
 ## ライセンス
 
