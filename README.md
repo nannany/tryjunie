@@ -4,6 +4,10 @@
 
 このプロジェクトは、React、TypeScript、Viteを使用して構築されたタスク管理アプリケーションです。ユーザーはタスクの作成、表示、管理を行うことができます。
 
+**プラットフォーム:**
+- **Webアプリ** (`ui/`): ブラウザで動作するWebアプリケーション
+- **Androidアプリ** (`android/`): Androidデバイスで動作するネイティブアプリ
+
 ## デプロイ
 
 このアプリケーションは以下のURLでデプロイされています：
@@ -18,6 +22,7 @@ https://tryjunie.vercel.app/
 
 ## 技術スタック
 
+### Webアプリ (`ui/`)
 - **フロントエンド**：React、TypeScript
 - **ルーティング**：React Router
 - **スタイリング**：Tailwind CSS
@@ -25,26 +30,44 @@ https://tryjunie.vercel.app/
 - **アイコン**：Lucide React
 - **ビルドツール**：Vite
 
+### Androidアプリ (`android/`)
+- **フレームワーク**：Capacitor
+- **ベース**：React、TypeScript (Webアプリと同じコードベース)
+- **ネイティブプラットフォーム**：Android
+
+## プロジェクト構成
+
+```
+tryjunie/
+├── ui/              # Webアプリケーション
+├── android/         # Androidモバイルアプリ
+├── supabase/        # Supabaseバックエンド設定
+└── mcp/             # Model Context Protocol ブリッジ
+```
+
 ## インストール方法
 
-### 前提条件
+### Webアプリ (`ui/`)
+
+#### 前提条件
 
 - Node.js (バージョン14以上)
 - npm または yarn
 
-### セットアップ手順
+#### セットアップ手順
 
 1. リポジトリをクローンする
 
    ```bash
    git clone [ここにリポジトリのURLを挿入してください]
-   cd task-management-app
+   cd tryjunie
    ```
 
-2. 依存関係をインストールする
+2. UI ディレクトリに移動して依存関係をインストールする
 
    ```bash
-   npm install
+   cd ui
+   npm install --legacy-peer-deps
    # または
    yarn install
    ```
@@ -62,6 +85,10 @@ https://tryjunie.vercel.app/
    http://localhost:5173
    ```
 
+### Androidアプリ (`android/`)
+
+Androidアプリのセットアップと実行方法については、[android/README.md](android/README.md) を参照してください。
+
 ## 使用方法
 
 - **タスク一覧ページ**: アプリケーションのメインページです。特定の日付のタスクを表示し、タスクの並び替え、編集、削除が可能です。また、タスクの総見積もり時間などの統計もここに表示されます。
@@ -71,10 +98,22 @@ https://tryjunie.vercel.app/
 
 ## 開発コマンド
 
+### Webアプリ (`ui/`)
+
 - `npm run dev`：開発サーバーを起動します
 - `npm run build`：プロダクション用にアプリケーションをビルドします
 - `npm run lint`：ESLintを使用してコードをリントします
 - `npm run preview`：ビルドされたアプリケーションをプレビューします
+
+### Androidアプリ (`android/`)
+
+- `npm run dev`：開発サーバーを起動します
+- `npm run build`：プロダクション用にWebアセットをビルドします
+- `npm run android:sync`：ビルドしたアセットをAndroidプロジェクトに同期します
+- `npm run android:open`：Android Studioでプロジェクトを開きます
+- `npm run android:run`：アプリをデバイス/エミュレーターで実行します
+
+詳細は [android/README.md](android/README.md) を参照してください。
 
 ## ライセンス
 

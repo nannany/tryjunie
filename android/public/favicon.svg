@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+    width="200"
+    height="200"
+    viewBox="0 0 200 200"
+    xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- 背景（必要に応じて変える） -->
+  <rect x="0" y="0" width="200" height="200" fill="#fff" />
+
+  <!-- オレンジの円（Bitcoinロゴを連想させる配色） -->
+  <circle
+      cx="100"
+      cy="100"
+      r="80"
+      fill="#F7931A"
+  />
+
+  <!-- 白色でBを模した形 -->
+  <g fill="#fff">
+    <!-- 中心の縦棒 -->
+    <rect x="85" y="40" width="20" height="120" />
+    <!-- 上の横棒 -->
+    <rect x="60" y="60" width="60" height="10" />
+    <!-- 下の横棒 -->
+    <rect x="60" y="110" width="60" height="10" />
+  </g>
+</svg>
