@@ -7,7 +7,14 @@ import js from "@eslint/js"; // For eslint:recommended
 
 export default [
   {
-    ignores: ["node_modules/", "dist/", "supabase/functions/**"],
+    ignores: [
+      "node_modules/",
+      "dist/",
+      "supabase/functions/**",
+      "src/**/*.test.ts",
+      "src/**/*.test.tsx",
+      "src/test/",
+    ],
   },
   // Configuration for CJS config files (e.g., postcss.config.cjs, tailwind.config.cjs)
   {
