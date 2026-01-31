@@ -33,12 +33,25 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 ## セットアップ手順
 
+### 0. 環境チェック（推奨）
+
+開発環境が正しくセットアップされているか確認するには、以下のスクリプトを実行してください：
+
+```bash
+cd android
+./check-requirements.sh
+```
+
+このスクリプトは、Node.js、Java、Android SDK などの必要な環境が整っているかチェックします。
+
 ### 1. 依存関係のインストール
 
 ```bash
 cd android
-npm install
+npm install --legacy-peer-deps
 ```
+
+**注意**: `--legacy-peer-deps` フラグは、依存関係の競合を回避するために必要です。
 
 ### 2. Webアプリのビルド
 
