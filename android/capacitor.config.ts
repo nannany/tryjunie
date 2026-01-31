@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.tryjunie.taskmanager',
+  appId: 'com.tryjunie.tasks',
   appName: 'TaskManagementApp',
   webDir: 'dist'
 };

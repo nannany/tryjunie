@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Android アプリ開発環境チェックスクリプト
+# 使い方: ./check-requirements.sh
+# 初回実行時: chmod +x check-requirements.sh でスクリプトに実行権限を付与してください
 
 echo "===== Android アプリ開発環境のチェック ====="
 echo ""
