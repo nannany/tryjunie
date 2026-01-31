@@ -6,7 +6,7 @@
 
 **プラットフォーム:**
 - **Webアプリ** (`ui/`): ブラウザで動作するWebアプリケーション
-- **Androidアプリ** (`android/`): Androidデバイスで動作するネイティブアプリ
+- **Androidアプリ** (`android/`): Kotlin + Jetpack Compose で構築されたネイティブAndroidアプリ
 
 ## デプロイ
 
@@ -31,9 +31,11 @@ https://tryjunie.vercel.app/
 - **ビルドツール**：Vite
 
 ### Androidアプリ (`android/`)
-- **フレームワーク**：Capacitor
-- **ベース**：React、TypeScript (Webアプリと同じコードベース)
-- **ネイティブプラットフォーム**：Android
+- **言語**：Kotlin
+- **UIフレームワーク**：Jetpack Compose
+- **アーキテクチャ**：MVVM + Repository パターン
+- **依存性注入**：Hilt
+- **バックエンド**：Supabase Kotlin SDK
 
 ## プロジェクト構成
 
@@ -107,11 +109,18 @@ Androidアプリのセットアップと実行方法については、[android/R
 
 ### Androidアプリ (`android/`)
 
-- `npm run dev`：開発サーバーを起動します
-- `npm run build`：プロダクション用にWebアセットをビルドします
-- `npm run android:sync`：ビルドしたアセットをAndroidプロジェクトに同期します
-- `npm run android:open`：Android Studioでプロジェクトを開きます
-- `npm run android:run`：アプリをデバイス/エミュレーターで実行します
+Kotlin と Jetpack Compose で構築されたネイティブAndroidアプリです。
+
+**前提条件:**
+- Android Studio Hedgehog (2023.1.1) 以上
+- JDK 17 以上
+- Android SDK
+
+**セットアップ:**
+1. Android Studio で `android/` ディレクトリを開く
+2. `local.properties` に Supabase の設定を追加
+3. Gradle Sync を実行
+4. エミュレーターまたは実機で実行
 
 詳細は [android/README.md](android/README.md) を参照してください。
 

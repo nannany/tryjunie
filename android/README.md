@@ -1,238 +1,251 @@
-# タスク管理アプリ - Android版
+# タスク管理アプリ - Android（Kotlin）版
 
-このディレクトリには、タスク管理アプリのAndroid向けモバイルアプリケーションが含まれています。
+このディレクトリには、タスク管理アプリのAndroid向けネイティブモバイルアプリケーション（Kotlin + Jetpack Compose）が含まれています。
 
 ## 概要
 
-Capacitorを使用して、既存のReact UIをAndroidネイティブアプリとしてパッケージ化しています。
+Kotlin と Jetpack Compose を使用したネイティブAndroidアプリです。
 機能は `ui/` フォルダのWebアプリと同じです：
 
 - タスク一覧の表示と管理
 - タスクの作成・編集・削除
-- ドラッグ&ドロップでの並び替え
-- インテグレーションキー管理
 - 認証機能（ログイン・登録）
+- Supabase バックエンドとの連携
+
+## 技術スタック
+
+- **言語**: Kotlin
+- **UIフレームワーク**: Jetpack Compose
+- **アーキテクチャ**: MVVM + Repository パターン
+- **依存性注入**: Hilt
+- **ネットワーク**: Supabase Kotlin SDK + Ktor
+- **非同期処理**: Kotlin Coroutines + Flow
+- **ナビゲーション**: Navigation Compose
 
 ## 前提条件
 
 ### 必須
-- Node.js (v14以上)
-- npm または yarn
-- Android Studio (最新版推奨)
-- Java Development Kit (JDK) 17以上
+- Android Studio Hedgehog (2023.1.1) 以上
+- JDK 17 以上
+- Android SDK (API Level 24-34)
+- Kotlin 1.9.20 以上
 
 ### 環境変数
 
-アプリを実行する前に、Supabaseの設定が必要です。
-プロジェクトルートに `.env.local` ファイルを作成し、以下の環境変数を設定してください：
+Supabase の設定が必要です。以下の方法で環境変数を設定してください：
+
+#### 方法1: local.properties に追加（推奨）
+
+`android/local.properties` ファイルに以下を追加：
+
+```properties
+SUPABASE_URL=your-supabase-url
+SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+#### 方法2: システム環境変数
+
+以下の環境変数を設定：
 
 ```bash
-VITE_SUPABASE_URL=your-supabase-url
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+export SUPABASE_URL="your-supabase-url"
+export SUPABASE_ANON_KEY="your-supabase-anon-key"
 ```
 
 ## セットアップ手順
 
-### 0. 環境チェック（推奨）
+### 1. Android Studio でプロジェクトを開く
 
-開発環境が正しくセットアップされているか確認するには、以下のスクリプトを実行してください：
+1. Android Studio を起動
+2. "Open" を選択
+3. `android/` ディレクトリを選択
 
-```bash
-cd android
-./check-requirements.sh
-```
+### 2. Gradle Sync
 
-このスクリプトは、Node.js、Java、Android SDK などの必要な環境が整っているかチェックします。
+Android Studio が自動的に Gradle Sync を開始します。
+初回は依存関係のダウンロードに時間がかかります。
 
-### 1. 依存関係のインストール
+### 3. 環境変数の設定
 
-```bash
-cd android
-npm install --legacy-peer-deps
-```
+上記の「環境変数」セクションを参照して、Supabase の設定を行ってください。
 
-**注意**: `--legacy-peer-deps` フラグは、依存関係の競合を回避するために必要です。
+### 4. エミュレーターまたは実機の準備
 
-### 2. Webアプリのビルド
+#### エミュレーターを使用する場合
 
-```bash
-npm run build
-```
+1. Android Studio の "Device Manager" を開く
+2. "Create Device" をクリック
+3. 任意のデバイスを選択（推奨: Pixel 6, API 34）
+4. エミュレーターを起動
 
-これにより、`dist/` フォルダにプロダクション用のWebアセットが生成されます。
+#### 実機を使用する場合
 
-### 3. Androidプロジェクトと同期
-
-```bash
-npm run android:sync
-```
-
-このコマンドは、ビルドされたWebアセットをAndroidプロジェクトにコピーします。
-
-### 4. Android Studioでプロジェクトを開く
-
-```bash
-npm run android:open
-```
-
-または、手動で以下のディレクトリをAndroid Studioで開きます：
-```
-android/android/
-```
+1. Android デバイスで開発者オプションを有効化
+2. USB デバッグを有効化
+3. USB でコンピューターに接続
 
 ### 5. アプリの実行
 
-#### Android Studioから実行する場合
-
-1. Android Studioでプロジェクトを開く
-2. エミュレーターを起動するか、実機を接続
-3. 「Run」ボタン（▶️）をクリック
-
-#### コマンドラインから実行する場合
+Android Studio の "Run" ボタン（▶️）をクリックするか、以下のコマンドを実行：
 
 ```bash
-npm run android:run
+./gradlew installDebug
 ```
-
-注: デバイスまたはエミュレーターが起動している必要があります。
-
-## 開発ワークフロー
-
-### コード変更時の手順
-
-1. `src/` 配下のコードを編集
-2. Webアプリをビルド: `npm run build`
-3. Androidプロジェクトと同期: `npm run android:sync`
-4. Android Studioでリフレッシュまたは再実行
-
-### ライブリロード開発（推奨）
-
-開発中は、Capacitorのライブリロード機能を使用できます：
-
-1. 開発サーバーを起動:
-```bash
-npm run dev
-```
-
-2. `capacitor.config.ts` を編集し、開発サーバーのURLを追加:
-```typescript
-import type { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
-  appId: 'com.tryjunie.taskmanager',
-  appName: 'TaskManagementApp',
-  webDir: 'dist',
-  server: {
-    url: 'http://localhost:5173', // 開発時のみ
-    cleartext: true
-  }
-};
-
-export default config;
-```
-
-3. アプリを再実行すると、開発サーバーに接続され、変更が即座に反映されます
-
-**注意**: 本番ビルド前に `server` セクションは削除してください。
-
-## ビルドとリリース
-
-### リリース用APKのビルド
-
-1. Android Studioでプロジェクトを開く
-2. **Build** > **Build Bundle(s) / APK(s)** > **Build APK(s)** を選択
-3. ビルドが完了すると、APKファイルの場所が通知されます
-
-### 署名付きリリースビルド
-
-1. **Build** > **Generate Signed Bundle / APK** を選択
-2. **APK** を選択し、「Next」
-3. キーストアを作成または選択
-4. リリース設定を選択し、ビルド
-
-## トラブルシューティング
-
-### ビルドエラー
-
-**問題**: `dist/` ディレクトリが見つからない
-**解決策**: `npm run build` を実行してWebアセットをビルドしてください
-
-**問題**: Gradleビルドエラー
-**解決策**: 
-- Android Studioのバージョンを確認
-- JDKバージョンを確認（JDK 17推奨）
-- Android SDKが正しくインストールされているか確認
-
-### デバイス/エミュレーターが見つからない
-
-**解決策**:
-```bash
-# 接続されているデバイスを確認
-adb devices
-
-# エミュレーターがない場合、Android Studio > Device Manager で作成
-```
-
-### 環境変数が読み込まれない
-
-**解決策**: 
-- `.env.local` がプロジェクトルートに存在するか確認
-- `npm run build` を再実行
-- `npm run android:sync` を再実行
 
 ## プロジェクト構造
 
 ```
 android/
-├── src/                      # React アプリケーションのソースコード（ui/ からコピー）
-├── public/                   # 静的アセット
-├── android/                  # Capacitorが生成したAndroidネイティブプロジェクト（git無視）
-├── dist/                     # ビルドされたWebアセット（git無視）
-├── node_modules/             # npmパッケージ（git無視）
-├── capacitor.config.ts       # Capacitor設定
-├── package.json              # 依存関係とスクリプト
-├── vite.config.ts            # Viteビルド設定
-├── tailwind.config.cjs       # Tailwind CSS設定
-├── .env.local.example        # 環境変数テンプレート
-├── check-requirements.sh     # 環境チェックスクリプト
-└── README.md                 # このファイル
+├── app/
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/com/tryjunie/tasks/
+│   │       │   ├── MainActivity.kt              # メインアクティビティ
+│   │       │   ├── TaskManagementApplication.kt # Application クラス
+│   │       │   ├── data/                        # データ層
+│   │       │   │   ├── AuthRepository.kt        # 認証リポジトリ
+│   │       │   │   └── TaskRepository.kt        # タスクリポジトリ
+│   │       │   ├── di/                          # 依存性注入
+│   │       │   │   └── AppModule.kt             # Hilt モジュール
+│   │       │   ├── domain/                      # ドメイン層
+│   │       │   │   ├── Task.kt                  # タスクモデル
+│   │       │   │   └── User.kt                  # ユーザーモデル
+│   │       │   └── ui/                          # UI 層
+│   │       │       ├── TaskManagementApp.kt     # アプリナビゲーション
+│   │       │       ├── screens/                 # 画面
+│   │       │       │   ├── LoginScreen.kt       # ログイン画面
+│   │       │       │   └── TaskListScreen.kt    # タスク一覧画面
+│   │       │       ├── theme/                   # テーマ
+│   │       │       │   ├── Color.kt
+│   │       │       │   ├── Theme.kt
+│   │       │       │   └── Type.kt
+│   │       │       └── viewmodels/              # ViewModel
+│   │       │           ├── AuthViewModel.kt
+│   │       │           └── TaskListViewModel.kt
+│   │       ├── res/                             # リソース
+│   │       │   └── values/
+│   │       │       ├── strings.xml              # 文字列リソース
+│   │       │       ├── colors.xml               # 色リソース
+│   │       │       └── themes.xml               # テーマ
+│   │       └── AndroidManifest.xml              # マニフェスト
+│   ├── build.gradle.kts                         # アプリレベル Gradle
+│   └── proguard-rules.pro                       # ProGuard ルール
+├── build.gradle.kts                             # プロジェクトレベル Gradle
+├── settings.gradle.kts                          # Gradle 設定
+├── gradle.properties                            # Gradle プロパティ
+└── README.md                                    # このファイル
 ```
 
-## クイックスタート
+## 開発コマンド
 
-初めての方は、以下の手順で最速セットアップできます：
+### ビルド
 
 ```bash
-# 1. android ディレクトリに移動
-cd android
+# Debug ビルド
+./gradlew assembleDebug
 
-# 2. 環境チェック（オプション）
-./check-requirements.sh
-
-# 3. 依存関係をインストール
-npm install --legacy-peer-deps
-
-# 4. 環境変数を設定
-cp .env.local.example .env.local
-# .env.local を編集して、Supabase の URL とキーを設定
-
-# 5. ビルド
-npm run build
-
-# 6. Android プロジェクトと同期
-npm run android:sync
-
-# 7. Android Studio で開く
-npm run android:open
+# Release ビルド
+./gradlew assembleRelease
 ```
+
+### テスト
+
+```bash
+# ユニットテストを実行
+./gradlew test
+
+# インストルメンテッドテストを実行
+./gradlew connectedAndroidTest
+```
+
+### クリーン
+
+```bash
+./gradlew clean
+```
+
+## 開発ワークフロー
+
+### コード変更時の手順
+
+1. Kotlin ファイルを編集
+2. Android Studio が自動的にビルド
+3. "Run" で実行して変更を確認
+
+### ライブプレビュー（Jetpack Compose）
+
+Compose の `@Preview` アノテーションを使用して、Android Studio 内でUIをプレビューできます：
+
+```kotlin
+@Preview
+@Composable
+fun TaskItemPreview() {
+    TaskManagementTheme {
+        TaskItem(...)
+    }
+}
+```
+
+## トラブルシューティング
+
+### ビルドエラー
+
+**問題**: Gradle Sync が失敗する
+**解決策**: 
+- Android Studio を最新版に更新
+- JDK 17 が正しくインストールされているか確認
+- `./gradlew clean` を実行してキャッシュをクリア
+
+**問題**: Supabase の設定エラー
+**解決策**:
+- `local.properties` または環境変数が正しく設定されているか確認
+- ビルドを再実行（`./gradlew --refresh-dependencies`）
+
+### 実行時エラー
+
+**問題**: アプリがクラッシュする
+**解決策**:
+- Logcat を確認してエラーメッセージを確認
+- Supabase の URL と Key が正しいか確認
+- ネットワーク接続を確認
+
+**問題**: タスクが表示されない
+**解決策**:
+- Supabase でデータが正しく保存されているか確認
+- 認証が成功しているか確認
+- Logcat でネットワークエラーを確認
+
+## 今後の実装予定
+
+- [ ] タスクの編集機能
+- [ ] タスクのドラッグ&ドロップ並び替え
+- [ ] カテゴリ管理
+- [ ] タスクタイマー機能
+- [ ] インテグレーションキー管理
+- [ ] ダークモード対応の改善
+- [ ] オフライン対応（Room DB）
+
+## リリースビルド
+
+### 署名付き APK/AAB の作成
+
+1. Android Studio で **Build** > **Generate Signed Bundle / APK**
+2. キーストアを作成または選択
+3. リリース設定を選択してビルド
+
+### Google Play へのデプロイ
+
+1. AAB ファイルを作成
+2. Google Play Console にアップロード
+3. リリーストラックを選択してデプロイ
 
 ## 参考リンク
 
-- [Capacitor公式ドキュメント](https://capacitorjs.com/)
-- [Android Developer Guide](https://developer.android.com/)
-- [Capacitor Android Documentation](https://capacitorjs.com/docs/android)
-- [React公式ドキュメント](https://react.dev/)
-- [Vite公式ドキュメント](https://vitejs.dev/)
+- [Jetpack Compose ドキュメント](https://developer.android.com/jetpack/compose)
+- [Android Kotlin ガイド](https://developer.android.com/kotlin)
+- [Supabase Kotlin SDK](https://github.com/supabase-community/supabase-kt)
+- [Hilt ドキュメント](https://dagger.dev/hilt/)
+- [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
 
 ## ライセンス
 
