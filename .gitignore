@@ -14,3 +14,9 @@ yarn-error.log*
 .envrc
 
 dist
+
+# Android specific
+android/android/
+android/.capacitor/
+android/dist/
+android/node_modules/
